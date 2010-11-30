@@ -7,7 +7,8 @@ module Classes (Point (..),
                 Limit, 
                 InSpace (..),
                 Limited (..),
-                Streamable (..)) where
+                Stream (..),
+                Advance (..)) where
 
 data Point = Point { x::Double, y::Double, z::Double } deriving Show
 
@@ -32,11 +33,17 @@ class InSpace p where
   move particle distance = daxpy (position particle) (direction particle) distance
   
 class Limited p where
-  value   :: p -> Limit
-  advance :: p -> Distance -> (Limit, Distance)
+  value    :: p -> Limit
+  actual   :: p -> Distance -> (Limit, Distance)
 
-class Streamable p e where
-  stream :: p -> Distance -> Maybe (e, p)
+class Advance p e where
+  advance :: p -> Distance -> p
   
-class AutoStream p e where
+
+
+
+class Stream p e where
   stream :: p -> Maybe (e, p)
+  
+
+
