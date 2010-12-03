@@ -19,7 +19,7 @@ instance Limited LimitedParticle where
     | otherwise        = (0, limit)
     where limit = value particle
 
-instance Advance LimitedParticle Double where
+instance Advance LimitedParticle where
   advance particle distance 
    | (value particle) <= 0 = particle
    | otherwise             = LimitedParticle (move particle distance) (direction particle) remaining

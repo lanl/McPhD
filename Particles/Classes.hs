@@ -21,11 +21,8 @@ class Limited p where
   value    :: p -> Limit
   actual   :: p -> Distance -> (Limit, Distance)
 
-class Advance p e where
+class Advance p where
   advance :: p -> Distance -> p
 
 class Stream p e where
   stream :: p -> Maybe (e, p)
-
-
-
