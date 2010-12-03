@@ -1,8 +1,9 @@
 {-# OPTIONS_GHC -XMultiParamTypeClasses #-}
 
-module Simple where
+module Particles.Simple where
 
-import Classes
+import Particles.Classes
+import Particles.Data
 
 -- A Simple particle.
 

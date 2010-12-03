@@ -1,8 +1,9 @@
 {-# OPTIONS_GHC -XMultiParamTypeClasses #-}
 
-module Limited where
+module Particles.Limited where
 
-import Classes
+import Particles.Classes
+import Particles.Data
 
 -- A Simple particle, with a limiting distance (e.g. timestep)
 
