@@ -7,11 +7,12 @@ import Particles.Data
 
 -- A Simple particle.
 
-data Simple = Simple { s_p :: Position,  s_d :: Direction } deriving Show
-instance InSpace Simple where
+data SimpleParticle = Simple { s_p :: Position,  s_d :: Direction } deriving Show
+instance InSpace SimpleParticle where
   position   = s_p
   direction  = s_d
   
-instance Advance Simple where
+instance Advance SimpleParticle where
   advance particle distance =  Simple (move particle distance) (direction particle)
+
 
