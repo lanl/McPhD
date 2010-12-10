@@ -7,6 +7,7 @@ module Particles.Classes (
   Advance (..)) where
 
 import Particles.Data
+import Events.Event
 
 -- Typeclasses
 -- -----------
@@ -24,5 +25,6 @@ class Limited p where
 class Advance p where
   advance :: p -> Distance -> p
 
-class Stream p e where
-  stream :: p -> Maybe (e, p)
+class Stream s where
+  stream :: s -> Maybe (Event, s)
+
