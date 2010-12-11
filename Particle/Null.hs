@@ -1,8 +1,8 @@
-module Particles.Null where
+module Particle.Null where
 
-import Particles.Classes
+import Particle.Classes
 
-data Position = Position
+data Position  = Position
 data Direction = Direction
 
 data NullParticle = NullParticle

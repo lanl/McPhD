@@ -1,13 +1,11 @@
-{-# OPTIONS_GHC -XMultiParamTypeClasses #-}
-
 module Mesh.Null where
 
-data Position = Position
+data Position  = Position
 data Direction = Direction
-data Face = Face
-data Cell = Cell
-data Field = Field
-data Distance = Distance
+data Face      = Face
+data Cell      = Cell
+data Field     = Field
+data Distance  = Distance
 
 data NullMesh = NullMesh
 

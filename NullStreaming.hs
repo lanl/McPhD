@@ -1,12 +1,9 @@
-import Particles.Null
+import Particle.Null
 import Mesh.Null
-
-import Particles.Classes
 import Events.Event
+import Streaming
 
 import Data.List
-import Control.Monad
-
 
 data NullStream = NS { particle :: NullParticle, mesh :: NullMesh }
 
@@ -20,3 +17,4 @@ nullstream = let p = NullParticle
 
 
 main =  putStrLn $ show (take 10 nullstream)
+

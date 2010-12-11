@@ -2,10 +2,12 @@
 
 
 import Mesh.Classes
-import Particles.Classes
+import Particle.Classes
 
-import Particles.Simple
+import Particle.Simple
 import Mesh.Simple
+
+import Particle.Limited
 
 main = putStrLn "Hello World!"
 
