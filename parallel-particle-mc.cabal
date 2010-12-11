@@ -1,0 +1,70 @@
+name:                parallel-particle-mc
+version:             0.0.1
+cabal-version:       >= 1.6
+synopsis:            FIXME: Parallel particle simulation (Monte-Carlo)
+description:
+ FIXME: Parallel particle simulation (Monte-Carlo)
+ .
+ TODO: Write longer description here
+category:            Distributed Computing
+license:             BSD3
+license-file:        COPYRIGHT
+copyright:           (c) 2010 Michael Buksas <mwbuksas@lanl.gov>
+author:              Michael Buksas
+maintainer:          mwbuksas@lanl.gov
+homepage:            http://FIXME.fix/me
+build-type:          Simple
+stability:           experimental
+tested-with:         GHC==6.12.1
+-- extra-source-files:  README.txt
+
+source-repository head
+  type: hg
+  location: https://software.lanl.gov/McPhD/hg/source
+
+flag test
+  description: Build testsuite, code coverage tests etc
+  default: False
+
+Library
+   ghc-options: -Wall -fno-warn-name-shadowing -fno-warn-orphans
+   hs-source-dirs:
+      src
+   build-depends:
+      base > 3 && <= 5,
+      AC-Vector == 2.3.1
+   exposed-modules:
+      Control.Parallel.MPI.Base,
+      Control.Parallel.MPI.Internal,
+      Control.Parallel.MPI.Fast,
+      Control.Parallel.MPI.Simple
+   other-modules:
+      Control.Parallel.MPI.Utils
+
+executable  haskell-mpi-testsuite
+  hs-source-dirs:
+    ./src
+  build-tools:      c2hs
+  ghc-options: -Wall -fno-warn-name-shadowing -fno-warn-orphans
+  other-modules:
+    Control.Parallel.MPI.Base,
+    Control.Parallel.MPI.Internal,
+    Control.Parallel.MPI.Fast,
+    Control.Parallel.MPI.Simple,
+    Control.Parallel.MPI.Utils,
+    C2HS,
+    IOArrayTests,
+    SimpleTests,
+    FastAndSimpleTests,
+    StorableArrayTests,
+    GroupTests,
+    PrimTypeTests,
+    ExceptionTests,
+    OtherTests,
+    TestHelpers
+  main-is:       NullStreaming.hs
+  if flag(test)
+    ghc-options: -fhpc
+    build-depends: base >=3 && <=5, hpc
+  else
+    buildable: False
