@@ -5,7 +5,6 @@ module Particle.Classes (
   translate_p) where
 
 import Space
-import Events.Event
 
 -- Typeclasses
 -- -----------
