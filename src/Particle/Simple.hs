@@ -1,9 +1,9 @@
+{-| A Simple particle - basically, point in 3d space + direction vector
+-}
 module Particle.Simple where
 
 import Space
 import Particle.Classes
-
--- A Simple particle.
 
 data SimpleParticle = Simple { s_p :: Position,  s_d :: Direction } deriving Show
 instance InSpace SimpleParticle where
