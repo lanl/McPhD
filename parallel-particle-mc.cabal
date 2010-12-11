@@ -24,47 +24,30 @@ source-repository head
 
 flag test
   description: Build testsuite, code coverage tests etc
-  default: False
+  default: True
 
-Library
-   ghc-options: -Wall -fno-warn-name-shadowing -fno-warn-orphans
-   hs-source-dirs:
-      src
-   build-depends:
-      base > 3 && <= 5,
-      AC-Vector == 2.3.1
-   exposed-modules:
-      Control.Parallel.MPI.Base,
-      Control.Parallel.MPI.Internal,
-      Control.Parallel.MPI.Fast,
-      Control.Parallel.MPI.Simple
-   other-modules:
-      Control.Parallel.MPI.Utils
+-- Library
+--    ghc-options: -Wall -fno-warn-name-shadowing -fno-warn-orphans
+--    hs-source-dirs:
+--       src
+--    build-depends:
+--       base > 3 && <= 5,
+--       AC-Vector == 2.3.1
+--    exposed-modules:
+--    other-modules:
 
-executable  haskell-mpi-testsuite
+executable  NullStreaming
   hs-source-dirs:
     ./src
-  build-tools:      c2hs
   ghc-options: -Wall -fno-warn-name-shadowing -fno-warn-orphans
   other-modules:
-    Control.Parallel.MPI.Base,
-    Control.Parallel.MPI.Internal,
-    Control.Parallel.MPI.Fast,
-    Control.Parallel.MPI.Simple,
-    Control.Parallel.MPI.Utils,
-    C2HS,
-    IOArrayTests,
-    SimpleTests,
-    FastAndSimpleTests,
-    StorableArrayTests,
-    GroupTests,
-    PrimTypeTests,
-    ExceptionTests,
-    OtherTests,
-    TestHelpers
+    Particle.Null
+    Mesh.Null
+    Events.Event
+    Streaming
   main-is:       NullStreaming.hs
   if flag(test)
     ghc-options: -fhpc
-    build-depends: base >=3 && <=5, hpc
+    build-depends: base >=3 && <=5, hpc, AC-Vector == 2.3.1
   else
     buildable: False
