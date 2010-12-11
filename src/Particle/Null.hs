@@ -1,15 +1,13 @@
+{-| Simple "null" particle that is not going anywhere
+-}
 module Particle.Null where
 
 import Particle.Classes
 
-data Position  = Position
-data Direction = Direction
-
 data NullParticle = NullParticle
 
-position :: NullParticle -> Position
-position _ = Position
-
-direction :: NullParticle -> Direction
-direction _ = Direction
+instance InSpace NullParticle where
+  position  = error "NullParticle has no position"
+  direction = error "NullParticle has no direction"
+  move = error "NullParticle refuses to move"
 
