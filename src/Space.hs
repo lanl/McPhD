@@ -1,16 +1,21 @@
 {-| Provides data types for Three-dimensonal space in Cartesian coordinates
 -}
 module Space (
-  Position, -- ^ Position, a 3d vector
-  Direction, -- ^ Direction, a 3d vector
-  Distance (..), -- ^ Distance, scalar
+  Position, 
+  Direction,
+  Distance (..),
   translate) where
 
 import Data.Vector.V3
 import Data.Vector.Class
 
+-- | Position, a 3d vector
 newtype Position  = Position  { pos :: Vector3 } deriving Show
+
+-- | Direction, a 3d vector
 newtype Direction = Direction { dir :: Vector3 } deriving Show
+
+-- | Distance, scalar
 newtype Distance  = Distance  { val :: Double  } deriving Show
 
 -- | Translates object along the direction vector
