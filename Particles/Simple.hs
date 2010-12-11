@@ -2,8 +2,8 @@
 
 module Particles.Simple where
 
+import Space
 import Particles.Classes
-import Particles.Data
 
 -- A Simple particle.
 

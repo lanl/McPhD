@@ -6,17 +6,19 @@ module Particles.Classes (
   Stream  (..),
   Advance (..)) where
 
-import Particles.Data
+import Space
 import Events.Event
 
 -- Typeclasses
 -- -----------
 
+newtype Limit = Limit Double
+
 class InSpace p where
   position  :: p -> Position
   direction :: p -> Direction
   move      :: p -> Distance -> Position
-  move particle distance = daxpy (position particle) (direction particle) distance
+  move particle distance = translate (position particle) (direction particle) distance
 
 class Limited p where
   value    :: p -> Limit

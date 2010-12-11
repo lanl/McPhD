@@ -2,7 +2,7 @@ module Mesh.Simple where
 
 import Data.Vector.V3
 
-import Particles.Data    
+import Space
 import Particles.Simple
     
 data Size = Size { nx :: Integer, ny :: Integer, nz :: Integer }
