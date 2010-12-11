@@ -12,8 +12,8 @@ instance InSpace LimitedParticle where
   move particle distance = let
     limit = l_l particle
     (limit', distance')      = limiter limit distance
-    (position', direction')  = translate_p particle distance'
-    in LimitedParticle position' direction' limit' 
+    position'  = translate_p particle distance'
+    in particle { l_p=position', l_l=limit' }
 
 -- | Checks whether the distance is withing given limit
 limiter :: Distance -- ^ Limit

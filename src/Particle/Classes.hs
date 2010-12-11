@@ -18,8 +18,8 @@ class InSpace p where
   direction :: p -> Direction -- ^ Get current direction of movement
   move      :: p -> Distance -> p -- ^ Move the object by given distance
   
--- | Move generic object in space using 'Space.translate'
-translate_p :: (InSpace p) => p -> Distance -> (Position, Direction)
+-- | Move generic object in space using 'Space.translate'.
+translate_p :: (InSpace p) => p -> Distance -> Position
 translate_p p distance = translate (position p) (direction p) distance
 
 

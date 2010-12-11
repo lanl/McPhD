@@ -9,9 +9,7 @@ data SimpleParticle = Simple { s_p :: Position,  s_d :: Direction } deriving Sho
 instance InSpace SimpleParticle where
   position   = s_p
   direction  = s_d
-  move particle distance = 
-    Simple position' direction' where
-      (position', direction')  = translate_p particle distance
+  move particle distance = particle { s_p = translate_p particle distance }
   
 
 

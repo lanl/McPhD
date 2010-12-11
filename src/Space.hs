@@ -17,7 +17,7 @@ newtype Distance  = Distance  { val :: Double  } deriving Show
 translate :: Position -- ^ Initial position
              -> Direction -- ^ Direction vector
              -> Distance -- ^ Movement distance
-             -> (Position, Direction) -- ^ New position, unchanged direction vector (TODO: why?)
-translate (Position x) dv@(Direction v) (Distance d) = (Position $ vzip (+) x (d *| v), dv) 
+             -> Position -- ^ New position
+translate (Position x) dv@(Direction v) (Distance d) = Position $ vzip (+) x (d *| v)
 
 
