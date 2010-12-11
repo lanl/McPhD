@@ -1,5 +1,6 @@
 module Mesh.Null where
 
+-- | TODO: those types will clash with 'Space'
 data Position  = Position
 data Direction = Direction
 data Face      = Face
