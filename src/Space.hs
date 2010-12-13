@@ -1,8 +1,8 @@
-{-| Provides data types for Three-dimensonal space in Cartesian coordinates
--}
+-- Data types for Three-dimensonal space in Cartesian coordinates
+
 module Space (
-  Position, 
-  Direction,
+  Position (..),
+  Direction (..),
   Distance (..),
   translate) where
 

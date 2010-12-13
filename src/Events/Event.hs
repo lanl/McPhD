@@ -2,12 +2,22 @@
 -}
 module Events.Event where
 
--- | TODO: Why constructor and datatype have such drastically different names?
-data Motion   = Stream Double deriving Show
+import Space
 
--- | What has happened to the particle in the end
-data Endpoint = Scatter | Escape | Reflect deriving Show
+-- | Vector of particle motion between events
+data Motion = Stream Direction deriving Show
 
-data Event = Event Motion Endpoint -- ^ Ordinary event consists of series of motions (FIXME: correct?) + final event
-           | NullEvent -- ^ TODO: what is this? just for testing?
+-- | What has happened to the particle in the end of a step
+data StepEnd = Scatter  -- ^ Particle is changing direction and energy.
+             | Boundary -- ^ Particle has encountered a boundary in the domain or mesh.
+             deriving Show
+
+-- | What stopped the particle streaming. Type parameter carries final particle value.
+data Fates p = Escape p     -- ^ Particle has escaped computational domain
+             | Absorption p -- ^ Particle has been absorbed into the material.
+             | Survived p   -- ^ Particle remains at end of the computational step.
+
+data Event = Event Motion StepEnd  -- ^ Ordinary event consists of a motion and a step end
+           | Fate                  -- ^ Final destination of the particle
+           | NullEvent             -- ^ Just for testing
            deriving Show

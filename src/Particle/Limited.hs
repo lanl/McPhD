@@ -1,10 +1,9 @@
-{-| A Simple particle, with a limiting distance (e.g. timestep)
--}
 module Particle.Limited where
 
 import Space
 import Particle.Classes
 
+-- | A Simple particle, with a limiting distance (e.g. timestep)
 data LimitedParticle = LimitedParticle { l_p :: Position, l_d :: Direction, l_l :: Distance } deriving Show
 instance InSpace LimitedParticle where
   position  = l_p
@@ -12,13 +11,13 @@ instance InSpace LimitedParticle where
   move particle distance = let
     limit = l_l particle
     (limit', distance')      = limiter limit distance
-    position'  = translate_p particle distance'
-    in particle { l_p=position', l_l=limit' }
+    (position', direction')  = translate_p particle distance'
+    in LimitedParticle position' direction' limit' 
 
--- | Checks whether the distance is withing given limit
-limiter :: Distance -- ^ Limit
-           -> Distance -- ^ Distance
-           -> (Distance, Distance) -- ^ (How much limit is "unused", How much distance fit within limit)
+
+-- | Given potential distance and limit, return the actal distance and
+-- remaining distance to the limit
+limiter :: Distance -> Distance -> (Distance, Distance)
 limiter (Distance limit) (Distance distance) 
   | distance < limit = (Distance $ limit-distance, Distance $ distance)
   | otherwise        = (Distance 0, Distance limit)

@@ -1,39 +1,46 @@
-{-| Simple mesh, dividing space into parallelepiped cells stacked in neat rows and columns
--}
 module Mesh.Simple where
 
+-- A uniform Cartesian Mesh in three dimensions. Min coordinate values are zero.
+
 import Data.Vector.V3
+import Data.Vector.Class
 
 import Space
-import Particle.Simple
     
--- | Size of the mesh in cells, along each axis (FIXME: correct?). 
--- TODO: maybe, needs less generic name in order not to pollute the namespace
-data Size = Size { nx :: Integer, ny :: Integer, nz :: Integer }
+-- | Size of the mesh in cells, along each axis 
+data MeshSize = MeshSize { nx :: Integer, ny :: Integer, nz :: Integer }
 
-data SimpleMesh = SimpleMesh { size :: Size -- ^ Size of the mesh in cells
-                             , dim ::Vector3 -- ^ Either size of the mesh or size of the cell
-                             , opacity :: [Double] -- ^ TODO: what is this?
+data Direction = Negative_X 
+               | Positive_X 
+               | Negative_Y 
+               | Positive_Y 
+               | Negative_Z 
+               | Positive_Z deriving (Eq, Show, Ord)
+
+-- | Types for indexing cells in the mesh
+data Cell = Cell Integer Integer Integer
+make_cell :: [Integer] -> Cell
+make_cell (x: (y: (z:_))) = Cell x y z
+
+-- | Type for indexing faces in the mesh. Faces are the boundaries
+-- between cells, or a cell and the edge of the computational domain
+type Face = (Cell, Mesh.Simple.Direction)
+
+data SimpleMesh = SimpleMesh { size    :: MeshSize -- ^ Size of the mesh in cells
+                             , dim     :: Vector3  -- ^ Either size of the mesh or size of the cell
                              }
 
--- | Cell number (FIXME: ?)
-data Cell = Integer
+mesh_size :: SimpleMesh -> Integer
+mesh_size (SimpleMesh (MeshSize nx ny nz) _ ) = nx*ny*nz
 
--- | Face separates two cells with given numbers
-type Face = (Cell,Cell)
-
--- | Find the cell bounding the given position
 cell :: SimpleMesh -> Position -> Cell
-cell = undefined
+cell mesh position = make_cell $ map floor $ vunpack (vzip (/) (pos position) (dim mesh))
 
--- | Which cell lies behind given face
 next :: SimpleMesh -> Cell -> Face -> Maybe Cell
 next = undefined
 
--- | TODO: ???
-get :: SimpleMesh -> Cell -> Double
-get = undefined
-
--- | Distance from @a@ to the nearest(?) 'Face'. FIXME: correct?
+-- | Streaming distance from @a@ to the first-encountered face of @Cell@. 
 distance :: SimpleMesh -> Cell -> a -> (Distance, Face)
 distance = undefined    
+
+

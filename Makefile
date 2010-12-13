@@ -12,10 +12,10 @@ all: main nullstreaming meshtests
 main: Main.hs
 	ghc -o ../../bin/$@ -outputdir ../../build/ --make $<
 
-nullstreaming: Test/NullStreaming.hs
+nullstreaming: NullStreaming.hs
 	ghc -o ../../bin/$@ -outputdir ../../build/ --make $<
 
-simplestreaming: Test/SimpleStreaming.hs
+simplestreaming: SimpleStreaming.hs
 	ghc -o ../../bin/$@ -outputdir ../../build/ --make $<
 
 meshtests: Mesh/Tests.hs

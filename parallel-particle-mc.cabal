@@ -1,18 +1,17 @@
 name:                parallel-particle-mc
 version:             0.0.1
 cabal-version:       >= 1.6
-synopsis:            FIXME: Parallel particle simulation (Monte-Carlo)
+synopsis:            FIXME: Parallel partcile-based Monte-Carlo simulations
 description:
  FIXME: Parallel particle simulation (Monte-Carlo)
- .
- TODO: Write longer description here
+ parallel-particle-mc is a framework for executing a particle-based Monte Carlo simulations.
 category:            Distributed Computing
 license:             BSD3
 license-file:        COPYRIGHT
 copyright:           (c) 2010 Michael Buksas <mwbuksas@lanl.gov>
 author:              Michael Buksas
 maintainer:          mwbuksas@lanl.gov
-homepage:            http://FIXME.fix/me
+homepage:            http://software.lanl.gov/McPhD
 build-type:          Simple
 stability:           experimental
 tested-with:         GHC==6.12.1
@@ -51,3 +50,4 @@ executable  NullStreaming
     build-depends: base >=3 && <=5, hpc, AC-Vector == 2.3.1
   else
     buildable: False
+
