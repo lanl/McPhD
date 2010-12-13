@@ -1,5 +1,3 @@
-{-# OPTIONS_GHC -XMultiParamTypeClasses #-}
-
 
 import Mesh.Classes
 import Particle.Classes

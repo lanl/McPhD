@@ -1,10 +1,13 @@
+{-# OPTIONS_GHC -XTypeFamilies #-}
+
 module Streaming where
 
 import Events.Event
 import Data.List
 
 class Stream s where
-  stream :: s -> Maybe (Event, s)
+    type Particle :: *
+    stream :: s -> Maybe (Event Particle, s)
 
-makeStream :: (Stream s) => s -> [Event]
+makeStream :: (Stream s) => s -> [Event Particle]
 makeStream s = unfoldr stream s

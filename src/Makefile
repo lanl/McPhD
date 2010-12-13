@@ -7,7 +7,7 @@
 
 .PHONY : main nullstreaming simplestreaming meshtests
 
-all: main nullstreaming meshtests
+all: main nullstreaming simplestreaming meshtests
 
 main: Main.hs
 	ghc -o ../../bin/$@ -outputdir ../../build/ --make $<

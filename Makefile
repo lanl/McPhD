@@ -10,16 +10,16 @@
 all: main nullstreaming meshtests
 
 main: Main.hs
-	ghc -o ../../bin/$@ -outputdir ../../build/ --make $<
+	ghc -o ../bin/$@ -outputdir ../../build/ --make $<
 
-nullstreaming: NullStreaming.hs
-	ghc -o ../../bin/$@ -outputdir ../../build/ --make $<
+nullstreaming: src/Test/NullStreaming.hs
+	ghc -o ../bin/$@ -outputdir ../../build/ --make $<
 
-simplestreaming: SimpleStreaming.hs
-	ghc -o ../../bin/$@ -outputdir ../../build/ --make $<
+simplestreaming: src/Test/SimpleStreaming.hs
+	ghc -o ../bin/$@ -outputdir ../../build/ --make $<
 
-meshtests: Mesh/Tests.hs
-	ghc -o ../../bin/$@ -outputdir ../../build/ --make $<
+meshtests: src/Mesh/Tests.hs
+	ghc -o ../bin/$@ -outputdir ../../build/ --make $<
 
 
 ### Makefile ends here
