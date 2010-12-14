@@ -43,7 +43,7 @@ executable  NullStreaming
     Particle.Null
     Mesh.Null
     Events.Event
-    Streaming
+    Stream
   main-is:       Test/NullStreaming.hs
   if flag(test)
     ghc-options: -fhpc
@@ -59,7 +59,7 @@ executable  SimpleStreaming
     Particle.Null
     Mesh.Null
     Events.Event
-    Streaming
+    Stream
   main-is:       Test/SimpleStreaming.hs
   if flag(test)
     ghc-options: -fhpc

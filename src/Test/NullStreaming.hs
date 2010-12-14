@@ -3,14 +3,14 @@
 import Particle.Null
 import Mesh.Null
 import Events.Event
-import Streaming
+import Stream
 
 
 data NullStream = NS { particle :: NullParticle, mesh :: NullMesh }
 
-instance Stream NullStream where
+instance Steppable NullStream where
     type Particle = NullParticle
-    stream s = Just (NullEvent, s)
+    step s = Just (NullEvent, s)
 
 nullstream = let p = NullParticle
                  m = NullMesh
