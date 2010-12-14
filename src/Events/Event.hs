@@ -19,6 +19,6 @@ data Fate p = Escape p     -- ^ Particle has escaped computational domain
            deriving Show
 
 data Event p = Event Motion StepEnd    -- ^ Ordinary event consists of a motion and a step end
-             | Fates p                 -- ^ Final destination of the particle
+             | Final (Fate p)          -- ^ Final destination of the particle
              | NullEvent               -- ^ Just for testing
            deriving Show
