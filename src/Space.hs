@@ -1,3 +1,4 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 -- Data types for Three-dimensonal space in Cartesian coordinates
 
 module Space (
@@ -16,7 +17,7 @@ newtype Position  = Position  { pos :: Vector3 } deriving Show
 newtype Direction = Direction { dir :: Vector3 } deriving Show
 
 -- | Distance, scalar
-newtype Distance  = Distance  { val :: Double  } deriving Show
+newtype Distance  = Distance  { val :: Double  } deriving (Eq, Ord, Num, Show)
 
 -- | Translates object along the direction vector
 translate :: Position -- ^ Initial position
