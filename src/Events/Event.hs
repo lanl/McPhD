@@ -15,7 +15,7 @@ data Fate p = Escape p     -- ^ Particle has escaped computational domain
             | Survival p   -- ^ Particle remains at end of the computational step.
            deriving Show
 
-data Event p = Event Direction StepEnd -- ^ Ordinary event consists of a vector of motion between steps and a step end
+data Event p = Step Direction StepEnd  -- ^ Ordinary event consists of a vector of motion between steps and a step end
              | Final (Fate p)          -- ^ Final destination of the particle
              | NullEvent               -- ^ Just for testing
            deriving Show
