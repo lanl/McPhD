@@ -1,6 +1,5 @@
 {-# OPTIONS_GHC -XTypeFamilies #-}
 
-
 {-| Datatypes for events generated during simulation.
 -}
 module Events.Event where
@@ -20,6 +19,8 @@ data Fates p = Escape p     -- ^ Particle has escaped computational domain
              | Absorption p -- ^ Particle has been absorbed into the material.
              | Survived p   -- ^ Particle remains at end of the computational step.
 
+-- | A Event is either a combination of particle motion and stopping or a final event.
+-- FIXME: Does this work? We may need a final event and a Fate at the end of streaming.
 data Event p = Event Motion StepEnd    -- ^ Ordinary event consists of a motion and a step end
              | Fates p                 -- ^ Final destination of the particle
              | NullEvent               -- ^ Just for testing
