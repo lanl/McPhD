@@ -1,6 +1,3 @@
-{-# OPTIONS_GHC -XTypeFamilies #-}
-
-
 {-| Datatypes for events generated during simulation.
 -}
 module Events.Event where
