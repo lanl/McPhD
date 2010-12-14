@@ -16,6 +16,7 @@ data StepEnd = Scatter  -- ^ Particle is changing direction and energy.
 data Fate p = Escape p     -- ^ Particle has escaped computational domain
             | Absorption p -- ^ Particle has been absorbed into the material.
             | Survival p   -- ^ Particle remains at end of the computational step.
+           deriving Show
 
 data Event p = Event Motion StepEnd    -- ^ Ordinary event consists of a motion and a step end
              | Fates p                 -- ^ Final destination of the particle
