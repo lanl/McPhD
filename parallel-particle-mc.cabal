@@ -44,7 +44,7 @@ executable  NullStreaming
     Mesh.Null
     Events.Event
     Streaming
-  main-is:       NullStreaming.hs
+  main-is:       Test/NullStreaming.hs
   if flag(test)
     ghc-options: -fhpc
     build-depends: base >=3 && <=5, hpc, AC-Vector == 2.3.1
