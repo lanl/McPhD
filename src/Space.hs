@@ -23,6 +23,6 @@ translate :: Position -- ^ Initial position
              -> Direction -- ^ Direction vector
              -> Distance -- ^ Movement distance
              -> Position -- ^ New position
-translate (Position x) dv@(Direction v) (Distance d) = Position $ vzip (+) x (d *| v)
+translate (Position x) (Direction v) (Distance d) = Position $ vzip (+) x (d *| v)
 
 

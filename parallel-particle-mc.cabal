@@ -36,8 +36,7 @@ flag test
 --    other-modules:
 
 executable  NullStreaming
-  hs-source-dirs:
-    ./src
+  hs-source-dirs: ./src/Test/, ./src
   ghc-options: -Wall -fno-warn-name-shadowing -fno-warn-orphans
   other-modules:
     Particle.Null
@@ -51,3 +50,32 @@ executable  NullStreaming
   else
     buildable: False
 
+executable SimpleStremaing
+  hs-source-dirs: ./src/Test/ ./src/ 
+  ghc-options: -Wall -fno-warn-name-shadowing -fno-warn-orphans
+  other-modules:
+    Particle.Simple
+    Mesh.Simple
+    Events.Event
+    Streaming
+  main-is:       SimpleStreaming.hs
+  if flag(test)
+    ghc-options: -fhpc
+    build-depends: base >=3 && <=5, hpc, AC-Vector == 2.3.1
+  else
+    buildable: False
+
+executable MeshTests
+  hs-source-dirs: ./src/ ./src/Mesh/ 
+  ghc-options: -Wall -fno-warn-name-shadowing -fno-warn-orphans
+  other-modules:
+    Mesh.Simple
+    Events.Event
+    Streaming
+  main-is:       Tests.hs
+  if flag(test)
+    ghc-options: -fhpc
+    build-depends: base >=3 && <=5, hpc, AC-Vector == 2.3.1, HUnit >= 1.2.2.1
+  else
+    buildable: False
+  

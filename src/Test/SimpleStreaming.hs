@@ -2,7 +2,6 @@
 
 import Particle.Simple
 import Mesh.Simple
-import Events.Event
 import Streaming
 
 import Data.Vector.V3
