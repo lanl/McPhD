@@ -1,7 +1,7 @@
 {-# OPTIONS_GHC -XTypeFamilies #-}
 
 import Particle.Simple
-import Mesh.Simple
+import Mesh.SimpleCartesian
 import Events.Event
 import Stream
 
@@ -18,5 +18,5 @@ instance Steppable SimpleStream where
         -- Return appropiate event.
       undefined
 
-main = let mesh = SimpleMesh (MeshSize 10 10 10) (Vector3 0.1 0.1 0.1)
+main = let mesh = SimpleMesh (CellIndex 10 10 10) (Vector3 0.1 0.1 0.1)
        in putStrLn $ show mesh
