@@ -12,7 +12,7 @@ data SimpleStream = SS { particle :: SimpleParticle, mesh :: SimpleMesh, cell ::
 
 instance Steppable SimpleStream where
     type Particle = SimpleParticle
-    stream s = 
+    step s = 
         -- Compute Distance to cell boundary
         -- Determine kind of boundary. Cell or Domain
         -- Return appropiate event.
