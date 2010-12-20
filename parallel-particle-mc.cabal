@@ -24,6 +24,9 @@ source-repository head
   type: hg
   location: https://software.lanl.gov/McPhD/hg/source
 
+-- Note that default value is just a hint for "cabal", which could be
+-- disregarded if there is a way to configure package WITHOUT the flag.
+-- Therefore, users are required to run "cabal install -ftest" to get desired results.
 flag test
   description: Build testsuite, code coverage tests etc
   default: True
