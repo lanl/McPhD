@@ -2,7 +2,7 @@ module Main where
 
 -- Testing libraries
 import Test.Framework (defaultMain, testGroup)
-import Test.Framework.Providers.QuickCheck (testProperty)
+import Test.Framework.Providers.QuickCheck2 (testProperty)
 import Test.Framework.Providers.HUnit
 
 -- The library under test
