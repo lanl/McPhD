@@ -18,15 +18,15 @@
 import DataTypes
 import Constants (c,tiny,huge)
 import System.Random (getStdRandom,randomR)
-import Control.Monad (liftM)
 import Data.Map
+import Control.Applicative
 
 -- To do: run multiple tallies, generate a per-cell tally
 
 
 -- push a particle, tally what happens
 runParticle :: Particle -> (IO FP) -> Mesh -> Material -> IO EventCount
-runParticle p rng mesh mat = push p rng mesh mat >>= return . tally
+runParticle p rng mesh mat = tally <$> push p rng mesh mat
 
 {- Use a particle, 'opacity', and an RNG to
  - generate a list of Event, Particle pairs.    -}
@@ -39,13 +39,13 @@ push p rng mesh mat = do
   case pickEvent p sel_s sel_a omega' mat mesh of 
     -- continuing events
     evt@(Scatter _ _) -> 
-        stepMsg "Scatter" p' >> liftM ((evt, p'):) (push p' rng mesh mat)
+        stepMsg "Scatter" p' >> ((evt, p'):) <$> (push p' rng mesh mat)
         where p' = stream p evt omega'
     evt@(Reflect _ _) ->  
-        stepMsg "Reflect" p' >> liftM ((evt, p'):) (push p' rng mesh mat)
+        stepMsg "Reflect" p' >> ((evt, p'):) <$> (push p' rng mesh mat)
         where p' = stream p evt omega'
     evt@(Transmit _ _) -> 
-        stepMsg "Transmit" p' >> liftM ((evt, p'):) (push p' rng mesh mat)
+        stepMsg "Transmit" p' >> ((evt, p'):) <$> (push p' rng mesh mat)
         where p' = stream p evt omega'
     -- terminal events
     evt@(Escape _ _)  -> stepMsg "Escape" p' >> return [(evt, p')]
@@ -56,7 +56,7 @@ push p rng mesh mat = do
         where p' = stream p evt omega'
   where 
     stepMsg :: String -> Particle -> IO ()
-    stepMsg s pp = print $ s ++ " at x = " ++ show (px pp) ++ ", cell = " 
+    stepMsg s pp = putStrLn $ s ++ " at x = " ++ show (px pp) ++ ", cell = " 
                       ++ show (pcell pp) ++ ", omega' = " ++ show (pomega p)
 
 pickEvent :: Particle -> 
