@@ -15,9 +15,6 @@ homepage:            http://software.lanl.gov/McPhD
 build-type:          Simple
 stability:           experimental
 tested-with:         GHC==6.12.1
-
--- This makes haskell-mode happy
-hs-source-dirs:      src  
 -- extra-source-files:  README.txt
 
 source-repository head
@@ -102,6 +99,6 @@ executable SimpleRandom_test
                    test-framework-quickcheck2,
                    test-framework-hunit,
                    test-framework,
-                   QuickCheck >= 2.1.0.0
+                   QuickCheck
   else
     buildable: False
