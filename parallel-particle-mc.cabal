@@ -82,23 +82,23 @@ executable MeshTests
   else
     buildable: False
 
--- executable SimpleRandom_test
---   hs-source-dirs: ./src/Test ./src/ 
---   ghc-options: -Wall -fno-warn-name-shadowing -fno-warn-orphans
---   other-modules:
---     SimpleRandom
---     Space
---   main-is: SimpleRandom_test.hs
---   if flag(test)
---     ghc-options: -fhpc
---     build-depends: base >=3 && <=5, 
---                    hpc, 
---                    AC-Vector == 2.3.1, 
---                    mersenne-random-pure64 >= 0.2.0.3, 
---                    HUnit >= 1.2.2.1, 
---                    test-framework-quickcheck,
---                    test-framework-hunit,
---                    test-framework,
---                    QuickCheck
---   else
---     buildable: False
+executable SimpleRandom_test
+  hs-source-dirs: ./src/Test ./src/ 
+  ghc-options: -Wall -fno-warn-name-shadowing -fno-warn-orphans
+  other-modules:
+    SimpleRandom
+    Space
+  main-is: SimpleRandom_test.hs
+  if flag(test)
+    ghc-options: -fhpc
+    build-depends: base >=3 && <=5, 
+                   hpc, 
+                   AC-Vector == 2.3.1, 
+                   mersenne-random-pure64 >= 0.2.0.3, 
+                   HUnit >= 1.2.2.1, 
+                   test-framework-quickcheck,
+                   test-framework-hunit,
+                   test-framework,
+                   QuickCheck
+  else
+    buildable: False

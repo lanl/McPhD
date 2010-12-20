@@ -11,8 +11,6 @@ import Control.Applicative
 import Data.Vector.V3
 import Data.Vector.Class
 
-data Particle = InSpace { spPos :: Position, spDir :: Direction, spDist :: Distance, spRand :: PureMT }
-
 randomDirection_compute :: Double -> Double -> Direction
 randomDirection_compute a b = let 
   theta = a * pi
