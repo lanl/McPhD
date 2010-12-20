@@ -1,4 +1,4 @@
-module SimpleRandom_test where
+module Main where
 
 -- Testing libraries
 import Test.Framework (defaultMain, testGroup)
