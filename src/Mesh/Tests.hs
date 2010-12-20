@@ -12,6 +12,7 @@ test1 = TestCase (assertBool "LEQ operator for CellIndex" (CellIndex 0 0 0 <=// 
 test2 :: Test
 test2 = TestCase (assertBool "LEQ operator for CellIndex" (cellIndex <=// CellIndex 20 20 20))
 
+indexTests :: Test
 indexTests = TestList [TestLabel "test1" test1
                       , TestLabel "test2" test2]
 
@@ -31,5 +32,5 @@ meshTests = TestList [TestLabel "Size" test3]
 
 main :: IO Counts
 main = do
-  runTestTT indexTests
+  _ <- runTestTT indexTests
   runTestTT meshTests

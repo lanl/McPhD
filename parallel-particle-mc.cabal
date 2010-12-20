@@ -8,13 +8,16 @@ description:
 category:            Distributed Computing
 license:             BSD3
 license-file:        COPYRIGHT
-copyright:           (c) 2010 Michael Buksas <mwbuksas@lanl.gov>
-author:              Michael Buksas
+copyright:           (c) 2010 Los Alamos National Security
+author:              Michael Buksas, Tim Kelley
 maintainer:          mwbuksas@lanl.gov
 homepage:            http://software.lanl.gov/McPhD
 build-type:          Simple
 stability:           experimental
 tested-with:         GHC==6.12.1
+
+-- This makes haskell-mode happy
+hs-source-dirs:      src  
 -- extra-source-files:  README.txt
 
 source-repository head
@@ -58,7 +61,7 @@ executable SimpleStremaing
     Mesh.SimpleCartesian
     Events.Event
     Stream
-  main-is:       SimpleStreaming.hs
+  main-is:       Test/SimpleStreaming.hs
   if flag(test)
     ghc-options: -fhpc
     build-depends: base >=3 && <=5, hpc, AC-Vector == 2.3.1
@@ -78,4 +81,24 @@ executable MeshTests
     build-depends: base >=3 && <=5, hpc, AC-Vector == 2.3.1, HUnit >= 1.2.2.1
   else
     buildable: False
-  
+
+-- executable SimpleRandom_test
+--   hs-source-dirs: ./src/Test ./src/ 
+--   ghc-options: -Wall -fno-warn-name-shadowing -fno-warn-orphans
+--   other-modules:
+--     SimpleRandom
+--     Space
+--   main-is: SimpleRandom_test.hs
+--   if flag(test)
+--     ghc-options: -fhpc
+--     build-depends: base >=3 && <=5, 
+--                    hpc, 
+--                    AC-Vector == 2.3.1, 
+--                    mersenne-random-pure64 >= 0.2.0.3, 
+--                    HUnit >= 1.2.2.1, 
+--                    test-framework-quickcheck,
+--                    test-framework-hunit,
+--                    test-framework,
+--                    QuickCheck
+--   else
+--     buildable: False
