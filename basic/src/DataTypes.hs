@@ -15,13 +15,15 @@ type CellIdx  = Int
 type Energy   = FP  
 type EnergyWeight = FP
 
+-- NOTE: If the range of CellIdx values is contiguous, it is better to use Array here - it will use less space in
+-- setting with lots of cells
 type Mesh           = Map CellIdx CellProperties
 type Material       = Map CellIdx MaterialState
 type MomentumTally  = Map CellIdx Momentum
 type EnergyTally    = Map CellIdx Energy
 
 data Particle = Particle {
-      px      :: FP
+      px      :: FP -- NOTE: you would probably want to make those fields strict
     , pomega  :: FP
     , pt      :: FP 
     , penergy :: Energy         -- dynamic energy of the particle.
@@ -30,12 +32,12 @@ data Particle = Particle {
     , pcell   :: CellIdx
     } deriving Show
 
-data EventCount = EventCount { n_scatter  :: Int 
-                             , n_absorb   :: Int
-                             , n_transmit :: Int
-                             , n_reflect  :: Int
-                             , n_escape   :: Int
-                             , n_census   :: Int
+data EventCount = EventCount { n_scatter  :: !Int -- NOTE: Strict counters are always a good idea
+                             , n_absorb   :: !Int
+                             , n_transmit :: !Int
+                             , n_reflect  :: !Int
+                             , n_escape   :: !Int
+                             , n_census   :: !Int
                              } deriving Show
                 
 {- Events: what can happen to a particle on a Monte Carlo step.
