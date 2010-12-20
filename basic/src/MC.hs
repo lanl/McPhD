@@ -36,24 +36,20 @@ push p rng mesh mat = do
   sel_a <- rng
   sel_o <- rng
   let omega' = isotropicDirection sel_o
-  case pickEvent p sel_s sel_a omega' mat mesh of 
+      evt = pickEvent p sel_s sel_a omega' mat mesh
+      p' = stream p evt omega'
+  case evt of 
     -- continuing events
-    evt@(Scatter _ _) -> 
+    evt@(Scatter {}) -> 
         stepMsg "Scatter" p' >> ((evt, p'):) <$> (push p' rng mesh mat)
-        where p' = stream p evt omega'
-    evt@(Reflect _ _) ->  
+    evt@(Reflect {}) ->  
         stepMsg "Reflect" p' >> ((evt, p'):) <$> (push p' rng mesh mat)
-        where p' = stream p evt omega'
-    evt@(Transmit _ _) -> 
+    evt@(Transmit {}) -> 
         stepMsg "Transmit" p' >> ((evt, p'):) <$> (push p' rng mesh mat)
-        where p' = stream p evt omega'
     -- terminal events
-    evt@(Escape _ _)  -> stepMsg "Escape" p' >> return [(evt, p')]
-        where p' = stream p evt omega'
-    evt@(Absorb _ _)  -> stepMsg "Absorb" p' >> return [(evt, p')]
-        where p' = stream p evt omega'
-    evt@(Census _ _)  -> stepMsg "Census" p' >> return [(evt, p')]
-        where p' = stream p evt omega'
+    evt@(Escape {})  -> stepMsg "Escape" p' >> return [(evt, p')]
+    evt@(Absorb {})  -> stepMsg "Absorb" p' >> return [(evt, p')]
+    evt@(Census {})  -> stepMsg "Census" p' >> return [(evt, p')]
   where 
     stepMsg :: String -> Particle -> IO ()
     stepMsg s pp = putStrLn $ s ++ " at x = " ++ show (px pp) ++ ", cell = " 
@@ -113,14 +109,16 @@ closestEvent evts = foldr compLess (head evts) (tail evts)
 stream :: Particle -> Event -> FP -> Particle
 stream p event omega' = 
     case event of
-      (Scatter d _)  -> p {px=x' d,pt=t' d,pomega=omega'}
-      (Absorb d _)   -> p {px=x' d,pt=t' d,pomega=omega}
-      (Reflect d _)  -> p {px=x' d,pt=t' d,pomega=(-omega)}
-      (Transmit d _) -> p {px=x' d,pt=t' d,pcell=newcell}
-      (Escape d _)   -> p {px=x' d,pt=t' d,pcell=0}
-      (Census d _)   -> p {px=x' d,pt=t' d}
-    where x' d      = px p + omega * d
-          t' d      = pt p - d/c
+      Scatter {}  -> p' {pomega=omega'}
+      Absorb {}   -> p' {pomega=omega}
+      Reflect {}  -> p' {pomega=(-omega)}
+      Transmit {} -> p' {pcell=newcell}
+      Escape {}   -> p' {pcell=0}
+      Census {}   -> p'
+    where p'        = p{px = x', pt = t'}
+          d         = dist event
+          x'        = px p + omega * d
+          t'        = pt p - d/c
           omega     = pomega p
           newcell   = if omega > 0.0 then 1 + pcell p else pcell p - 1
 
@@ -139,12 +137,12 @@ tally :: [(Event,Particle)] -> EventCount
 tally walk = foldr countEvent (EventCount 0 0 0 0 0 0) walk
 
 countEvent :: (Event,Particle) -> EventCount -> EventCount
-countEvent (Scatter _ _, _)  ctr = ctr { n_scatter  = 1 + n_scatter  ctr}
-countEvent (Absorb _ _, _)   ctr = ctr { n_absorb   = 1 + n_absorb   ctr}
-countEvent (Transmit _ _, _) ctr = ctr { n_transmit = 1 + n_transmit ctr}
-countEvent (Escape _ _, _)   ctr = ctr { n_escape   = 1 + n_escape   ctr}
-countEvent (Reflect _ _, _)  ctr = ctr { n_reflect  = 1 + n_reflect  ctr}
-countEvent (Census _ _, _)   ctr = ctr { n_census   = 1 + n_census   ctr}
+countEvent (Scatter {}, _)  ctr = ctr { n_scatter  = 1 + n_scatter  ctr}
+countEvent (Absorb {}, _)   ctr = ctr { n_absorb   = 1 + n_absorb   ctr}
+countEvent (Transmit {}, _) ctr = ctr { n_transmit = 1 + n_transmit ctr}
+countEvent (Escape {}, _)   ctr = ctr { n_escape   = 1 + n_escape   ctr}
+countEvent (Reflect {}, _)  ctr = ctr { n_reflect  = 1 + n_reflect  ctr}
+countEvent (Census {}, _)   ctr = ctr { n_census   = 1 + n_census   ctr}
 
 
 
