@@ -6,8 +6,6 @@ import Space
 
 import System.Random.Mersenne.Pure64
 import System.Random.Mersenne.Pure64.Base
-import Control.Monad
-import Control.Applicative
 import Data.Vector.V3
 import Data.Vector.Class
 
@@ -28,12 +26,18 @@ randomDirection g = let
 
 
 randomExponential_compute :: Double -> Double -> Double
-randomExponential_compute lambda a = -log (a)/lambda
+randomExponential_compute lambda a = -log (a)*lambda
 
-randomExponential :: Double -> PureMT -> (Double, PureMT)
+randomExponential :: Double -> PureMT -> (Distance, PureMT)
 randomExponential lambda g = let
   (a, g') = randomDouble g
-  in (randomExponential_compute lambda a, g')
+  in (Distance $ randomExponential_compute lambda a, g')
 
 
+sampleN :: (PureMT -> (a, PureMT)) -> PureMT -> Int -> [a]
+sampleN generator rand n 
+  | n <= 0 = []
+  | otherwise = 
+    let (value, rand') = generator rand
+    in value : ( sampleN generator rand' (n-1) )
 

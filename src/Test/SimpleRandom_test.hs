@@ -1,4 +1,4 @@
-module Main where
+module SimpleRandom_test where
 
 -- Testing libraries
 import Test.Framework (defaultMain, testGroup)
@@ -8,13 +8,10 @@ import Test.Framework.Providers.HUnit
 -- The library under test
 import SimpleRandom
 
--- It's dependencies
+-- Its dependencies
 import Space
 import Data.Vector.Class
 
-
-main :: IO ()
-main = defaultMain tests 
 
 tests = [
         testGroup "Random Directions" [
@@ -28,3 +25,7 @@ approx a b = abs (a-b) < epsilon where
 
 prop_UnitLength :: Double -> Double -> Bool
 prop_UnitLength a b = let v = randomDirection_compute a b in approx (vmag (dir v)) 1.0
+
+main :: IO ()
+main = defaultMain tests 
+

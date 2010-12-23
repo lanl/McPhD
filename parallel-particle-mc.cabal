@@ -17,6 +17,9 @@ stability:           experimental
 tested-with:         GHC==6.12.1
 -- extra-source-files:  README.txt
 
+
+hs-source-dirs: ./src/
+
 source-repository head
   type: hg
   location: https://software.lanl.gov/McPhD/hg/source
@@ -102,3 +105,15 @@ executable SimpleRandom_test
                    QuickCheck
   else
     buildable: False
+
+-- executable RandomParticle
+--   hs-source-dirs: ./src/ 
+--   ghc-options: -Wall -fno-warn-name-shadowing -fno-warn-orphans
+--   other-modules: 
+--     SimpleRandom
+--     Space
+--   main-is: RandomParticle.hs
+--   build-depends: base >=3 && <=5, 
+--                  hpc, 
+--                  AC-Vector == 2.3.1, 
+--                  mersenne-random-pure64 >= 0.2.0.3
