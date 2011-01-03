@@ -13,8 +13,7 @@ test2 :: Test
 test2 = TestCase (assertBool "LEQ operator for CellIndex" (cellIndex <=// CellIndex 20 20 20))
 
 indexTests :: Test
-indexTests = TestList [TestLabel "test1" test1
-                      , TestLabel "test2" test2]
+indexTests = TestList [TestLabel "test1" test1, TestLabel "test2" test2]
 
 
 -- Simple Mesh Tests

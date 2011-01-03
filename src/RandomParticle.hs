@@ -33,8 +33,6 @@ sampleIsoParticle rand position distance = let
   in InFlight position direction distance rand'
 
 
-
-
 -- | Each event is motion of a particle & a Limiter which stopped it.
 data Event = Event { motion::Motion, limit::Limiter } deriving Show
 
@@ -108,7 +106,6 @@ step _ Dead = Nothing
 step opacity particle = 
   let (scatter_distance, randState) = randomExponential (opValue opacity) (rpRand particle) 
   in stepRP particle{rpRand = randState} scatter_distance
-     
      
 
 -- * Simulation Functions

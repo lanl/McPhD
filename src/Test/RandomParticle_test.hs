@@ -1,3 +1,5 @@
+-- | A testing executable for RandomParticle
+
 -- Testing libraries
 import Test.Framework (defaultMain, testGroup)
 import Test.Framework.Providers.HUnit
@@ -15,7 +17,7 @@ import System.Random.Mersenne.Pure64
 import Data.Vector.V3
 
 
--- Some initial values
+-- * Initial values
 origin :: Position
 origin = Position (Vector3 0 0 0)
 
@@ -25,9 +27,8 @@ rand = pureMT $ fromIntegral (0::Integer)
 particle :: RandomParticle
 particle = sampleIsoParticle rand origin (Distance 10.0)
 
-sampleStream = (stream (Opacity 1.0) $ sampleIsoParticle rand origin (Distance 10.0))
-
-test_sampleStream = length sampleStream @?= 7
+-- * Arbitrary instances for RandomParticle attributes. These will go
+-- into makeing random particles for QuickCheck tests.
 
 instance Arbitrary Direction where
   arbitrary = do
@@ -66,24 +67,27 @@ instance Arbitrary Opacity where
 prop_StepMomentum :: RandomParticle -> Bool
 prop_StepMomentum p = let next = step (Opacity 1.0) p in
   case next of
-    Just (Event _ (Scatter     d ), p') -> within_eps 1e-8 (d +/ rpDir p) (rpDir p')
-    Just (Event _ (Termination p'), _ ) -> within_eps 1e-8 (rpDir p) (rpDir p')
-    Just (Event _ (Escape p'), _)       -> within_eps 1e-8 (rpDir p) (rpDir p')
+    -- | The momentum change is the difference between the initial final directions
+    Just (Event _ (Scatter     d ), p') -> within_eps 1e-12 (d +/ rpDir p) (rpDir p')
+    
+    -- | For other events, the direction is unchanged.
+    Just (Event _ (Termination p'), _ ) -> within_eps 1e-12 (rpDir p) (rpDir p')
+    Just (Event _ (Escape      p'), _ ) -> within_eps 1e-12 (rpDir p) (rpDir p')
     Nothing -> True
 
--- Testing Steps
--- TODO: Properties for steps
---   E.g. Motion = difference in position.
---        Momentum deposition = difference in direction.          
-        
--- TODO: Quickcheck step properties
-        
--- Test streaming without testing events?
+-- * Tests.  TODO: Needs more? Hard to test streaming results
+-- operation with an operation to accumulate the tally.
+
+-- | A regression test which happens to be seven steps long.
+-- TODO: Add more checks on this sample stream.
+sampleStream = (stream (Opacity 1.0) $ sampleIsoParticle rand origin (Distance 10.0))
+test_sampleStream = length sampleStream @?= 7
 
 
 tests = [ testGroup "Step Operation" [testProperty "Momentum conservation" prop_StepMomentum],
           testGroup "Streaming Results" [testCase "Sample stream length" test_sampleStream]
         ]
+
 
 main :: IO ()
 main = defaultMain tests
