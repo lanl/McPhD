@@ -1,13 +1,11 @@
 {-# LANGUAGE BangPatterns #-}
 
-module SimpleRandom where
+module RandomValues where
 
 import Space
 
 import System.Random.Mersenne.Pure64
-import System.Random.Mersenne.Pure64.Base
 import Data.Vector.V3
-import Data.Vector.Class
 
 randomDirection_compute :: Double -> Double -> Direction
 randomDirection_compute a b = let 

@@ -17,9 +17,6 @@ stability:           experimental
 tested-with:         GHC==6.12.1
 -- extra-source-files:  README.txt
 
-
-hs-source-dirs: ./src/
-
 source-repository head
   type: hg
   location: https://software.lanl.gov/McPhD/hg/source
@@ -41,57 +38,27 @@ flag test
 --    exposed-modules:
 --    other-modules:
 
-executable  NullStreaming
-  hs-source-dirs: ./src/Test/, ./src
-  ghc-options: -Wall -fno-warn-name-shadowing -fno-warn-orphans
-  other-modules:
-    Particle.Null
-    Mesh.Null
-    Events.Event
-    Stream
-  main-is:       Test/NullStreaming.hs
-  if flag(test)
-    ghc-options: -fhpc
-    build-depends: base >=3 && <=5, hpc, AC-Vector == 2.3.1
-  else
-    buildable: False
-
-executable SimpleStremaing
-  hs-source-dirs: ./src/Test/ ./src/ 
-  ghc-options: -Wall -fno-warn-name-shadowing -fno-warn-orphans
-  other-modules:
-    Particle.Simple
-    Mesh.SimpleCartesian
-    Events.Event
-    Stream
-  main-is:       Test/SimpleStreaming.hs
-  if flag(test)
-    ghc-options: -fhpc
-    build-depends: base >=3 && <=5, hpc, AC-Vector == 2.3.1
-  else
-    buildable: False
-
-executable MeshTests
+executable Mesh_test
   hs-source-dirs: ./src/ ./src/Mesh/ 
   ghc-options: -Wall -fno-warn-name-shadowing -fno-warn-orphans
   other-modules:
     Mesh.SimpleCartesian
-    Events.Event
-    Stream
-  main-is:       Tests.hs
+  main-is: Tests.hs
   if flag(test)
     ghc-options: -fhpc
     build-depends: base >=3 && <=5, hpc, AC-Vector == 2.3.1, HUnit >= 1.2.2.1
   else
     buildable: False
 
-executable SimpleRandom_test
-  hs-source-dirs: ./src/Test ./src/ 
+
+
+executable RandomValues_test
+  hs-source-dirs: ./src/ ./src/Test
   ghc-options: -Wall -fno-warn-name-shadowing -fno-warn-orphans
   other-modules:
-    SimpleRandom
+    RandomValues
     Space
-  main-is: SimpleRandom_test.hs
+  main-is: RandomValues_test.hs
   if flag(test)
     ghc-options: -fhpc
     build-depends: base >=3 && <=5, 
@@ -106,14 +73,20 @@ executable SimpleRandom_test
   else
     buildable: False
 
--- executable RandomParticle
---   hs-source-dirs: ./src/ 
---   ghc-options: -Wall -fno-warn-name-shadowing -fno-warn-orphans
---   other-modules: 
---     SimpleRandom
---     Space
---   main-is: RandomParticle.hs
---   build-depends: base >=3 && <=5, 
---                  hpc, 
---                  AC-Vector == 2.3.1, 
---                  mersenne-random-pure64 >= 0.2.0.3
+
+
+executable RandomParticle_test
+  hs-source-dirs: ./src/ ./src/Test
+  ghc-options: -Wall -fno-warn-name-shadowing -fno-warn-orphans
+  other-modules: 
+    RandomParticle
+    Space
+  main-is: RandomParticle_test.hs
+  if flag(test)
+    ghc-options: -fhpc
+    build-depends: base >=3 && <=5, 
+                   hpc, 
+                   AC-Vector == 2.3.1, 
+                   mersenne-random-pure64 >= 0.2.0.3
+  else
+    buildable: False

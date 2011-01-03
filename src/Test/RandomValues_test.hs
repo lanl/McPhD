@@ -1,12 +1,10 @@
-module SimpleRandom_test where
 
 -- Testing libraries
 import Test.Framework (defaultMain, testGroup)
 import Test.Framework.Providers.QuickCheck2 (testProperty)
-import Test.Framework.Providers.HUnit
 
 -- The library under test
-import SimpleRandom
+import RandomValues
 
 -- Its dependencies
 import Space
