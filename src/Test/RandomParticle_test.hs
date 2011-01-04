@@ -4,6 +4,7 @@ import Test.Framework.Providers.HUnit
 import Test.Framework.Providers.QuickCheck2 (testProperty)
 import Test.HUnit
 import Test.QuickCheck
+import Control.Applicative
 
 -- The library under test
 import RandomParticle
@@ -30,36 +31,19 @@ sampleStream = (stream (Opacity 1.0) $ sampleIsoParticle rand origin (Distance 1
 test_sampleStream = length sampleStream @?= 7
 
 instance Arbitrary Direction where
-  arbitrary = do
-    a <- arbitrary
-    b <- arbitrary
-    return $ randomDirection_compute a b
+  arbitrary = randomDirection_compute <$> arbitrary <*> arbitrary
 
 instance Arbitrary Position where
-  arbitrary = do
-    x <- arbitrary
-    y <- arbitrary
-    z <- arbitrary
-    return $ Position (Vector3 x y z)
+  arbitrary = Position <$> ( Vector3 <$> arbitrary <*> arbitrary <*> arbitrary ) 
 
 instance Arbitrary Distance where
-  arbitrary = do
-    d <- arbitrary
-    return $ Distance d*10
+  arbitrary = Distance . (10*) <$> arbitrary
 
 instance Arbitrary RandomParticle where
-  arbitrary = do
-    seed      <- arbitrary
-    position  <- arbitrary
-    direction <- arbitrary
-    distance  <- arbitrary
-    return $ createParticle position direction distance seed
+  arbitrary = createParticle <$> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary
 
 instance Arbitrary Opacity where
-  arbitrary = do
-    p <- arbitrary
-    return $ Opacity p
-
+  arbitrary = Opacity <$> arbitrary
 
 -- | The direction after the step should be either the same as before,
 -- or differ by the scattering vector.
