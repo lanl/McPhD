@@ -71,12 +71,12 @@ prop_StepMomentum p = let next = step (Opacity 1.0) p in
     Just (Event _ (Scatter     d ), p') -> within_eps 1e-12 (d +/ rpDir p) (rpDir p')
     
     -- | For other events, the direction is unchanged.
-    Just (Event _ (Termination p'), _ ) -> within_eps 1e-12 (rpDir p) (rpDir p')
-    Just (Event _ (Escape      p'), _ ) -> within_eps 1e-12 (rpDir p) (rpDir p')
+    Just (Event _ (Termination p'), _ ) -> (rpDir p) ~== (rpDir p')
+    Just (Event _ (Escape      p'), _ ) -> (rpDir p) ~== (rpDir p')
     Nothing -> True
 
 -- * Tests.  TODO: Needs more? Hard to test streaming results
--- operation with an operation to accumulate the tally.
+-- operation without an operation to accumulate the tally.
 
 -- | A regression test which happens to be seven steps long.
 -- TODO: Add more checks on this sample stream.

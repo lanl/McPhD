@@ -39,13 +39,18 @@ instance NumUnit Direction where
 -- | A class which supports approximate equality testing.
 class Approx a where
   within_eps :: Double -> a -> a -> Bool
+  (~==) :: a -> a -> Bool
+  (~==) = within_eps 1.0e-14
+  
+  (~~==) :: a -> a -> Bool
+  (~~==) = within_eps 1.0e-8
   
 instance Approx Double where
   within_eps epsilon a b = abs (a-b) < epsilon
 
 instance Approx Vector3 where
   within_eps epsilon a b = let d = a-b in 
-    vdot d d < epsilon^ (2::Integer) 
+    vdot d d < epsilon^(2::Int) 
 
 instance Approx Position where
   within_eps epsilon (Position a) (Position b)  = within_eps epsilon a b
