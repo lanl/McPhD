@@ -1,12 +1,12 @@
--- | A testing executable for RandomParticle
+-- | A testing module for RandomParticle
+module Test.RandomParticle_test (tests) where
 
 -- Testing libraries
-import Test.Framework (defaultMain, testGroup)
+import Test.Framework (testGroup)
 import Test.Framework.Providers.HUnit
 import Test.Framework.Providers.QuickCheck2 (testProperty)
 import Test.HUnit
 import Test.QuickCheck
-import Control.Applicative
 
 -- The library under test
 import RandomParticle
@@ -16,6 +16,7 @@ import Space
 import RandomValues
 import System.Random.Mersenne.Pure64
 import Data.Vector.V3
+import Control.Applicative
 
 
 -- * Initial values
@@ -25,11 +26,8 @@ origin = Position (Vector3 0 0 0)
 rand :: PureMT
 rand = pureMT $ fromIntegral (0::Integer)
 
-particle :: RandomParticle
-particle = sampleIsoParticle rand origin (Distance 10.0)
-
 -- * Arbitrary instances for RandomParticle attributes. These will go
--- into makeing random particles for QuickCheck tests.
+-- into making random particles for QuickCheck tests.
 
 instance Arbitrary Direction where
   arbitrary = randomDirection_compute <$> arbitrary <*> arbitrary
@@ -64,14 +62,14 @@ prop_StepMomentum p = let next = step (Opacity 1.0) p in
 
 -- | A regression test which happens to be seven steps long.
 -- TODO: Add more checks on this sample stream.
+sampleStream :: [Event]
 sampleStream = (stream (Opacity 1.0) $ sampleIsoParticle rand origin (Distance 10.0))
+
+test_sampleStream :: Assertion
 test_sampleStream = length sampleStream @?= 7
 
 
-tests = [ testGroup "Step Operation" [testProperty "Momentum conservation" prop_StepMomentum],
+tests = [ testGroup "Step Operation"    [testProperty "Momentum conservation" prop_StepMomentum],
           testGroup "Streaming Results" [testCase "Sample stream length" test_sampleStream]
         ]
 
-
-main :: IO ()
-main = defaultMain tests

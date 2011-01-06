@@ -8,7 +8,6 @@ import RandomValues
 
 import Data.List
 import System.Random.Mersenne.Pure64
-import Data.Vector.Class
 
 -- * Particle and Event datatypes
 
