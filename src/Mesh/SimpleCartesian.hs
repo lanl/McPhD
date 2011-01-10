@@ -2,17 +2,21 @@
 -}
 module Mesh.SimpleCartesian where
 
+import Mesh.Classes
+import Space
+    
 import Data.Vector.V3
 import Data.Vector.Class
 
-import Space
-    
 -- | Size of the mesh in cells, along each axis 
 data CellIndex = CellIndex { nx :: Integer, ny :: Integer, nz :: Integer } deriving (Show, Eq)
 
+-- | An inequality operator for testing membership in a mesh.
 (<=//) :: CellIndex -> CellIndex -> Bool
 (<=//) (CellIndex nx ny nz) (CellIndex nx' ny' nz') = and [(nx <= nx'), (ny <= ny'), (nz <= nz')]
 
+(>=//) :: CellIndex -> CellIndex -> Bool
+(>=//) a b = b <=// a
 
 -- | The Cartesian directions in 3D. Used to identify faces of a cell.
 data Mesh_Direction = Negative_X 
@@ -61,8 +65,6 @@ next _ Void _ = Nothing
 next _ cell@(Index (CellIndex ix iy iz)) (cell', mesh_direction) 
   | not (cell == cell') = Nothing
   | otherwise = undefined
-
-    
 
 
   

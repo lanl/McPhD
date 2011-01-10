@@ -42,7 +42,7 @@ executable TestSuite
   hs-source-dirs: ./src/ ./src/Test
   ghc-options: -Wall -fno-warn-name-shadowing -fno-warn-orphans
   other-modules:
-    Test.RandomParticle_test
+    Particle.Test.RandomParticle_test
     Test.RandomValues_test
     Mesh.Tests
   main-is: TestSuite.hs

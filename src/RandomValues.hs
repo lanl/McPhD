@@ -15,7 +15,7 @@ randomDirection_compute a b = let
   x = (sin theta) * (cos phi)
   y = (sin theta) * (sin phi)
   z = (cos theta)
-  in (Direction $ Vector3 x y z)
+  in (direction $ Vector3 x y z)
 
 -- | Compute a random Direction from a PureMT
 randomDirection :: PureMT -> (Direction, PureMT)

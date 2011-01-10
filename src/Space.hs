@@ -1,23 +1,57 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 -- Data types for Three-dimensonal space in Cartesian coordinates
 
-module Space where
+module Space(Distance (..),
+             Position (..),
+             Momentum (..),
+             Motion (..), displacement, move,
+             Direction (), dir, direction, direction_unsafe,
+             translate) where
 
 import Data.Vector.V3
 import Data.Vector.Class
+import Approx
+import NumUnit
 
--- | Position, a 3d vector
-newtype Position = Position  { pos :: Vector3 } deriving (Show, Eq, Num)
+-- * Data types
 
--- | Direction, a 3d vector
+-- | Distance, scalar
+newtype Distance  = Distance { dis :: Double  } deriving (Eq, Ord, Show, Num)
+
+-- | Position, a 3D vector
+newtype Position = Position { pos :: Vector3 } deriving (Show, Eq)
+
+-- | Momentum, a 3D vector
+newtype Momentum = Momentum { momentum :: Vector3 } deriving (Show, Eq)
+
+-- | Motion, a 3D vector
+newtype Motion = Motion { motion :: Vector3 } deriving (Show, Eq)
+
+-- | Direction, a 3D vector of magnitude 1.
 newtype Direction = Direction { dir :: Vector3 } deriving (Show, Eq)
 
+
+-- * Construction and manupulation of space quantities
+
+-- | Normalizes the vector when creating a Direction
 direction :: Vector3 -> Direction
 direction v = Direction (vnormalise v)
 
+-- | Assumes that the vector is already normalized
+direction_unsafe :: Vector3 -> Direction
+direction_unsafe v = Direction v
 
--- | Distance, scalar
-newtype Distance  = Distance  { val :: Double  } deriving (Eq, Ord, Num, Show)
+-- | Defines normalize operation for Directions
+instance NumUnit Direction where
+  normalize (Direction v) = direction v
+
+-- | Create motion from a distance and direction
+displacement :: Direction -> Distance -> Motion
+displacement (Direction dir) (Distance dist) = Motion (dist *| dir)
+
+-- | Applies Motion to a Position to find a new Position
+move :: Position -> Motion -> Position
+move (Position p) (Motion m) = Position (p + m)
 
 -- | Translates object along the direction vector
 translate :: Position -- ^ Initial position
@@ -27,30 +61,6 @@ translate :: Position -- ^ Initial position
 translate (Position x) (Direction v) (Distance d) = Position $ x + (d *| v)
 
 
--- | A class like Num for values restricted to an appropiate unit value.
-class NumUnit a where
-  (+/) :: a -> a -> a
-  (-/) :: a -> a -> a
-  
-instance NumUnit Direction where
-  (+/) (Direction a) (Direction b) = direction $ a + b
-  (-/) (Direction a) (Direction b) = direction $ a - b
-
--- | A class which supports approximate equality testing.
-class Approx a where
-  within_eps :: Double -> a -> a -> Bool
-  (~==) :: a -> a -> Bool
-  (~==) = within_eps 1.0e-14
-  
-  (~~==) :: a -> a -> Bool
-  (~~==) = within_eps 1.0e-8
-  
-instance Approx Double where
-  within_eps epsilon a b = abs (a-b) < epsilon
-
-instance Approx Vector3 where
-  within_eps epsilon a b = let d = a-b in 
-    vdot d d < epsilon^(2::Int) 
 
 instance Approx Position where
   within_eps epsilon (Position a) (Position b)  = within_eps epsilon a b
