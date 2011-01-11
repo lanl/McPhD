@@ -38,7 +38,7 @@ sampleIsoParticle rand position distance = let
 
 
 -- | Each event is motion of a particle & a Limiter which stopped it.
-data Event = Event { motion::Motion, limit::Limiter } deriving Show
+data Event = Event { eventMotion::Motion, eventLimit::Limiter } deriving Show
 
 -- | Limiters are things which stop a particle's motion.
 data Limiter = 
@@ -66,17 +66,17 @@ translateRP p d = p{rpPos = position, rpDist = distance}
 -- | A composite operation for motion and scattering
 translateAndScatterRP :: RandomParticle -> Distance -> (Event, RandomParticle)
 translateAndScatterRP particle distance = (event, particle') where 
-  motion    = displacement (rpDir particle) distance
+  motion'   = motion (rpDir particle) distance
   particle' = scatterRP $ translateRP particle distance
   momentum  = Momentum ((dir $ rpDir particle') - (dir $ rpDir particle))
-  event     = Event motion (Scatter momentum)
+  event     = Event motion' (Scatter momentum)
 
 -- | A composite event for motion and termination
 translateAndTerminateRP :: RandomParticle -> Distance -> (Event, RandomParticle)
 translateAndTerminateRP particle distance = (event, Dead) where
-  motion    = displacement (rpDir particle) distance
+  motion'   = motion (rpDir particle) distance
   particle' = translateRP particle distance
-  event     = Event motion (Termination particle')
+  event     = Event motion' (Termination particle')
 
 
 -- * Step functions

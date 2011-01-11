@@ -31,7 +31,7 @@ prop_StepMomentum :: RandomParticle -> Bool
 prop_StepMomentum p = let next = step (Opacity 1.0) p in
   case next of
     -- | The momentum change is the difference between the initial final directions
-    Just (Event _ (Scatter     d ), p') -> (momentum d + (dir $ rpDir p)) ~== (dir $ rpDir p')
+    Just (Event _ (Scatter     d ), p') -> (mom d + (dir $ rpDir p)) ~== (dir $ rpDir p')
     
     -- | For other events, the direction is unchanged.
     Just (Event _ (Termination p'), _ ) -> (rpDir p) ~== (rpDir p')
@@ -64,12 +64,12 @@ finalParticle = InFlight {
 get_final_particle :: Limiter -> RandomParticle
 get_final_particle (Termination p) = p
 get_final_particle (Escape p) = p
-get_final_particle _ = error "get_final_paticle called on wrong event type"
+get_final_particle _ = error "get_final_paticle called on wrong Limiter value"
   
 
 test_finalParticle :: Assertion
 test_finalParticle = assertBool "final particle equality" 
-                     ((get_final_particle $ limit $ last sampleStream) ~== finalParticle)
+                     ((get_final_particle $ eventLimit $ last sampleStream) ~== finalParticle)
 
 
 tests = [ testGroup "Step Operation"    [testProperty "Momentum conservation" prop_StepMomentum],
