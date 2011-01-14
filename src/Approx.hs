@@ -4,13 +4,15 @@ import Data.Vector.V3
 import Data.Vector.Class
 
 -- | A class which supports approximate equality testing.
+infix 4 ~==
+infix 4 ~~==
 class Approx a where
   within_eps :: Double -> a -> a -> Bool
   (~==) :: a -> a -> Bool
   (~==) = within_eps 1.0e-14 -- | Operator for a common tight tolerance
   
   (~~==) :: a -> a -> Bool
-  (~~==) = within_eps 1.0e-8 -- | OPerator for a common looser tolerance
+  (~~==) = within_eps 1.0e-8 -- | Operator for a common looser tolerance
   
 
 instance Approx Double where

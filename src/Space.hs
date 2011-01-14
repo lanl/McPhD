@@ -52,6 +52,7 @@ instance NumUnit Direction where
 motion :: Direction -> Distance -> Motion
 motion (Direction dir) (Distance dist) = Motion (dist *| dir)
 
+infix 7 *->
 (*->) :: Direction -> Distance -> Motion
 (*->) direction distance = motion direction distance
 
@@ -59,6 +60,7 @@ motion (Direction dir) (Distance dist) = Motion (dist *| dir)
 move :: Position -> Motion -> Position
 move (Position p) (Motion m) = Position (p + m)
 
+infix 6 +->
 (+->) :: Position -> Motion -> Position
 (+->) position motion = move position motion
 
