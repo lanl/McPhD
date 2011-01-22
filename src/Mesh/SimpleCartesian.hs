@@ -79,7 +79,7 @@ index_in_mesh mesh index = (isJust $ index `ge` minimumIndex) && (isJust $ index
 
 -- | Find the mesh cell containing a given position
 findCell :: SimpleMesh -> Position -> Maybe Cell
-findCell mesh position = let index = (fromList $ map floor $ vunpack (vzip (/) (pos position) (dim mesh)))
+findCell mesh position = let index = (fromList $ map floor $ vunpack ((pos position) / (dim mesh)))
                          in liftM Local index
 
 face_on_cell :: Cell -> Face -> Bool
