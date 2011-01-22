@@ -4,7 +4,7 @@
 -}
 module Mesh.Classes (SpaceMesh (..)) where
 
-import Space
+import Space3DCartesian
 
 -- | A class for describing operations on meshes. Still multi-parameter though.
 class SpaceMesh m where

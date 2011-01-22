@@ -10,7 +10,7 @@ import Test.Framework.Providers.QuickCheck2 (testProperty)
 import RandomValues
 
 -- Its dependencies
-import Space
+import Space3DCartesian
 import Data.Vector.Class
 
 approx :: Double -> Double -> Bool

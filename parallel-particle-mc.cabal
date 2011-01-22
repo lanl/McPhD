@@ -50,6 +50,7 @@ executable TestSuite
     ghc-options: -fhpc
     build-depends: base >=3 && <=5, hpc, AC-Vector == 2.3.1, HUnit >= 1.2.2.1,
                    mersenne-random-pure64 >= 0.2.0.3,
+                   logfloat,
                    test-framework-quickcheck2,
                    test-framework-hunit,
                    test-framework,

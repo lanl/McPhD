@@ -4,7 +4,7 @@ module Particle.Test.Arbitrary where
 import Test.QuickCheck
 
 import Particle.RandomParticle
-import Space
+import Space3DCartesian
 import RandomValues
 import Data.Vector.V3
 

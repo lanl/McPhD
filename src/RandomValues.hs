@@ -2,7 +2,7 @@
 
 module RandomValues where
 
-import Space
+import Space3DCartesian
 
 import System.Random.Mersenne.Pure64
 import Data.Vector.V3

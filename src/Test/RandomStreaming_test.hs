@@ -13,7 +13,7 @@ import RandomStreaming
 -- Its dependencies
 import Particle.RandomParticle
 import Particle.Test.Arbitrary ()
-import Space
+import Space3DCartesian
 import Approx
 import System.Random.Mersenne.Pure64
 import Data.Vector.V3

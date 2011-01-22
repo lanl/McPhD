@@ -12,7 +12,7 @@ import Test.QuickCheck
 import Particle.RandomParticle
 
 -- Its dependencies
-import Space
+import Space3DCartesian
 import RandomValues
 import Approx
 import NumUnit

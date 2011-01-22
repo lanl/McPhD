@@ -2,7 +2,7 @@
 -- homogeneous space without a mesh. 
 module Particle.RandomParticle where
 
-import Space
+import Space3DCartesian
 import RandomValues
 import Approx
 

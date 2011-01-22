@@ -11,6 +11,9 @@ import Mesh.SimpleCartesian
 
 -- Its dependencies
 import Data.Vector.V3
+import Data.Number.PartialOrd
+
+import Data.Maybe
 
 
 -- * CellIndex tests
@@ -19,10 +22,10 @@ cellIndex :: CellIndex
 cellIndex = CellIndex 10 10 10
 
 test1 :: Assertion
-test1 = (CellIndex 0 0 0 <=// cellIndex) @? "LEQ operator for CellIndex"
+test1 = isJust (CellIndex 0 0 0 `lt` cellIndex) @? "LEQ operator for CellIndex"
 
 test2 :: Assertion
-test2 = (cellIndex <=// CellIndex 20 20 20) @? "LEQ operator for CellIndex"
+test2 = isJust (cellIndex `lt` CellIndex 20 20 20) @? "LEQ operator for CellIndex"
 
 
 -- * Simple Mesh Tests
