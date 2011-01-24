@@ -2,11 +2,11 @@
 -- Data types for Three-dimensonal space in Cartesian coordinates
 
 module Space3DCartesian(Distance (..),
-                        Position (..),
-                        Momentum (..),
-                        Motion (..), motion, move,
-                        Direction (), dir, direction, direction_unsafe, (*->), (+->),
-                        translate) where
+			Position (..),
+			Momentum (..),
+			Motion (..), motion, move,
+			Direction (), dir, direction, direction_unsafe, (*->), (+->),
+			translate) where
 
 import Data.Vector.V3
 import Data.Vector.Class
@@ -14,6 +14,9 @@ import Approx
 import NumUnit
 
 -- * Data types
+
+-- | Coords, an Index type.
+data Coords = X | Y | Z deriving (Show, Eq, Ord, Ix)
 
 -- | Position, a 3D vector
 newtype Position = Position { pos :: Vector3 } deriving (Eq, Show, Num)
@@ -66,9 +69,9 @@ infix 6 +->
 
 -- | Translates object along the direction vector
 translate :: Position -- ^ Initial position
-             -> Direction -- ^ Direction vector
-             -> Distance  -- ^ Movement distance
-             -> Position  -- ^ New position
+	     -> Direction -- ^ Direction vector
+	     -> Distance  -- ^ Movement distance
+	     -> Position  -- ^ New position
 translate position direction distance = position +-> (direction *-> distance)
 
 
@@ -77,15 +80,15 @@ translate position direction distance = position +-> (direction *-> distance)
 
 instance Approx Position where
   within_eps epsilon (Position a) (Position b)  = within_eps epsilon a b
-  
+
 instance Approx Direction where
   within_eps epsilon (Direction a) (Direction b) = within_eps epsilon a b
-  
+
 instance Approx Distance where
   within_eps epsilon (Distance a) (Distance b) = within_eps epsilon a b
-  
+
 instance Approx Momentum where
   within_eps epsilon (Momentum a) (Momentum b) = within_eps epsilon a b
-  
+
 instance Approx Motion where
   within_eps epsilon (Motion a) (Motion b) = within_eps epsilon a b
