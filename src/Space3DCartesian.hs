@@ -15,9 +15,6 @@ import NumUnit
 
 -- * Data types
 
--- | Coords, an Index type.
-data Coords = X | Y | Z deriving (Show, Eq, Ord, Ix)
-
 -- | Position, a 3D vector
 newtype Position = Position { pos :: Vector3 } deriving (Eq, Show, Num)
 
