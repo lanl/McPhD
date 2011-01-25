@@ -13,10 +13,10 @@ newtype Opacity = Opacity { opValue :: Double }
 
 step :: Opacity -> RandomParticle -> Maybe (Event, RandomParticle)
 step _ Dead = Nothing
-step opacity particle = 
-  let (scatter_distance, randState) = randomExponential (opValue opacity) (rpRand particle) 
+step opacity particle =
+  let (scatter_distance, randState) = randomExponential (opValue opacity) (rpRand particle)
   in stepRP particle{rpRand = randState} scatter_distance
-     
+
 
 -- * Simulation Functions
 

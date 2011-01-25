@@ -34,14 +34,11 @@ simpleMesh :: SimpleMesh
 simpleMesh = SimpleMesh cellIndex (Vector3 0.1 0.2 0.3)
 
 test3 :: Assertion
-test3 = (mesh_size simpleMesh) @?= 1000
+test3 = (meshSize simpleMesh) @?= 1000
 
-
-
-tests = [ testGroup "Index Tests" 
-          [ testCase "LEQ operator"   test1, 
-            testCase "LEQ operator 2" test2
-          ],
-          testGroup "Mesh Tests" [testCase "Size Equality" test3]
-        ]
-
+tests = [ testGroup "Index Tests"
+	  [ testCase "LEQ operator"   test1,
+	    testCase "LEQ operator 2" test2
+	  ],
+	  testGroup "Mesh Tests" [testCase "Size Equality" test3]
+	]

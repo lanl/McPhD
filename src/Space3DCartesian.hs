@@ -10,10 +10,18 @@ module Space3DCartesian(Distance (..),
 
 import Data.Vector.V3
 import Data.Vector.Class
+
+import Data.Array.IArray
+import Data.Ix
+
 import Approx
 import NumUnit
 
 -- * Data types
+
+-- | Coordinates
+data Coord = X | Y | Z deriving (Show, Eq, Ord, Ix)
+coords = listArray (X,Z) "xyz" :: Array Coord Char
 
 -- | Position, a 3D vector
 newtype Position = Position { pos :: Vector3 } deriving (Eq, Show, Num)

@@ -4,13 +4,14 @@
 module Mesh.SimpleCartesian where
 
 import Space3DCartesian
-    
+
 import Data.Vector.V3
 import Data.Vector.Class
 import Data.Maybe
 import Data.Number.PartialOrd
 import Control.Monad
 import Control.Applicative
+import Data.Ix
 
 
 compare_all :: [Ordering] -> Maybe Ordering
@@ -20,9 +21,9 @@ compare_all comps
     | all (==GT) comps = Just GT
     | otherwise = Nothing
 
-
--- | Size of the mesh in cells, along each axis 
-data CellIndex = CellIndex { nx :: Integer, ny :: Integer, nz :: Integer } deriving (Show, Eq)
+-- | Size of the mesh in cells, along each axis
+data CellIndex = CellIndex { nx :: Integer, ny :: Integer, nz :: Integer }
+	       deriving (Show, Eq, Ord, Ix)
 
 toList :: CellIndex -> [Integer]
 toList (CellIndex nx ny nz) = [nx,ny,nz]
@@ -33,21 +34,21 @@ fromList _ = Nothing
 
 instance PartialOrd CellIndex where
     cmp a b = let comps = liftA2 compare (toList a) (toList b) in
-              compare_all comps
-                          
+	      compare_all comps
+
 minimumIndex :: CellIndex
 minimumIndex = CellIndex 0 0 0
 
 -- | The Cartesian directions in 3D. Used to identify faces of a cell.
-data Local_Face = Negative_X 
-                | Positive_X 
-                | Negative_Y 
-                | Positive_Y 
-                | Negative_Z 
-                | Positive_Z deriving (Eq, Show)
-                                      
+data Local_Face = Negative_X
+		| Positive_X
+		| Negative_Y
+		| Positive_Y
+		| Negative_Z
+		| Positive_Z deriving (Eq, Show)
+
 next_index :: CellIndex -> Local_Face -> CellIndex
-next_index (CellIndex nx ny nz) face = 
+next_index (CellIndex nx ny nz) face =
   case face of
     Negative_X -> CellIndex (nx-1) ny nz
     Positive_X -> CellIndex (nx+1) ny nz
@@ -56,51 +57,45 @@ next_index (CellIndex nx ny nz) face =
     Negative_Z -> CellIndex nx ny (nz-1)
     Positive_Z -> CellIndex nx ny (nz+1)
 
-    
+
 -- | Types for indexing cells in the mesh
-data Cell = Local CellIndex 
-          | Void             -- ^ Used to indicate space beyond the mesh
-            deriving (Show, Eq)
+data Cell = Local CellIndex
+	  | Void             -- ^ Used to indicate space beyond the mesh
+	    deriving (Show, Eq)
 
 
 -- | Type for indexing faces in the mesh. Faces are the boundaries
 -- between cells, or a cell and the edge of the computational domain
 data Face = Face Cell Local_Face
 
-data SimpleMesh = SimpleMesh { size    :: CellIndex -- ^ Size of the mesh in cells
-                             , dim     :: Vector3   -- ^ Dimensions of each cell.
-                             } deriving Show
+data SimpleMesh = SimpleMesh { maxIndex :: CellIndex -- ^ Max cell index in each dir.
+			     , cellDim  :: Vector3   -- ^ Dimensions of each cell.
+			     } deriving Show
 
-mesh_size :: SimpleMesh -> Integer
-mesh_size mesh = let CellIndex x y z = size mesh in x*y*z
+meshSize :: SimpleMesh -> Integer
+meshSize mesh = let CellIndex x y z = maxIndex mesh in x*y*z
 
-index_in_mesh :: SimpleMesh -> CellIndex -> Bool
-index_in_mesh mesh index = (isJust $ index `ge` minimumIndex) && (isJust $ index `lt` size mesh)
+inMesh :: SimpleMesh -> CellIndex -> Bool
+inMesh mesh index = inRange (minimumIndex, maxIndex mesh) index
 
 -- | Find the mesh cell containing a given position
 findCell :: SimpleMesh -> Position -> Maybe Cell
-findCell mesh position = let index = (fromList $ map floor $ vunpack ((pos position) / (dim mesh)))
-                         in liftM Local index
+findCell mesh position =
+  let index = (fromList $ map floor $ vunpack ((pos position) / (cellDim mesh)))
+  in liftM Local index
 
-face_on_cell :: Cell -> Face -> Bool
-face_on_cell Void _ = False
-face_on_cell cell (Face cell' _) = cell == cell'
-
-on :: Face -> Cell -> Bool
-on face cell = face_on_cell cell face
+faceOnCell :: Face -> Cell -> Bool
+faceOnCell _ Void = False
+faceOnCell (Face cell' _) cell = cell == cell'
 
 -- | Find the cell on the other side of a given face. Returns Nothing
 -- the the face does not belong to the given cell.
 nextCell :: SimpleMesh -> Cell -> Face -> Maybe Cell
-nextCell mesh cell face 
-  | not (face `on` cell) = Nothing
+nextCell mesh cell face
+  | not (face `faceOnCell` cell) = Nothing
   | otherwise = undefined
 
 -- | Streaming distance from given position in the given direction, to
 -- the first-encountered face of cell.
-escape_distance :: SimpleMesh -> Cell -> Position -> Direction -> (Distance, Face)
-escape_distance mesh cell position direction = undefined
-
-
-
-
+escapeDistance :: SimpleMesh -> Cell -> Position -> Direction -> (Distance, Face)
+escapeDistance mesh cell position direction = undefined
