@@ -13,18 +13,19 @@ import Control.Applicative
 import Data.Ix
 
 -- | Size of the mesh in cells, along each axis
-data CellIndex = CellIndex { nx :: Integer, ny :: Integer, nz :: Integer }
+data CellIndex = CellIndex { nx :: Int, ny :: Int, nz :: Int }
 	       deriving (Show, Eq, Ord, Ix)
 
-toList :: CellIndex -> [Integer]
-toList (CellIndex nx ny nz) = [nx,ny,nz]
+toTuple :: CellIndex -> (Int, Int, Int)
+toTuple (CellIndex nx ny nz) = (nx,ny,nz)
 
-fromList :: [Integer] -> Maybe CellIndex
-fromList (x:y:z:[]) = Just $ CellIndex x y z
+fromTuple :: (Int, Int, Int) -> CellIndex
+fromTuple (x,y,z) = CellIndex x y z
+
+fromList :: [Int] -> Maybe CellIndex
+fromList (x:y:z:_) = Just $ CellIndex x y z
 fromList _ = Nothing
 
-minimumIndex :: CellIndex
-minimumIndex = CellIndex 0 0 0
 
 -- | The Cartesian directions in 3D. Used to identify faces of a cell.
 data Local_Face = Negative_X
@@ -44,43 +45,61 @@ next_index (CellIndex nx ny nz) face =
     Negative_Z -> CellIndex nx ny (nz-1)
     Positive_Z -> CellIndex nx ny (nz+1)
 
-
--- | Types for indexing cells in the mesh
-data Cell = Local CellIndex
-	  | Void             -- ^ Used to indicate space beyond the mesh
-	    deriving (Show, Eq)
-
-
 -- | Type for indexing faces in the mesh. Faces are the boundaries
 -- between cells, or a cell and the edge of the computational domain
-data Face = Face Cell Local_Face
+data Face = Face { cell::CellIndex, local::Local_Face }
+
+nextIndex :: Face -> CellIndex
+nextIndex face = next_index (cell face) (local face)
+
 
 data SimpleMesh = SimpleMesh { maxIndex :: CellIndex -- ^ Max cell index in each dir.
 			     , cellDim  :: Vector3   -- ^ Dimensions of each cell.
 			     } deriving Show
 
-meshSize :: SimpleMesh -> Integer
+meshSize :: SimpleMesh -> Int
 meshSize mesh = let CellIndex x y z = maxIndex mesh in x*y*z
 
 inMesh :: SimpleMesh -> CellIndex -> Bool
-inMesh mesh index = inRange (minimumIndex, maxIndex mesh) index
+inMesh mesh index = inRange (CellIndex 0 0 0, maxIndex mesh) index
+
+
+
+
+
+-- | A Type that unifies  cells and off-mesh areas. For now, the mesh is
+-- surrounded by empty space.
+data Cell = Local CellIndex
+	  | Void             -- ^ Used to indicate space beyond the mesh
+	    deriving (Show, Eq)
+
+-- | Convert a CellIndex to a Cell.
+toCell :: SimpleMesh -> CellIndex -> Cell
+toCell mesh index = if inMesh mesh index then (Local index)
+		    else Void
+
+-- | Find the cell on the other side of a given face. Returns Void if the face
+-- is on the boundary of the mesh
+nextCell :: SimpleMesh -> Face -> Cell
+nextCell mesh face = toCell mesh (nextIndex face)
+
+
+
+
+
 
 -- | Find the mesh cell containing a given position
-findCell :: SimpleMesh -> Position -> Maybe Cell
+findCell :: SimpleMesh -> Position -> Maybe CellIndex
 findCell mesh position =
-  let index = (fromList $ map floor $ vunpack ((pos position) / (cellDim mesh)))
-  in liftM Local index
+  (fromList $ map floor $ vunpack ((pos position) / (cellDim mesh)))
+
 
 faceOnCell :: Face -> Cell -> Bool
 faceOnCell _ Void = False
-faceOnCell (Face cell' _) cell = cell == cell'
+faceOnCell (Face cell index) (Local cell') = cell == cell'
 
--- | Find the cell on the other side of a given face. Returns Nothing
--- the the face does not belong to the given cell.
-nextCell :: SimpleMesh -> Cell -> Face -> Maybe Cell
-nextCell mesh cell face
-  | (face `faceOnCell` cell) = undefined
-  | otherwise = Nothing
+
+
 
 -- | Streaming distance from given position in the given direction, to
 -- the first-encountered face of cell.
