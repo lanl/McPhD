@@ -1,13 +1,15 @@
-{-# LANGUAGE TypeSynonymInstances  #-}
+{-# LANGUAGE TypeSynonymInstances, GeneralizedNewtypeDeriving  #-}
 import Data.Functor
 import Data.Array.IArray
 import Data.Ix
+import Data.Vector.V3
+import Data.Vector.Class
 
 -- An index type for coordinates.
 data Coord = X | Y | Z deriving (Show, Eq, Ord, Ix)
 
 -- I can use this to index into arrays. For example, here's an array which stores a name for each one.
-myarray = listArray (X,Z) ['x', 'y', 'z'] :: Array Coord Char
+coord = listArray (X,Z) "xyz" :: Array Coord Char
 
 -- Here's a newtype for arrays indexed over these coordinates.
 newtype InSpace v = InSpace (Array Coord v) deriving (Show, Eq, Ord)
@@ -67,3 +69,9 @@ instance Ix SpaceIndexType where
     range p   = map fromTuple $ range . fromPair $ toTuple <$> Pair p     -- Using the Pair type for range.
     index p i = index (onPair toTuple p) (toTuple i)                      -- Pattern matching on the tuple.
     inRange p i = inRange (toTuple (fst p), toTuple (snd p)) (toTuple i)  -- Extracting data from the tuple
+
+
+
+-- Making a type an instance of Ix is fairly easy. What about making a type an instance of Array?
+
+newtype Position = Position { fromVector :: Vector3 } deriving (Eq, Show, Num)

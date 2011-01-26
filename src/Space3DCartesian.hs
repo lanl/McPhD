@@ -33,11 +33,10 @@ newtype Momentum = Momentum { mom :: Vector3 } deriving (Eq, Show, Num)
 newtype Motion = Motion { mot :: Vector3 } deriving (Eq, Show, Num)
 
 -- | Distance, scalar
-newtype Distance  = Distance { dis :: Double  } deriving (Eq, Show, Num, Ord)
+newtype Distance = Distance { dis :: Double  } deriving (Eq, Show, Num, Ord)
 
 -- | Direction, a 3D vector of magnitude 1.
 newtype Direction = Direction { dir :: Vector3 } deriving (Eq, Show, Num)
-
 
 
 -- * Construction and manupulation of space quantities

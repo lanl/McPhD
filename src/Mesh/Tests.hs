@@ -11,9 +11,8 @@ import Mesh.SimpleCartesian
 
 -- Its dependencies
 import Data.Vector.V3
-import Data.Number.PartialOrd
-
 import Data.Maybe
+import Data.Ix
 
 
 -- * CellIndex tests
@@ -21,11 +20,8 @@ import Data.Maybe
 cellIndex :: CellIndex
 cellIndex = CellIndex 10 10 10
 
-test1 :: Assertion
-test1 = isJust (CellIndex 0 0 0 `lt` cellIndex) @? "LEQ operator for CellIndex"
-
-test2 :: Assertion
-test2 = isJust (cellIndex `lt` CellIndex 20 20 20) @? "LEQ operator for CellIndex"
+testRange :: Assertion
+testRange = inRange (CellIndex 0 0 0, CellIndex 20 20 20) cellIndex @? "InRange operator for CellIndex"
 
 
 -- * Simple Mesh Tests
@@ -33,12 +29,13 @@ test2 = isJust (cellIndex `lt` CellIndex 20 20 20) @? "LEQ operator for CellInde
 simpleMesh :: SimpleMesh
 simpleMesh = SimpleMesh cellIndex (Vector3 0.1 0.2 0.3)
 
-test3 :: Assertion
-test3 = (meshSize simpleMesh) @?= 1000
+testSize :: Assertion
+testSize = (meshSize simpleMesh) @?= 1000
 
 tests = [ testGroup "Index Tests"
-	  [ testCase "LEQ operator"   test1,
-	    testCase "LEQ operator 2" test2
+	  [ testCase "LEQ operator" testRange
 	  ],
-	  testGroup "Mesh Tests" [testCase "Size Equality" test3]
+	  testGroup "Mesh Tests" 
+          [ testCase "Size Equality" testSize
+          ]
 	]

@@ -8,18 +8,9 @@ import Space3DCartesian
 import Data.Vector.V3
 import Data.Vector.Class
 import Data.Maybe
-import Data.Number.PartialOrd
 import Control.Monad
 import Control.Applicative
 import Data.Ix
-
-
-compare_all :: [Ordering] -> Maybe Ordering
-compare_all comps
-    | all (==EQ) comps = Just EQ
-    | all (==LT) comps = Just LT
-    | all (==GT) comps = Just GT
-    | otherwise = Nothing
 
 -- | Size of the mesh in cells, along each axis
 data CellIndex = CellIndex { nx :: Integer, ny :: Integer, nz :: Integer }
@@ -31,10 +22,6 @@ toList (CellIndex nx ny nz) = [nx,ny,nz]
 fromList :: [Integer] -> Maybe CellIndex
 fromList (x:y:z:[]) = Just $ CellIndex x y z
 fromList _ = Nothing
-
-instance PartialOrd CellIndex where
-    cmp a b = let comps = liftA2 compare (toList a) (toList b) in
-	      compare_all comps
 
 minimumIndex :: CellIndex
 minimumIndex = CellIndex 0 0 0
@@ -92,8 +79,8 @@ faceOnCell (Face cell' _) cell = cell == cell'
 -- the the face does not belong to the given cell.
 nextCell :: SimpleMesh -> Cell -> Face -> Maybe Cell
 nextCell mesh cell face
-  | not (face `faceOnCell` cell) = Nothing
-  | otherwise = undefined
+  | (face `faceOnCell` cell) = undefined
+  | otherwise = Nothing
 
 -- | Streaming distance from given position in the given direction, to
 -- the first-encountered face of cell.
