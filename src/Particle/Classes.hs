@@ -19,5 +19,3 @@ class InSpace p where
 translate_p :: (InSpace p) => p -> Distance -> (Position, Direction)
 translate_p particle distance = (translate (position particle) (direction particle) distance, (direction particle))
 
-
-
