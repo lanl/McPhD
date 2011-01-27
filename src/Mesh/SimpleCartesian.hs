@@ -47,7 +47,7 @@ next_index (CellIndex nx ny nz) face =
 
 -- | Type for indexing faces in the mesh. Faces are the boundaries
 -- between cells, or a cell and the edge of the computational domain
-data Face = Face { cell::CellIndex, local::Local_Face }
+data Face = Face { cell::CellIndex, local::Local_Face } deriving (Show)
 
 nextIndex :: Face -> CellIndex
 nextIndex face = next_index (cell face) (local face)
