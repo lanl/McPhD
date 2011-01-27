@@ -32,12 +32,12 @@ prop_StepMomentum :: RandomParticle -> Bool
 prop_StepMomentum p = let next = step (Opacity 1.0) p in
   case next of
     -- | The momentum change is the difference between the initial final directions
-    Just (Event _ (Scatter     d ), p') -> (mom d + (dir $ rpDir p)) ~== (dir $ rpDir p')
+    Just (Event _ (Scatter d), p') -> (mom d + (dir $ rpDir p)) ~== (dir $ rpDir p')
 
     -- | For other events, the direction is unchanged.
     Just (Event _ (FaceCrossing face), p')  -> (rpDir p) ~== (rpDir p')
     Just (Event _ (Termination p'), _ ) -> (rpDir p) ~== (rpDir p')
-    Just (Event _ (Escape      p'), _ ) -> (rpDir p) ~== (rpDir p')
+    Just (Event _ (Escape p'), _ ) -> (rpDir p) ~== (rpDir p')
     Nothing -> True
 
 -- * Tests.  TODO: Needs more? Hard to test streaming results
