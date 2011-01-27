@@ -14,6 +14,9 @@ import Control.Applicative
 -- * Arbitrary instances for RandomParticle attributes. These will go
 -- into making random particles for QuickCheck tests.
 
+instance Arbitrary Seed where
+  arbitrary = Seed <$> arbitrary
+
 instance Arbitrary CellIndex where
   arbitrary = CellIndex <$> arbitrary <*> arbitrary <*> arbitrary
 
@@ -33,6 +36,7 @@ instance Arbitrary RandomParticle where
   arbitrary = createParticle
 	      <$> arbitrary
 	      <*> arbitrary
+              <*> arbitrary
 	      <*> arbitrary
 	      <*> arbitrary
 	      <*> arbitrary

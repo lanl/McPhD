@@ -7,6 +7,11 @@ import Space3DCartesian
 import System.Random.Mersenne.Pure64
 import Data.Vector.V3
 
+newtype Seed = Seed { toInt :: Integer }
+makePureMT :: Seed -> PureMT
+makePureMT = pureMT . fromIntegral . toInt
+
+
 -- | Compute a random direction vector from a two random doubles
 randomDirection_compute :: Double -> Double -> Direction
 randomDirection_compute a b = let 

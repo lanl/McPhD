@@ -13,36 +13,48 @@ import System.Random.Mersenne.Pure64
 -- * Particle and Event datatypes
 
 data RandomParticle =
-  InFlight { rpPos   :: Position     -- ^ Position in space
-	     , rpDir   :: Direction  -- ^ Direction of travel
-	     , rpDist  :: Distance   -- ^ Remaining distance of travel
-	     , rpIndex :: Cell       -- ^ Cell index
-	     , rpRand  :: PureMT     -- ^ Random number generator
+  InFlight { rpPos             :: Position   -- ^ Position in space
+	     , rpDir           :: Direction  -- ^ Direction of travel
+	     , rpDistToEnd     :: Distance   -- ^ Remaining distance of travel
+	     , rpDistToScatter :: Distance   -- ^ Distance in MFP to next scatter
+             , rpIndex         :: Cell       -- ^ Cell index
+	     , rpRand          :: PureMT     -- ^ Random number generator
 	   }
   | Dead  -- ^ Pining for the Fjords. Used to terminate the unfold.
   deriving Show
 
 
 instance Approx RandomParticle where
-  within_eps epsilon a b = all id [ (within_eps epsilon (rpPos a)  (rpPos b)),
-				    (within_eps epsilon (rpDir a)  (rpDir b)),
-				    (within_eps epsilon (rpDist a) (rpDist b)),
-				    (rpIndex a == rpIndex b)
-				  ]
+  within_eps epsilon a b = all id [ 
+                                (within_eps epsilon (rpPos a) (rpPos b))
+                               , (within_eps epsilon (rpDir a) (rpDir b))
+                               , (within_eps epsilon (rpDistToEnd a) (rpDistToEnd b))
+                               , (within_eps epsilon (rpDistToScatter a) (rpDistToScatter b))
+                               , (rpIndex a == rpIndex b)
+			       ]
 
-
--- | Create a particle with given position, direction, distance and random seed.
-createParticle :: Position -> Direction -> Distance
-		  -> Cell -> Integer -> RandomParticle
-createParticle pos dir dist cell seed =
-  InFlight pos dir dist cell (pureMT $ fromIntegral seed)
+-- | Create a particle with given position, direction, distance and random seed. 
+createParticle :: Position 
+                  -> Direction 
+                  -> Distance 
+                  -> Distance 
+                  -> Cell 
+                  -> Seed
+                  -> RandomParticle
+createParticle pos dir distEnd distScatter cell seed =
+  InFlight pos dir distEnd distScatter cell (makePureMT seed)
 
 -- | Create a particle with given generator, position and
 -- distance and cell. Sample an isotropic initial direction.
-sampleIsoParticle :: PureMT -> Position -> Distance -> Cell -> RandomParticle
-sampleIsoParticle rand position distance cell = let
+sampleIsoParticle :: PureMT 
+                     -> Position 
+                     -> Distance 
+                     -> Distance 
+                     -> Cell 
+                     -> RandomParticle
+sampleIsoParticle rand position distEnd distScatter cell = let
   (direction, rand') = randomDirection rand
-  in InFlight position direction distance cell rand'
+  in InFlight position direction distEnd distScatter cell rand'
 
 
 -- | Each event is motion of a particle & a Limiter which stopped it.
@@ -68,52 +80,60 @@ scatterRP Dead = Dead
 scatterRP p = p{rpDir=direction, rpRand=rand}
   where (direction, rand) = randomDirection (rpRand p)
 
-nextCellRP :: SimpleMesh -> Face -> RandomParticle -> RandomParticle
+nextCellRP :: SimpleMesh 
+             -> Face 
+             -> RandomParticle 
+             -> RandomParticle
 nextCellRP mesh face particle = particle{rpIndex = nextCell mesh face}
 
 -- | Translate a particle in space.
-translateRP :: RandomParticle -> Distance -> RandomParticle
-translateRP Dead _ = Dead
-translateRP p d = p{rpPos = position, rpDist = distance}
-  where position  = translate (rpPos p) (rpDir p) d
-	distance  = rpDist p - d
+translateRP :: Distance 
+              -> RandomParticle 
+              -> RandomParticle
+translateRP _ Dead = Dead
+translateRP distance particle = particle{rpPos = position, rpDistToEnd = distance'}
+  where position  = translate (rpPos particle) (rpDir particle) distance
+	distance' = rpDistToEnd particle - distance
 
 -- | A composite operation for motion and scattering
-translateAndScatterRP :: RandomParticle -> Distance -> (Event, RandomParticle)
-translateAndScatterRP particle distance = (event, particle') where
+translateAndScatterRP :: Distance 
+                        -> RandomParticle 
+                        -> (Event, RandomParticle)
+translateAndScatterRP distance particle = (event, particle') where
   motion'   = motion (rpDir particle) distance
-  particle' = scatterRP $ translateRP particle distance
+  particle' = scatterRP $ translateRP distance particle
   momentum  = Momentum ((dir $ rpDir particle') - (dir $ rpDir particle))
   event     = Event motion' (Scatter momentum)
 
 -- | A compositie operation for motion and face crossing
-translateToFaceRP :: SimpleMesh ->
-		     RandomParticle ->
-		     Distance ->
-		     Face -> (Event, RandomParticle)
-translateToFaceRP mesh particle distance face = (event, particle') where
+translateToFaceRP :: SimpleMesh    
+                    -> Distance 
+                    -> Face 
+                    -> RandomParticle 
+                    -> (Event, RandomParticle)
+translateToFaceRP mesh distance face particle = (event, particle') where
   motion'   = motion (rpDir particle) distance
-  particle' = nextCellRP mesh face $ translateRP particle distance
+  particle' = nextCellRP mesh face $ translateRP distance particle
   event     = Event motion' (FaceCrossing face)
 
 
 
 -- | A composite event for motion and termination
-translateAndTerminateRP :: RandomParticle -> Distance -> (Event, RandomParticle)
-translateAndTerminateRP particle distance = (event, Dead) where
+translateAndTerminateRP :: Distance -> RandomParticle -> (Event, RandomParticle)
+translateAndTerminateRP distance particle = (event, Dead) where
   motion'   = motion (rpDir particle) distance
-  particle' = translateRP particle distance
+  particle' = translateRP distance particle
   event     = Event motion' (Termination particle')
 
 
 -- * Step functions
 
 -- | Step operation, with a given potential distance of travel
-stepRP :: RandomParticle -> Distance -> Maybe (Event, RandomParticle)
-stepRP Dead _ = Nothing
-stepRP particle distance = Just (event, particle') where
-  remaining = rpDist particle
+stepRP :: Distance -> RandomParticle -> Maybe (Event, RandomParticle)
+stepRP _ Dead = Nothing
+stepRP distance particle = Just (event, particle') where
+  remaining = rpDistToEnd particle
   (event, particle') = if distance < remaining then
-			 translateAndScatterRP particle distance
+			 translateAndScatterRP distance particle
 		       else
-			 translateAndTerminateRP particle remaining
+			 translateAndTerminateRP remaining particle

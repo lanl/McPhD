@@ -15,7 +15,7 @@ step :: Opacity -> RandomParticle -> Maybe (Event, RandomParticle)
 step _ Dead = Nothing
 step opacity particle =
   let (scatter_distance, randState) = randomExponential (opValue opacity) (rpRand particle)
-  in stepRP particle{rpRand = randState} scatter_distance
+  in stepRP scatter_distance particle{rpRand = randState} 
 
 
 -- * Simulation Functions
