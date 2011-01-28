@@ -8,14 +8,13 @@ import RandomValues
 
 import Data.List
 
--- | A physical property of the space which determines streaming distances.
-newtype Opacity = Opacity { opValue :: Double }
 
 step :: Opacity -> RandomParticle -> Maybe (Event, RandomParticle)
 step _ Dead = Nothing
 step opacity particle =
-  let (scatter_distance, randState) = randomExponential (opValue opacity) (rpRand particle)
-  in stepRP scatter_distance particle{rpRand = randState} 
+  let (scatter_distance, randState) =
+	randomExponential (opValue opacity) (rpRand particle)
+  in stepRP opacity scatter_distance particle{rpRand = randState}
 
 
 -- * Simulation Functions
