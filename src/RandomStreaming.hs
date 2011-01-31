@@ -3,22 +3,32 @@
 
 module RandomStreaming where
 
+import Space3DCartesian
 import Particle.RandomParticle
 import RandomValues
 
 import Data.List
 
--- | A physical property of the space which determines streaming distances.
-newtype Opacity = Opacity { opValue :: Double }
 
+<<<<<<< local
+step :: Opacity -> Time -> RandomParticle -> Maybe (Event, RandomParticle)
+step _ _ Dead = Nothing
+step opacity time particle =
+=======
 step :: Opacity -> RandomParticle -> Maybe (Event, RandomParticle)
 step _ Dead = Nothing
 step opacity particle =
-  let (scatter_distance, randState) = randomExponential (opValue opacity) (rpRand particle)
-  in stepRP scatter_distance particle{rpRand = randState} 
+>>>>>>> other
+  let (scatter_distance, randState) =
+	randomExponential (opValue opacity) (rpRand particle)
+<<<<<<< local
+  in stepRP opacity time scatter_distance particle{rpRand = randState}
+=======
+  in stepRP opacity scatter_distance particle{rpRand = randState}
+>>>>>>> other
 
 
 -- * Simulation Functions
 
-stream :: Opacity -> RandomParticle -> [Event]
-stream opacity initial_particle = unfoldr (step opacity) initial_particle
+stream :: Opacity -> Time -> RandomParticle -> [Event]
+stream opacity time initial_particle = unfoldr (step opacity time) initial_particle
