@@ -7,9 +7,6 @@ import Space3DCartesian
 
 import Data.Vector.V3
 import Data.Vector.Class
-import Data.Maybe
-import Control.Monad
-import Control.Applicative
 import Data.Ix
 
 -- | Size of the mesh in cells, along each axis
@@ -64,25 +61,20 @@ inMesh :: SimpleMesh -> CellIndex -> Bool
 inMesh mesh index = inRange (CellIndex 0 0 0, maxIndex mesh) index
 
 
-
-
-
--- | A Type that unifies  cells and off-mesh areas. For now, the mesh is
--- surrounded by empty space.
 data Cell = Local CellIndex
-	  | Void             -- ^ Used to indicate space beyond the mesh
-	    deriving (Show, Eq)
+ 	  | Void deriving (Eq, Show)
 
 -- | Convert a CellIndex to a Cell.
-toCell :: SimpleMesh -> CellIndex -> Cell
+toCell :: SimpleMesh
+	  -> CellIndex
+	  -> Cell
 toCell mesh index = if inMesh mesh index then (Local index)
 		    else Void
 
--- | Find the cell on the other side of a given face. Returns Void if the face
+-- | Find the cell on the other side of a given face. Returns Nothing if the face
 -- is on the boundary of the mesh
 nextCell :: SimpleMesh -> Face -> Cell
 nextCell mesh face = toCell mesh (nextIndex face)
-
 
 
 
@@ -96,12 +88,12 @@ findCell mesh position =
 
 faceOnCell :: Face -> Cell -> Bool
 faceOnCell _ Void = False
-faceOnCell (Face cell index) (Local cell') = cell == cell'
+faceOnCell (Face cell _) (Local cell') = cell == cell'
 
 
 
 
 -- | Streaming distance from given position in the given direction, to
 -- the first-encountered face of cell.
-escapeDistance :: SimpleMesh -> Cell -> Position -> Direction -> (Distance, Face)
-escapeDistance mesh cell position direction = undefined
+-- escapeDistance :: SimpleMesh -> Cell -> Position -> Direction -> (Distance, Face)
+-- escapeDistance mesh cell position direction = undefined

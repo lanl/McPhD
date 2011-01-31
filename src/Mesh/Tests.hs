@@ -11,7 +11,6 @@ import Mesh.SimpleCartesian
 
 -- Its dependencies
 import Data.Vector.V3
-import Data.Maybe
 import Data.Ix
 
 
@@ -35,7 +34,7 @@ testSize = (meshSize simpleMesh) @?= 1000
 tests = [ testGroup "Index Tests"
 	  [ testCase "LEQ operator" testRange
 	  ],
-	  testGroup "Mesh Tests" 
-          [ testCase "Size Equality" testSize
-          ]
+	  testGroup "Mesh Tests"
+	  [ testCase "Size Equality" testSize
+	  ]
 	]

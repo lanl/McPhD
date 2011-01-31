@@ -30,13 +30,24 @@ instance Arbitrary Position where
   arbitrary = Position <$> ( Vector3 <$> arbitrary <*> arbitrary <*> arbitrary )
 
 instance Arbitrary Distance where
-  arbitrary = Distance . (10*) <$> arbitrary
+  arbitrary = Distance <$> abs <$> arbitrary
+
+instance Arbitrary Time where
+  arbitrary = Time <$> abs <$> arbitrary
+
+-- Need > 0 for speed.
+instance Arbitrary Speed where
+  arbitrary = Speed <$> abs <$> (0.1+) <$> arbitrary
+
+instance Arbitrary Opacity where
+  arbitrary = Opacity <$> abs <$> arbitrary
 
 instance Arbitrary RandomParticle where
   arbitrary = createParticle
 	      <$> arbitrary
 	      <*> arbitrary
-              <*> arbitrary
+	      <*> arbitrary
+	      <*> arbitrary
 	      <*> arbitrary
 	      <*> arbitrary
 	      <*> arbitrary

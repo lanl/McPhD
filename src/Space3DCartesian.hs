@@ -1,18 +1,22 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving, TypeSynonymInstances, TypeFamilies, FlexibleInstances, UndecidableInstances #-}
 -- Data types for Three-dimensonal space in Cartesian coordinates
 
-module Space3DCartesian(Distance (..),
-			Position (..),
-			Momentum (..),
-			Motion (..), motion, move,
-			Direction (), dir, direction, direction_unsafe, (*->), (+->),
-			translate) where
+module Space3DCartesian(Distance (..)
+			, Position (..)
+			, Momentum (..)
+			, Motion (..), motion, move
+			, Direction (), dir, direction, direction_unsafe, (*->), (+->)
+			, Time (..)
+			, Speed (..)
+			, timeToDistance
+			, distanceToTime
+			, translate
+			) where
 
 import Data.Vector.V3
 import Data.Vector.Class
 
 import Data.Array.IArray
-import Data.Ix
 
 import Approx
 import NumUnit
@@ -23,7 +27,7 @@ import Control.Applicative
 
 -- | Coordinates
 data Coord = X | Y | Z deriving (Show, Eq, Ord, Ix)
-coords = listArray (X,Z) "xyz" :: Array Coord Char
+-- coords = listArray (X,Z) "xyz" :: Array Coord Char
 
 -- | Position, a 3D vector
 newtype Position = Position { pos :: Vector3 } deriving (Eq, Show, Num)
@@ -39,6 +43,12 @@ newtype Distance = Distance { dis :: Double  } deriving (Eq, Show, Num, Ord)
 
 -- | Direction, a 3D vector of magnitude 1.
 newtype Direction = Direction { dir :: Vector3 } deriving (Eq, Show, Num)
+
+-- | Time, elapsed time from beginning of streaming
+newtype Time = Time { time :: Double } deriving (Eq, Show, Num, Ord)
+
+-- | A scalar representing the magnitude of velocity.
+newtype Speed = Speed { speed :: Double } deriving (Eq, Show, Num, Ord)
 
 
 -- * Construction and manupulation of space quantities
@@ -80,6 +90,12 @@ translate :: Position -- ^ Initial position
 	     -> Position  -- ^ New position
 translate position direction distance = position +-> (direction *-> distance)
 
+timeToDistance :: Distance -> Speed -> Time
+timeToDistance (Distance distance) (Speed speed) = Time (distance / speed)
+
+distanceToTime :: Time -> Speed -> Distance
+distanceToTime (Time time) (Speed speed) = Distance (time * speed)
+
 
 -- * Nearness testing for space quantities. All of these dispatch to
 -- the same test for the inner data type.
@@ -99,16 +115,17 @@ instance Approx Momentum where
 instance Approx Motion where
     within_eps epsilon (Motion a) (Motion b) = within_eps epsilon a b
 
-
+instance Approx Time where
+  within_eps epsilon (Time a) (Time b) = within_eps epsilon a b
 
 -- * Experimental Code:
-    
+
 -- | A class for things which wrap a value.
 class Wrapper w where
     type Inner w
     unwrap :: w -> Inner w
-    
-instance Wrapper Position where 
+
+instance Wrapper Position where
     type Inner Position = Vector3
     unwrap = pos
 
@@ -119,8 +136,8 @@ instance Wrapper Momentum where
 instance Wrapper Distance where
   type Inner Distance = Double
   unwrap = dis
-  
-  
+
+
 -- I'd like to make the newtypes, which are not parameterized, into
 -- instances of Functor (and applicative?) to make the within_eps definitions simpler.
 
@@ -131,4 +148,6 @@ instance Applicative GenDistance where
     pure = GenDistance
     (<*>) (GenDistance f) (GenDistance a) = GenDistance (f a)
 
--- | Can I make class Wrapper a subclass of Functor?  
+-- | Can I make class Wrapper a subclass of Functor?
+instance Approx Speed where
+  within_eps epsilon (Speed a) (Speed b) = within_eps epsilon a b
