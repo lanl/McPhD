@@ -67,10 +67,10 @@ sampleIsoParticle rand position speed time distScatter cell =
 
 
 -- | Each event is motion of a particle & a Limiter which stopped it.
-data Event = Event
-	     { eventMotion::Motion
-	     , eventLimit::Limiter
-	     } deriving Show
+data Event = Event { 
+    , eventMotion::Motion
+    , eventLimit::Limiter
+    } deriving Show
 
 -- | Limiters are things which stop a particle's motion.
 data Limiter =
@@ -161,7 +161,7 @@ translateAndTerminateRP opacity distance particle = (event, Dead) where
 
 -- | Step operation, with a given potential distance of travel
 stepRP :: Opacity
-	  -> Time           -- ^ End of timestep time
+	  -> Time           -- ^ End of timestep
 	  -> Distance       -- ^ Tentative travel distance
 	  -> RandomParticle -- ^ Particle to Step
 	  -> Maybe (Event, RandomParticle)
@@ -173,3 +173,6 @@ stepRP opacity endtime distance particle = Just (event, particle') where
 			 translateAndScatterRP opacity distance particle
 		       else
 			 translateAndTerminateRP opacity distance_to_step_end particle
+
+-- | A simpler step function which only updates time and space quantities
+step' :: Distance -> RandomParticle ->  (Motion, RandomParticle)
