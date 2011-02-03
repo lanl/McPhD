@@ -2,10 +2,10 @@
 module NumUnit where
 
 import Data.Vector.Class
-import Data.Vector.V4
-import Data.Vector.V3
-import Data.Vector.V2
-import Data.Vector.V1
+import Data.Vector.V4()
+import Data.Vector.V3()
+import Data.Vector.V2()
+import Data.Vector.V1()
 
 -- | A Num-like class for quantities that need to remain
 -- normalized. E.g. certain vectors.  Provides normalize and magnitude
