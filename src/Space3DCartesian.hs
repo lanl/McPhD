@@ -40,7 +40,7 @@ newtype Motion = Motion { mot :: Vector3 } deriving (Eq, Show, Num, Approx)
 newtype Distance = Distance { dis :: Double  } deriving (Eq, Show, Num, Ord, Approx)
 
 -- | Direction, a 3D vector of magnitude 1.
-newtype Direction = Direction { dir :: Vector3 } deriving (Eq, Show, Num, Approx)
+newtype Direction = Direction { dir :: Vector3 } deriving (Eq, Show, Num, Approx, NumUnit)
 
 -- | Time, elapsed time from beginning of streaming
 newtype Time = Time { time :: Double } deriving (Eq, Show, Num, Ord, Approx)
@@ -58,12 +58,6 @@ direction v = Direction (vnormalise v)
 -- | User attests that the vector is already normalised
 direction_unsafe :: Vector3 -> Direction
 direction_unsafe = Direction
-
--- | Defines normalize operation for Directions
-instance NumUnit Direction where
-  normalize  = direction  . dir
-  magnitude  = magnitude  . dir
-  magnitude2 = magnitude2 . dir
 
 -- | Create motion from a distance and direction
 motion :: Direction -> Distance -> Motion
