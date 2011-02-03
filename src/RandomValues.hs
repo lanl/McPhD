@@ -6,6 +6,7 @@ import Space3DCartesian
 
 import System.Random.Mersenne.Pure64
 import Data.Vector.V3
+import Data.List (unfoldr)
 
 newtype Seed = Seed { toInt :: Integer }
 makePureMT :: Seed -> PureMT
@@ -48,3 +49,6 @@ sampleN generator rand n
     let (value, rand') = generator rand
     in value : ( sampleN generator rand' (n-1) )
 
+-- NOTE: this might be accomplished in more idiomatics way with (take n $ samples generator rand):
+samples :: (PureMT -> (a, PureMT)) -> PureMT -> [a]
+samples generator rand = unfoldr (Just . generator) rand
