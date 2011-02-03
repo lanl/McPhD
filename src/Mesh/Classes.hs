@@ -1,4 +1,4 @@
-{-# OPTIONS_GHC  -XTypeFamilies #-}
+{-# LANGUAGE TypeFamilies #-}
 
 {-| An exploratory typeclass for Meshes.
 -}
