@@ -18,6 +18,9 @@ data Fate p = Escape p     -- ^ Particle has escaped computational domain
             | Survival p   -- ^ Particle remains at end of the computational step.
            deriving Show
 
+-- FIXME: type "Fate" is not referenced anywhere. Is this correct?
+-- Perhaps, Event shoud have "| Final (Fate p)" instead of "| Fates p"?
+
 -- | A Event is either a combination of particle motion and stopping or a final event.
 -- FIXME: Does this work? We may need a final event and a Fate at the end of streaming.
 data Event p = Event Motion StepEnd    -- ^ Ordinary event consists of a motion and a step end
