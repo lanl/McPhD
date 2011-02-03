@@ -29,7 +29,7 @@ data RandomParticle =
 
 instance Approx RandomParticle where
   within_eps epsilon a b =
-    all id [
+    and [
       (within_eps epsilon   (rpPos a) (rpPos b))
       , (within_eps epsilon (rpDir a) (rpDir b))
       , (within_eps epsilon (rpSpeed a) (rpSpeed b))
