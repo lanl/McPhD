@@ -68,7 +68,7 @@ sampleIsoParticle rand position speed time distScatter cell =
 
 -- | Each event is motion of a particle & a Limiter which stopped it.
 data Event = Event { 
-    , eventMotion::Motion
+    eventMotion::Motion
     , eventLimit::Limiter
     } deriving Show
 
@@ -176,3 +176,4 @@ stepRP opacity endtime distance particle = Just (event, particle') where
 
 -- | A simpler step function which only updates time and space quantities
 step' :: Distance -> RandomParticle ->  (Motion, RandomParticle)
+step' = undefined
