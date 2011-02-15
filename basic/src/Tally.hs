@@ -1,19 +1,18 @@
--- SimpleDataTypes.hs
+-- Tally.hs
 -- T. M. Kelley
--- Dec 08, 2010
--- (c) Copyright 2010 LANSLLC all rights reserved.
+-- Feb 03, 2011
+-- (c) Copyright 2011 LANSLLC, all rights reserved
 
-module DataTypes where
+module Tally where
+
 
 import Data.Map
 import Numerical
+import Physical
 
--- FIX: these should be distinct types
-
--- NOTE: If the range of CellIdx values is contiguous, it is better to use Array here - it will use less space in
--- setting with lots of cells
-type MomentumTally  = Map CellIdx Momentum
-type EnergyTally    = Map CellIdx Energy
+-- want these to be array-based
+type MomentumTally  = Map Idx Momentum
+type EnergyTally    = Map Idx Energy
 
 data EventCount = EventCount { n_scatter  :: !Int -- NOTE: Strict counters are always a good idea
                              , n_absorb   :: !Int
@@ -30,7 +29,6 @@ data EventSelectors = EventSelectors {
     , d_sig_a     :: FP   -- sample distance to absorb
     , sel_omega   :: FP   -- sample new direction cosine
     }
-
 
 
 -- version

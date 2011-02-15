@@ -26,6 +26,25 @@ data RandomParticle =
   deriving Show
 
 instance Approx RandomParticle where
+<<<<<<< local
+  within_eps epsilon a b = all id [ 
+                                (within_eps epsilon (rpPos a) (rpPos b))
+                               , (within_eps epsilon (rpDir a) (rpDir b))
+                               , (within_eps epsilon (rpDistToEnd a) (rpDistToEnd b))
+                               , (within_eps epsilon (rpDistToScatter a) (rpDistToScatter b))
+                               , (rpIndex a == rpIndex b)
+			       ]
+-- | Create a particle with given position, direction, distance and random seed. 
+createParticle :: Position 
+                  -> Direction 
+                  -> Distance 
+                  -> Distance 
+                  -> Cell 
+                  -> Seed
+                  -> RandomParticle
+createParticle pos dir distEnd distScatter cell seed =
+  InFlight pos dir distEnd distScatter cell (makePureMT seed)
+=======
   within_eps epsilon a b =
     and [
       (within_eps epsilon   (rpPos a) (rpPos b))
@@ -43,6 +62,7 @@ createParticle :: Position
 		  -> CellIndex
 		  -> Seed
 		  -> RandomParticle
+>>>>>>> other
 
 
 createParticle pos dir speed time cell seed =

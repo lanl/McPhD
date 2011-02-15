@@ -22,15 +22,17 @@ flag test
   description: Build testsuite, code coverage tests etc
   default: True
 
--- Library
---    ghc-options: -Wall -fno-warn-name-shadowing -fno-warn-orphans
---    hs-source-dirs:
---       src
---    build-depends:
---       base > 3 && <= 5,
---       AC-Vector == 2.3.1
---    exposed-modules:
---    other-modules:
+Library
+   ghc-options: -Wall -fno-warn-name-shadowing -fno-warn-orphans
+   hs-source-dirs:
+      ./src
+   build-depends:
+       base > 3 && <= 5,
+       AC-Vector == 2.3.1
+       , array == 0.3.0.0
+       , mersenne-random-pure64 == 0.2
+   exposed-modules: MC 
+   other-modules:
 
 executable  basic
   hs-source-dirs:
@@ -39,7 +41,8 @@ executable  basic
   other-modules:
   DataTypes
   Constants
-  main-is:       MC.hs
+  MC
+  main-is:       Main.hs
   if flag(test)
     ghc-options: -fhpc
     build-depends: base >=3 && <=5, hpc, containers,random

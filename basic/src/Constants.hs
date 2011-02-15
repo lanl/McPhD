@@ -5,7 +5,7 @@
 
 module Constants where
 
-import DataTypes
+import Numerical
 
 -- constants 
 
