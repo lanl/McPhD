@@ -19,13 +19,11 @@ data RandomParticle =
 	     , rpDir           :: Direction  -- ^ Direction of travel
 	     , rpSpeed         :: Speed      -- ^ Magnitude of velocity
 	     , rpTime          :: Time       -- ^ Time in flight
-	     , rpMFPToScatter  :: Distance   -- ^ Distance in MFP to next scatter
 	     , rpIndex         :: Cell       -- ^ Cell index
 	     , rpRand          :: PureMT     -- ^ Random number generator
 	   }
   | Dead  -- ^ Pining for the Fjords. Used to terminate the unfold.
   deriving Show
-
 
 instance Approx RandomParticle where
   within_eps epsilon a b =
@@ -34,7 +32,6 @@ instance Approx RandomParticle where
       , (within_eps epsilon (rpDir a) (rpDir b))
       , (within_eps epsilon (rpSpeed a) (rpSpeed b))
       , (within_eps epsilon (rpTime a) (rpTime b))
-      , (within_eps epsilon (rpMFPToScatter a) (rpMFPToScatter b))
       , (rpIndex a == rpIndex b)
       ]
 
@@ -43,14 +40,13 @@ createParticle :: Position
 		  -> Direction
 		  -> Speed
 		  -> Time
-		  -> Distance
 		  -> CellIndex
 		  -> Seed
 		  -> RandomParticle
 
 
-createParticle pos dir speed time distScatter cell seed =
-  InFlight pos dir speed time distScatter (Local cell) (makePureMT seed)
+createParticle pos dir speed time cell seed =
+  InFlight pos dir speed time (Local cell) (makePureMT seed)
 
 -- | Create a particle with given position, time, distance remaining
 -- and cell. Sample an isotropic initial direction.
@@ -58,12 +54,11 @@ sampleIsoParticle :: PureMT
 		     -> Position
 		     -> Speed
 		     -> Time
-		     -> Distance
 		     -> CellIndex
 		     -> RandomParticle
-sampleIsoParticle rand position speed time distScatter cell =
+sampleIsoParticle rand position speed time cell =
   let (direction, rand') = randomDirection rand
-  in InFlight position direction speed time distScatter (Local cell) rand'
+  in InFlight position direction speed time (Local cell) rand'
 
 
 -- | Each event is motion of a particle & a Limiter which stopped it.
@@ -87,7 +82,7 @@ data Limiter =
 -- for some way of combining basic functions into these operations.
 
 -- | A physical property of the space which determines streaming distances.
-newtype Opacity = Opacity { opValue :: Double } deriving (Eq, Num, Show)
+-- newtype Opacity = Opacity { opValue :: Double } deriving (Eq, Num, Show)
 
 -- | Change a particle's direction of motion isotropically.
 scatterRP :: RandomParticle -> RandomParticle
@@ -102,78 +97,70 @@ nextCellRP :: SimpleMesh
 nextCellRP mesh face particle = particle{rpIndex = nextCell mesh face}
 
 -- | Translate a particle in space.
-translateRP :: Opacity
-	       -> Distance
+translateRP :: Distance
 	       -> RandomParticle
 	       -> RandomParticle
-translateRP _ _ Dead = Dead
-translateRP opacity distance particle =
+translateRP _ Dead = Dead
+translateRP distance particle =
   particle
   {
-    rpPos          = position'
-  , rpTime         = time'
-  , rpMFPToScatter = mfpToEnd'
+    rpPos  = position'
+  , rpTime = time'
   }
   where
     position'  = translate (rpPos particle) (rpDir particle) distance
     time'      = rpTime particle + timeToDistance distance (rpSpeed particle)
-    mfpToEnd'  = rpMFPToScatter particle -
-		 (Distance $ (dis distance)*(opValue opacity))
 
 -- | A composite operation for motion and scattering
-translateAndScatterRP :: Opacity
-			 -> Distance
+translateAndScatterRP :: Distance
 			 -> RandomParticle
 			 -> (Event, RandomParticle)
-translateAndScatterRP opacity distance particle = (event, particle') where
+translateAndScatterRP distance particle = (event, particle') where
   motion'   = motion (rpDir particle) distance
-  particle' = scatterRP $ translateRP opacity distance particle
+  particle' = scatterRP $ translateRP distance particle
   momentum  = Momentum ((dir $ rpDir particle') - (dir $ rpDir particle))
   event     = Event motion' (Scatter momentum)
 
 -- | A compositie operation for motion and face crossing
 translateToFaceRP :: SimpleMesh
-		     -> Opacity
 		     -> Distance
 		     -> Face
 		     -> RandomParticle
 		     -> (Event, RandomParticle)
-translateToFaceRP mesh opacity distance face particle =
+translateToFaceRP mesh distance face particle =
   let motion'    = motion (rpDir particle) distance
-      particle'  = translateRP opacity distance particle
+      particle'  = translateRP distance particle
       particle'' = nextCellRP mesh face particle'
       event      = Event motion' (FaceCrossing face)
   in (event, particle'')
 
 
 -- | A composite event for motion and termination
-translateAndTerminateRP :: Opacity
-			   -> Distance
+translateAndTerminateRP :: Distance
 			   -> RandomParticle
 			   -> (Event, RandomParticle)
-translateAndTerminateRP opacity distance particle = (event, Dead) where
+translateAndTerminateRP distance particle = (event, Dead) where
   motion'   = motion (rpDir particle) distance
-  particle' = translateRP opacity distance particle
+  particle' = translateRP distance particle
   event     = Event motion' (Termination particle')
 
 
 -- * Step functions
 
 -- | Step operation, with a given potential distance of travel
-stepRP :: Opacity
-	  -> Time           -- ^ End of timestep
+stepRP :: Time              -- ^ End of timestep
 	  -> Distance       -- ^ Tentative travel distance
 	  -> RandomParticle -- ^ Particle to Step
 	  -> Maybe (Event, RandomParticle)
 
-stepRP _ _ _ Dead = Nothing
-stepRP opacity endtime distance particle = Just (event, particle') where
+stepRP _ _ Dead = Nothing
+stepRP endtime distance particle = Just (event, particle') where
   distance_to_step_end = distanceToTime (endtime - rpTime particle) (rpSpeed particle)
   (event, particle') = if distance < distance_to_step_end then
-			 translateAndScatterRP opacity distance particle
+			 translateAndScatterRP distance particle
 		       else
-			 translateAndTerminateRP opacity distance_to_step_end particle
+			 translateAndTerminateRP distance_to_step_end particle
 
 -- | A simpler step function which only updates time and space quantities
 step' :: Distance -> RandomParticle ->  (Motion, RandomParticle)
-step' = undefined
+step' distance particle = undefined

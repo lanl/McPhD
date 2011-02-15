@@ -39,13 +39,12 @@ instance Arbitrary Time where
 instance Arbitrary Speed where
   arbitrary = Speed <$> abs <$> (0.1+) <$> arbitrary
 
-instance Arbitrary Opacity where
-  arbitrary = Opacity <$> abs <$> arbitrary
+-- instance Arbitrary Opacity where
+--   arbitrary = Opacity <$> abs <$> arbitrary
 
 instance Arbitrary RandomParticle where
   arbitrary = createParticle
 	      <$> arbitrary
-	      <*> arbitrary
 	      <*> arbitrary
 	      <*> arbitrary
 	      <*> arbitrary
