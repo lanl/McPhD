@@ -3,7 +3,8 @@
 -- Feb 09, 2011
 -- (c) Copyright 2011 LANSLLC, all rights reserved
 
-module Event (Event(..)) 
+module Event (Event(..)
+             ,isContinuing) 
     where     
 
 import Physical
@@ -39,6 +40,14 @@ data Event = Scatter  { dist   :: FP          -- distance travelled
                       , deltaP :: Momentum
                       , face   :: Face }
              deriving (Show,Eq)
+
+-- | Does an event continue a random walk?
+isContinuing :: Event -> Bool
+isContinuing evt = case evt of 
+                     Scatter {}  -> True
+                     Reflect {}  -> True
+                     Transmit {} -> True
+                     _           -> False
 
 -- version
 -- $Id$
