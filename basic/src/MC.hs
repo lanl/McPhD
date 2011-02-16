@@ -29,36 +29,27 @@ import Control.Applicative
 -- To do: run multiple tallies, generate a per-cell tally
 
 -- push a particle, tally what happens
-runParticleV :: Particle -> (IO FP) -> Mesh -> Material -> IO EventCount
-runParticleV p rng mesh mat = tally <$> push p rng mesh mat stepMsg2
+runParticleV :: Particle -> Mesh -> Material -> IO EventCount
+runParticleV p mesh mat = tally <$> push p mesh mat stepMsg2
 
 -- ditto, just not verbose
-runParticleQ :: Particle -> (IO FP) -> Mesh -> Material -> IO EventCount
-runParticleQ p rng mesh mat = tally <$> push p rng mesh mat nullPrtr
+runParticleQ :: Particle ->  Mesh -> Material -> IO EventCount
+runParticleQ p mesh mat = tally <$> push p mesh mat nullPrtr
 
 {- Use a particle, 'opacity', and an RNG to
  - generate a list of Event, Particle pairs.  
  - Pass a printer function to control per-step reporting.  -}
-push :: Particle -> IO FP -> Mesh -> Material -> (Event -> Particle -> IO ())
+push :: Particle -> Mesh -> Material -> (Event -> Particle -> IO ())
      -> IO [(Event,Particle)]
-push p rng mesh mat prtr = do 
-  sel_s <- rng 
-  sel_a <- rng
-  sel_o <- rng
-  let omega' = isotropicDirection1D sel_o
-      evt = pickEvent p sel_s sel_a omega' mat mesh
+push p msh mat prtr = do 
+  sel_s <- random $ pRNG p 
+  sel_a <- random $ pRNG p
+  omega' <- sampleDirection msh (pRNG p)
+  let evt = pickEvent p sel_s sel_a omega' mat msh
       p' = stream p evt omega'
   if (isContinuing evt) 
-    then prtr evt p' >> ((evt,p'):) <$> (push p' rng mesh mat prtr)
+    then prtr evt p' >> ((evt,p'):) <$> (push p' msh mat prtr)
     else prtr evt p' >> return [(evt,p')]
-
--- | Does an event continue a random walk?
-isContinuing :: Event -> Bool
-isContinuing evt = case evt of 
-                     Scatter {}  -> True
-                     Reflect {}  -> True
-                     Transmit {} -> True
-                     _           -> False
 
 -- Pick event for a particle. Provide particle, two uniform random deviates
 -- (to select distances), a new direction (however sampled), a material, and a 
@@ -90,11 +81,10 @@ pickEvent p sel_s sel_a omega' matl msh =
               omega = pDir p
               dp o' = elasticScatterMomDep (pEnergy p) omega o'
 
-{-let p1 = Particle (Position 1.0) (Direction 1) (Time 5) (Energy 6) (EnergyWeight 7) 8 rand-}
-
--- sample isotropic distribution
-isotropicDirection1D :: FP -> Direction
-isotropicDirection1D rn = Direction $ Vector1 (2.0 * rn - 1.0)
+-- must have at least one event!
+closestEvent :: [Event] -> Event
+closestEvent evts = foldr compLess (head evts) (tail evts)
+    where compLess e1 e2 = if (dist e1) < (dist e2) then e1 else e2
 
 -- compute the elastic scattering momentum deposition: E/c (k_i^ - k_f)
 -- somewhat bogus--won't conserve momentum, also must acct for energy weight
@@ -102,13 +92,7 @@ elasticScatterMomDep :: Energy -> Direction -> Direction -> Momentum
 elasticScatterMomDep energy omega_i omega_f = Momentum ((nrg/c) *| dir (omega_i - omega_f))
     where nrg = e energy
 
--- must have at least one event!
-closestEvent :: [Event] -> Event
-closestEvent evts = foldr compLess (head evts) (tail evts)
-    where compLess e1 e2 = if (dist e1) < (dist e2) then e1 else e2
-
-
--- Generate the particle at the event with the new direction 
+-- Generate a particle at the event with the new direction 
 stream :: Particle -> Event -> Direction -> Particle
 stream p event omega' = 
     case event of
