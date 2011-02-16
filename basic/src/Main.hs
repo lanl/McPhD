@@ -3,31 +3,27 @@ import Particle
 import Mesh
 import Material
 import Physical
-import Numerical
-
--- import Data.Word
-
 
 main :: IO ()
 main = runOne
 
 -- runABunch :: Int -> IO ()
--- let xs = [x | x <- rand]
+-- runABunch ntot = do
+--   ps <- genParticles ntot mesh rng 
+
 
 runOne :: IO ()
 runOne = do
   let x     = Position 0.5
-  let w     = Direction 1.0
-  let t     = Time 1.5
-  let nrg   = Energy 1.0
-  let wt    = EnergyWeight 1.0
-  let cell  = CellIdx 1
-  let tag   = 42 :: Word32
-  let p = Particle x w t nrg wt cell (RNG rand) tag
-  ecounts <- runParticleV p rand infMesh simpleMat
+      w     = Direction 1.0
+      t     = Time 1.5
+      nrg   = Energy 1.0
+      wt    = EnergyWeight 1.0
+      cell  = CellIdx 1
+      tag   = 42 :: Word32
+      p     = Particle x w t nrg wt cell (RNG rand) tag
+  ecounts <- runParticleV p infMesh simpleMat
   print ecounts
-
--- smBounds = (1::CellIdx,2::CellIdx)
 
 infMesh :: Mesh
 infMesh = Sphere1D $ listArray (1,2)
