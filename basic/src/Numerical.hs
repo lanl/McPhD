@@ -46,7 +46,7 @@ type Tag  = Word32 -- used for tagging things uniquely within their type
 
 type RandSeed = FP
 
-newtype CellIdx = CellIdx {idx :: Idx } deriving (Eq,Show,Num,Ord,Ix)
+newtype CellIdx = CellIdx {idx :: Idx } deriving (Eq,Show,Num,Ord,Ix,Integral,Real,Enum)
 
 newtype RNG = RNG { random :: (IO FP)} 
 
