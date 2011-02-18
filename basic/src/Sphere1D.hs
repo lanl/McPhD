@@ -35,6 +35,19 @@ pickPt r rng = do
     then return r' 
     else pickPt r rng 
 
+-- WARNING: The above calculation looks wrong to me. It should most probably
+-- be
+--
+-- let r' = sqrt (x*x + y*y + z*z)
+--
+-- instead.
+--
+-- Furthermore, depending on the range in which "random" returns numbers, it
+-- looks like a potentially extremely inefficient method to compute points
+-- within a small sphere. I think it would be much better to scale the random
+-- numbers to a cube with length 2*r first, or to choose a dedicated random
+-- sphere point picking algorithm.
+
 
 -- b search in the mesh
 findCell :: Mesh -> FP -> CellIdx
