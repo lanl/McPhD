@@ -31,6 +31,7 @@ Library
        AC-Vector == 2.3.1
        , array == 0.3.0.0
        , mersenne-random-pure64 == 0.2
+       , tuple
    exposed-modules: MC 
    other-modules:
 
