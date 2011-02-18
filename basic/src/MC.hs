@@ -23,6 +23,8 @@ import Mesh
 import Tally
 import Event
 
+import Data.Function
+import Data.List
 import System.Random (getStdRandom,randomR)
 import Control.Applicative
 
@@ -83,8 +85,7 @@ pickEvent p sel_s sel_a omega' matl msh =
 
 -- must have at least one event!
 closestEvent :: [Event] -> Event
-closestEvent evts = foldr compLess (head evts) (tail evts)
-    where compLess e1 e2 = if (dist e1) < (dist e2) then e1 else e2
+closestEvent = minimumBy (compare `on` dist)
 
 -- compute the elastic scattering momentum deposition: E/c (k_i^ - k_f)
 -- somewhat bogus--won't conserve momentum, also must acct for energy weight
