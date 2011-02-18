@@ -14,10 +14,10 @@ import MeshBase
 import Data.Function
 import Data.List
  
-sampDir :: RNG -> IO Direction
+sampDir :: FP -> FP -> FP -> Direction
 sampDir = undefined
 
-sampPos :: Mesh -> RNG -> IO (Position,CellIdx)
+sampPos :: Mesh -> FP -> FP -> FP -> (Position,CellIdx)
 sampPos = undefined
 
 

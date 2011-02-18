@@ -27,16 +27,16 @@ bdyEvent msh cell face = bdyTypeToEvent $ bdyType msh cell face
 
 -- * sampling on meshes
 -- | sample a position in the mesh: dispatch to appropriate module
-samplePosition :: Mesh -> RNG -> IO (Position,CellIdx)
-samplePosition msh@(Sphere1D {}) rng = Sphere1D.sampPos msh rng 
-samplePosition msh@(Cart1D {})   rng = Cart1D.sampPos   msh rng 
-samplePosition msh@(Cart3D {})   rng = Cart3D.sampPos   msh rng 
+samplePosition :: Mesh -> FP -> FP -> FP -> (Position,CellIdx)
+samplePosition msh@(Sphere1D {}) = Sphere1D.sampPos msh  
+samplePosition msh@(Cart1D {})   = Cart1D.sampPos   msh  
+samplePosition msh@(Cart3D {})   = Cart3D.sampPos   msh  
 
 -- | sample a direction: dispatch to appropriate module
-sampleDirection :: Mesh -> RNG -> IO Direction
-sampleDirection Sphere1D {} rng = Sphere1D.sampDir rng 
-sampleDirection Cart1D {}   rng = Cart1D.sampDir   rng 
-sampleDirection Cart3D {}   rng = Cart3D.sampDir   rng 
+sampleDirection :: Mesh -> FP -> FP -> FP -> Direction
+sampleDirection Sphere1D {} = Sphere1D.sampDir  
+sampleDirection Cart1D {}   = Cart1D.sampDir    
+sampleDirection Cart3D {}   = Cart3D.sampDir   
 
 -- | dispatch on mesh type to appropriate distance function
 distToBdy :: Mesh -> CellIdx -> Position -> Direction -> (FP, Face)

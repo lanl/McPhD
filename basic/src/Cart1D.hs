@@ -12,10 +12,10 @@ import Physical
 import Cell 
 import MeshBase
 
-sampDir :: RNG -> IO Direction
+sampDir :: FP -> FP -> FP -> Direction
 sampDir = undefined
 
-sampPos :: Mesh -> RNG -> IO (Position,CellIdx)
+sampPos :: Mesh -> FP -> FP -> FP -> (Position,CellIdx)
 sampPos = undefined
 
 -- | Distance to boundary in cartesian 1D coordinates

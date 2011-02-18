@@ -5,7 +5,8 @@
 
 module Sphere1D (sampDir
                 ,sampPos
-                ,distToBdy)
+                ,distToBdy
+                ,pickPt)
     where
 
 import SoftEquiv
@@ -14,43 +15,26 @@ import Cell
 import Data.Array (bounds)
 import MeshBase
 
-sampDir :: RNG -> IO Direction
-sampDir rng = random rng >>= \x -> return (Direction . Vector1 $ 2*x -1)
+sampDir :: FP -> FP -> FP -> Direction
+sampDir x _ _ = (Direction . Vector1 $ 2*x -1)
 
 -- | sample a position in a sphere
-sampPos :: Mesh -> RNG -> IO (Position,CellIdx)
-sampPos msh rng = do
-  r <- pickPt (rmax msh) rng
-  let pos = (Position . Vector1) r
-      cell = findCell msh r
-  return (pos,cell)
+sampPos :: Mesh -> FP -> FP -> FP -> (Position,CellIdx)
+sampPos msh x1 x2 x3 = (pos,cell)
+    where pos  = (Position . Vector1) r
+          cell = findCell msh r
+          r    = pickPt (rmax msh) x1 x2 x3
 
--- | rejection method to select an r-coordinate
-pickPt :: FP -> RNG -> IO FP
-pickPt r rng = do
-  x <- random rng
-  y <- random rng
-  z <- random rng
-  let r' = sqrt (x*x + y*y + z*z)
-  if r' < r
-    then return r' 
-    else pickPt r rng 
+-- | Sample a distribution with PDF r^2 dr cf. Kalos & Whitlock, Monte Carlo Methods
+-- Vol. 1, section 3.4.2; ISBN 0-471-89839-2. Also, prefactor? 
+-- Input: radius and three uniform random deviates on [0,1]
+-- returns radial coordinate of a point in sphere of radius r. 
+pickPt :: FP ->              -- radius
+          FP -> FP -> FP ->  -- three random [0,1]
+          FP                 
+pickPt r r1 r2 r3 = r * maximum [r1,r2,r3] -- better max (max r1 r2) r3? avoid (:)??
 
--- WARNING: The above calculation looks wrong to me. It should most probably
--- be
---
--- let r' = sqrt (x*x + y*y + z*z)
---
--- instead.
---
--- Furthermore, depending on the range in which "random" returns numbers, it
--- looks like a potentially extremely inefficient method to compute points
--- within a small sphere. I think it would be much better to scale the random
--- numbers to a cube with length 2*r first, or to choose a dedicated random
--- sphere point picking algorithm.
-
-
--- b search in the mesh
+-- b-search in the mesh
 findCell :: Mesh -> FP -> CellIdx
 findCell msh r = impl msh r f l
     where impl msh r lo hi | lo == hi  = lo
