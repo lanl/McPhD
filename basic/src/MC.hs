@@ -26,14 +26,12 @@ import Event
 import System.Random (getStdRandom,randomR)
 import Control.Applicative
 
--- To do: run multiple tallies, generate a per-cell tally
-
--- push a particle, tally what happens
-runParticleV :: Particle -> Mesh -> Material -> IO EventCount
+-- push a particle, tally what happens, report each step
+runParticleV :: Particle -> Mesh -> Material -> IO Tally
 runParticleV p mesh mat = tally <$> push p mesh mat stepMsg2
 
--- ditto, just not verbose
-runParticleQ :: Particle ->  Mesh -> Material -> IO EventCount
+-- ditto sans reporting
+runParticleQ :: Particle ->  Mesh -> Material -> IO Tally
 runParticleQ p mesh mat = tally <$> push p mesh mat nullPrtr
 
 {- Use a particle, 'opacity', and an RNG to
@@ -68,12 +66,12 @@ pickEvent p sel_s sel_a omega' matl msh =
         (d_bdy,face)  = distToBdy msh cell x omega
         d_cen  = c * tcen where tcen = t $ pTime p
         cellt  = bdyEvent msh cell face
-    in closestEvent [(Scatter d_scat $ dp omega'),  -- record the sampled omega
-                     (Absorb  d_abs $ dp 0),
-                     (cellt   d_bdy 0 face),
+    in closestEvent [(Scatter d_scat (dp omega') (pWeight p)),     --
+                     (Absorb  d_abs (dp 0) (pWeight p)), -- omega' is 0 
+                     (cellt   d_bdy face),
                      (Census  d_cen 0)]
         where sig_s = sigma $ sig_scat ( (mat matl) ! cell)
-              sig_a = sigma $ sig_abs ( (mat matl) ! cell)
+              sig_a = sigma $ sig_abs  ( (mat matl) ! cell)
               x     = pPos p
               cell  = pCell p
               -- TO DO: boost to co-moving frame, compute the scatter,
@@ -108,27 +106,6 @@ stream p event omega' =
           t'        = pTime p - Time (d/c)
           omega     = pDir p
           newcell   = if (xcomp . dir $ omega) > 0.0 then 1 + pCell p else pCell p - 1
-
--- -- better than before, still hard to maintain--must hand-coordinate with Event
--- tallyMom :: [(Event,Particle)] -> MomentumTally 
--- tallyMom walk = foldr tMom (fromList [(1,0.0),(2,0.0)]) walk
---     where tMom :: (Event,Particle) -> MomentumTally -> MomentumTally
---           tMom (Scatter _ dp,p) t = adjust (+dp) cell t
---               where cell = pCell p
---           tMom (Absorb _ dp,p) t = adjust (+dp) cell t
---               where cell = pCell p
---           tMom _ t    = t
-
-tally :: [(Event,Particle)] -> EventCount
-tally walk = foldr countEvent (EventCount 0 0 0 0 0 0) walk
-
-countEvent :: (Event,Particle) -> EventCount -> EventCount
-countEvent (Scatter {}, _)  ctr = ctr { n_scatter  = 1 + n_scatter  ctr}
-countEvent (Absorb {}, _)   ctr = ctr { n_absorb   = 1 + n_absorb   ctr}
-countEvent (Transmit {}, _) ctr = ctr { n_transmit = 1 + n_transmit ctr}
-countEvent (Escape {}, _)   ctr = ctr { n_escape   = 1 + n_escape   ctr}
-countEvent (Reflect {}, _)  ctr = ctr { n_reflect  = 1 + n_reflect  ctr}
-countEvent (Census {}, _)   ctr = ctr { n_census   = 1 + n_census   ctr}
 
 -- for testing, we'll need greater control of the RNG
 rand :: (IO FP)

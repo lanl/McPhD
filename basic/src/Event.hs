@@ -25,19 +25,18 @@ import Cell
  - compare successive events or particle states to compute this later.
  -}
 data Event = Scatter  { dist   :: FP          -- distance travelled
-                      , deltaP :: Momentum }  -- momentum transfer  
+                      , deltaP :: Momentum    -- momentum deposited  
+                      , eDep   :: EnergyWeight} -- energy deposited
            | Absorb   { dist   :: FP 
-                      , deltaP :: Momentum }  
+                      , deltaP :: Momentum 
+                      , eDep   :: EnergyWeight}
            | Census   { dist   :: FP 
                       , deltaP :: Momentum }
            | Transmit { dist   :: FP 
-                      , deltaP :: Momentum
                       , face   :: Face }
            | Escape   { dist   :: FP 
-                      , deltaP :: Momentum
                       , face   :: Face }
            | Reflect  { dist   :: FP 
-                      , deltaP :: Momentum
                       , face   :: Face }
              deriving (Show,Eq)
 
