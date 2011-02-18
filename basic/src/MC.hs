@@ -3,17 +3,13 @@
 -- Dec 06, 2010
 -- Copyright (c) 2010 LANSLLC all rights reserved.
 
-{- Second crack at it--this time with two cells and an opacity.
- - We have five events: scatter, absorb, reflect, transmit, and escape. 
- - Absorption or escape terminates a particle's flight. 
- - 
- - Caller supplies a probability of scattering 
- - called 'sigma'--not really using a cross section yet.    
- -
- - Uses getStdRandom, which commits one to doing a lot in IO. Not  
- - sure whether that's a problem.                                  -}
 
-module MC where
+module MC (runParticleV
+          ,runParticleQ
+          ,push
+          )
+
+    where
 
 -- import DataTypes
 import Physical
@@ -27,6 +23,7 @@ import Data.Function
 import Data.List
 import System.Random (getStdRandom,randomR)
 import Control.Applicative
+import Data.Tuple.Sequence (sequenceT)
 
 -- push a particle, tally what happens, report each step
 runParticleV :: Particle -> Mesh -> Material -> IO Tally
@@ -42,14 +39,15 @@ runParticleQ p mesh mat = tally <$> push p mesh mat nullPrtr
 push :: Particle -> Mesh -> Material -> (Event -> Particle -> IO ())
      -> IO [(Event,Particle)]
 push p msh mat prtr = do 
-  sel_s <- random $ pRNG p 
-  sel_a <- random $ pRNG p
-  omega' <- sampleDirection msh (pRNG p)
-  let evt = pickEvent p sel_s sel_a omega' mat msh
+  -- pull the random numbers needed for one MC step
+  (sel_s,sel_a,ds1,ds2,ds3) <- sequenceT (rndm,rndm,rndm,rndm,rndm)
+  let omega' = sampleDirection msh ds1 ds2 ds3
+      evt = pickEvent p sel_s sel_a omega' mat msh
       p' = stream p evt omega'
   if (isContinuing evt) 
     then prtr evt p' >> ((evt,p'):) <$> (push p' msh mat prtr)
     else prtr evt p' >> return [(evt,p')]
+  where rndm = random $ pRNG p
 
 -- Pick event for a particle. Provide particle, two uniform random deviates
 -- (to select distances), a new direction (however sampled), a material, and a 
@@ -107,10 +105,6 @@ stream p event omega' =
           t'        = pTime p - Time (d/c)
           omega     = pDir p
           newcell   = if (xcomp . dir $ omega) > 0.0 then 1 + pCell p else pCell p - 1
-
--- for testing, we'll need greater control of the RNG
-rand :: (IO FP)
-rand = getStdRandom (randomR (0.0 :: FP,1.0))
 
 -- for printing out steps
 stepMsg2 :: Event -> Particle -> IO ()
