@@ -12,8 +12,10 @@ import Physical
 import Cell 
 import MeshBase
 
+sampDir :: RNG -> IO Direction
 sampDir = undefined
 
+sampPos :: Mesh -> RNG -> IO (Position,CellIdx)
 sampPos = undefined
 
 -- | Distance to boundary in cartesian 1D coordinates
@@ -28,7 +30,7 @@ distToBdy psn drn b_low b_high =
         lows  = pos(psn - b_low)   --  -ve: chosen if omega < 0
         highs = pos(psn - b_high)  --  +ve: chosen if omega > 0
         d = dir drn
-    in head (filter (\(a,b) -> a>=0) dnfs)
+    in head (filter (\(a,_) -> a>=0) dnfs)
 
 
 

@@ -12,8 +12,10 @@ import Physical
 import Cell 
 import MeshBase
 
+sampDir :: RNG -> IO Direction
 sampDir = undefined
 
+sampPos :: Mesh -> RNG -> IO (Position,CellIdx)
 sampPos = undefined
 
 
@@ -34,7 +36,7 @@ distToBdy psn drn b_low b_high =
         lows  = pos(psn - b_low)   --  -ve: chosen if omega < 0
         highs = pos(psn - b_high)  --  +ve: chosen if omega > 0
         d = dir drn
-    in closestFace (filter (\(a,b) -> a>=0) dnfs)
+    in closestFace (filter (\(a,_) -> a>=0) dnfs)
 
 closestFace :: [(FP,Face)] -> (FP,Face)
 closestFace dnfs = foldr compLess (head dnfs) (tail dnfs) -- dnf: distance & face

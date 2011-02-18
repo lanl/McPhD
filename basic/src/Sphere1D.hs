@@ -14,10 +14,11 @@ import Cell
 import Data.Array (bounds)
 import MeshBase
 
-sampDir :: Mesh -> RNG -> IO Direction
-sampDir msh rng = random rng >>= \x -> return (Direction . Vector1 $ 2*x -1)
+sampDir :: RNG -> IO Direction
+sampDir rng = random rng >>= \x -> return (Direction . Vector1 $ 2*x -1)
 
 -- | sample a position in a sphere
+sampPos :: Mesh -> RNG -> IO (Position,CellIdx)
 sampPos msh rng = do
   r <- pickPt (rmax msh) rng
   let pos = (Position . Vector1) r

@@ -22,7 +22,7 @@ import MeshBase
 
 -- * geometric properties
 -- | Given a mesh,cell, and face, determine the Event (returned as Event ctor)
-bdyEvent :: Mesh -> CellIdx -> Face -> (FP->Momentum->Face->Event)
+bdyEvent :: Mesh -> CellIdx -> Face -> (FP->Face->Event)
 bdyEvent msh cell face = bdyTypeToEvent $ bdyType msh cell face
 
 -- * sampling on meshes
@@ -34,9 +34,9 @@ samplePosition msh@(Cart3D {})   rng = Cart3D.sampPos   msh rng
 
 -- | sample a direction: dispatch to appropriate module
 sampleDirection :: Mesh -> RNG -> IO Direction
-sampleDirection msh@(Sphere1D {}) rng = Sphere1D.sampDir msh rng 
-sampleDirection msh@(Cart1D {})   rng = Cart1D.sampDir   msh rng 
-sampleDirection msh@(Cart3D {})   rng = Cart3D.sampDir   msh rng 
+sampleDirection Sphere1D {} rng = Sphere1D.sampDir rng 
+sampleDirection Cart1D {}   rng = Cart1D.sampDir   rng 
+sampleDirection Cart3D {}   rng = Cart3D.sampDir   rng 
 
 -- | dispatch on mesh type to appropriate distance function
 distToBdy :: Mesh -> CellIdx -> Position -> Direction -> (FP, Face)
@@ -64,11 +64,11 @@ bdyType msh cell ZLow  = zbc $ low_bc  ((mesh msh) ! cell)
 bdyType msh cell ZHigh = zbc $ high_bc ((mesh msh) ! cell)
 
 -- | Given a boundary condition, return the corresponding event ctor
-bdyTypeToEvent :: BoundaryCondition -> (FP->Momentum->Face->Event)
+bdyTypeToEvent :: BoundaryCondition -> (FP->Face->Event)
 bdyTypeToEvent Vac = Escape
 bdyTypeToEvent Refl = Reflect
 bdyTypeToEvent Transp = Transmit
--- a 'None' BC represents failure: shd be Maybe Ctor?
+bdyTypeToEvent None = error "Cannot associate null boundary with an event"
 
 -- instance, handy for testing. 
 simpleMesh :: Mesh
