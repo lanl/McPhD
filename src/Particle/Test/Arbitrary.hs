@@ -44,9 +44,8 @@ instance Arbitrary Speed where
 
 instance Arbitrary RandomParticle where
   arbitrary = createParticle
-	      <$> arbitrary
-	      <*> arbitrary
-	      <*> arbitrary
-	      <*> arbitrary
-	      <*> arbitrary
-	      <*> arbitrary
+              <$> arbitrary
+              <*> arbitrary
+              <*> arbitrary
+              <*> arbitrary
+              <*> arbitrary

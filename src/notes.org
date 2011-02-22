@@ -1,0 +1,105 @@
+#+TITLE:     notes.org
+#+AUTHOR:    Michael Buksas
+#+EMAIL:     mb1@buksas.net
+#+DATE:      2011-02-19 Sat
+
+* Random notes:
+
+The Particle might be dead!
+
+It's a Maybe Particle!
+
+The only times I need the final complete state of the particle are when it dies.
+
+
+The life and times of a particle:
+
+  InFlight -> InFlight
+  InFlight -> Dead
+
+I need an event which takes me to the final destination. Then, I need
+to terminate the unfold.
+
+ step :: Stuff -> Particle -> Maybe (Event, Particle)
+
+Event should be called Step.
+
+ step :: Stuff -> Particle -> Maybe (Step, Particle)
+
+So, while stepping, I decide the particle is done.
+
+  InFlight --> Dead.
+
+Here, Step is something like:
+
+  Step = { motion :: Motion , limiter :: Limiter }
+
+The returned particle from step is Dead.
+
+The next step operation on the dead particle just returns Nothing.
+
+  step :: _ Dead = Nothing
+
+So, I get the final Step; Then I stop the unfold.
+
+
+
+* Deciding what to do to a particle
+
+On each step:
+
+1. Compute distances to scattering, absorption, escape, etc.
+2. Select the shortest distance
+3. Streaming the particle this distance.
+4. Apply a limiting operation to the particle, based on the result of 2:
+   1. Another function to transform the particle. E.g. scatter.
+   2. Construct and return the correct Limiter.
+
+Need a way of labeling limiters aside from the constructors in the Limiter type.
+
+There's a pair of functions here for each limiter:
+
+  distance_to_limiter :: Context -> Particle -> Distance
+  apply_limiter       :: Context -> Particle -> (Limiter, Particle)
+
+What is the context? Opacity, at least. Make it a parameter?
+
+Is there a context for stepping? If I want scatter to be an event
+which applies to random particle, then I need the opacity to compute the distance.
+
+I need opacity to compute distance to scatter, but not to apply
+it. This is mixing up my seperation between RandomParticle and MeshedParticle.
+
+
+| Event         | To Compute Distance | To Apply      | Information Needed in Event |
+|---------------+---------------------+---------------+-----------------------------|
+| Scattering    | Opacity             | Random Sample | Momentum                    |
+| Face crossing | Mesh and Cell       |               | Face/Cell index             |
+| Time step end | Time Step duration  |               | Final Particle              |
+| Absorption    | Energy Weight       |               | Final Particle              |
+
+So what are the right levels to compose algorithms?
+
+| Simulates                | Context   | Particle Data             | Events                 |
+|--------------------------+-----------+---------------------------+------------------------|
+| Motion in Space          | Space     | Position, Direction, etc. | None?                  |
+| Motion in Time           | Time Step | Clock                     | Termination            |
+| Scattering, Absorption   | Opacity   | RandomState               | Scattering, Absorption |
+| Motion in Discrete Space | Mesh      | Cell Index                | Face crossing, Esacpe. |
+
+
+What would I like the resulting code to look like?
+
+Assume attributes are constant in space. Then the space properties are given by:
+
+  Environment :: Particle -> Properties.
+
+  data Properties = { Opacity :: Double, Temperature :: Double }
+
+What about the tally?
+
+  data Tally = { Momentum :: MeshVector, Energy :: MeshDouble }  <- Depends on the index range.
+
+How about parts of the tally?
+
+  data TallyPart = { Momentum :: Vector, Energy :: Double, Index :: MeshIndex }  <- Depends on the mesh index
