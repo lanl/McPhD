@@ -44,7 +44,7 @@ push p msh mat prtr = do
   let omega' = sampleDirection msh ds1 ds2 ds3
       evt = pickEvent p sel_s sel_a omega' mat msh
       p' = stream p evt omega'
-  if (isContinuing evt) 
+  if isContinuing evt
     then prtr evt p' >> ((evt,p'):) <$> (push p' msh mat prtr)
     else prtr evt p' >> return [(evt,p')]
   where rndm = random $ pRNG p
