@@ -4,7 +4,7 @@
 module Space3DCartesian(Distance (..)
                         , Position (..)
                         , Momentum (..)
-                        , Motion (..), motion, move
+                        , Motion (..), motion
                         , Direction (), dir, direction, direction_unsafe, (*->), (+->)
                         , Time (..)
                         , Speed (..)
@@ -78,10 +78,11 @@ infix 6 +->
 
 -- | Translates object along the direction vector
 translate :: Position -- ^ Initial position
-             -> Direction -- ^ Direction vector
-             -> Distance  -- ^ Movement distance
-             -> Position  -- ^ New position
+          -> Direction -- ^ Direction vector
+          -> Distance  -- ^ Movement distance
+          -> Position  -- ^ New position
 translate position direction distance = position +-> (direction *-> distance)
+
 
 timeToDistance :: Distance -> Speed -> Time
 timeToDistance (Distance distance) (Speed speed) = Time (distance / speed)

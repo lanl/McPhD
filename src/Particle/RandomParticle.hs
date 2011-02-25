@@ -81,8 +81,8 @@ scatterRP p = p{rpDir=direction, rpRand=rand}
 
 -- | Translate a particle in space.
 translateRP :: Distance
-               -> RandomParticle
-               -> RandomParticle
+            -> RandomParticle
+            -> RandomParticle
 translateRP _ Dead = Dead
 translateRP distance particle =
   particle
@@ -96,8 +96,8 @@ translateRP distance particle =
 
 -- | A composite operation for motion and scattering
 translateAndScatterRP :: Distance
-                         -> RandomParticle
-                         -> (RandomEvent, RandomParticle)
+                      -> RandomParticle
+                      -> (RandomEvent, RandomParticle)
 translateAndScatterRP distance particle = (event, particle') where
   motion'   = motion (rpDir particle) distance
   particle' = scatterRP $ translateRP distance particle
@@ -107,8 +107,8 @@ translateAndScatterRP distance particle = (event, particle') where
 
 -- | A composite event for motion and termination
 translateAndTerminateRP :: Distance
-                           -> RandomParticle
-                           -> (RandomEvent, RandomParticle)
+                        -> RandomParticle
+                        -> (RandomEvent, RandomParticle)
 translateAndTerminateRP distance particle = (event, Dead) where
   motion'   = motion (rpDir particle) distance
   particle' = translateRP distance particle
@@ -116,10 +116,10 @@ translateAndTerminateRP distance particle = (event, Dead) where
 
 
 -- | Step operation, with a given potential distance of travel
-stepRP :: Time              -- ^ End of timestep
-          -> Distance       -- ^ Tentative travel distance
-          -> RandomParticle -- ^ Particle to Step
-          -> Maybe (RandomEvent, RandomParticle)
+stepRP :: Time           -- ^ End of timestep
+       -> Distance       -- ^ Tentative travel distance
+       -> RandomParticle -- ^ Particle to Step
+       -> Maybe (RandomEvent, RandomParticle)
 
 stepRP _ _ Dead = Nothing
 stepRP endtime distance particle = Just (event, particle') where

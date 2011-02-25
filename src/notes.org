@@ -3,14 +3,12 @@
 #+EMAIL:     mb1@buksas.net
 #+DATE:      2011-02-19 Sat
 
-* Random notes:
+* General notes:
 
-The Particle might be dead!
+Treat a particle that might be dead as a Maybe Particle? Or make Alive/Dead into a monad.
 
-It's a Maybe Particle!
-
-The only times I need the final complete state of the particle are when it dies.
-
+The only times I need the final complete state of the particle in an
+Event are when it dies. Treat these differently then Events. Fates?
 
 The life and times of a particle:
 
@@ -41,6 +39,10 @@ The next step operation on the dead particle just returns Nothing.
   step :: _ Dead = Nothing
 
 So, I get the final Step; Then I stop the unfold.
+
+Put Events and Fates in the same data structure:
+
+  Step = (Motion, Event | Fate p)
 
 
 
@@ -90,11 +92,21 @@ So what are the right levels to compose algorithms?
 
 What would I like the resulting code to look like?
 
+
+* Environments and Local Properties
+
 Assume attributes are constant in space. Then the space properties are given by:
 
-  Environment :: Particle -> Properties.
+  environment :: Environment -> Particle -> Properties.
 
-  data Properties = { Opacity :: Double, Temperature :: Double }
+  data Properties = { localOpacity :: Opacity,  localTemperature :: Temperature , etc... }
+
+Properties could even contain geometry of the current cell for distance calculations.
+
+  data Properties = { localOpacity :: Opacity, localCell :: Cell, etc... }
+
+
+* Local contributions and the Global Tally
 
 What about the tally?
 
@@ -102,4 +114,19 @@ What about the tally?
 
 How about parts of the tally?
 
-  data TallyPart = { Momentum :: Vector, Energy :: Double, Index :: MeshIndex }  <- Depends on the mesh index
+  data TallyContrib = { Momentum :: Vector, Energy :: Double, Index :: MeshIndex }  <- Depends on the mesh index
+
+
+** Connecting events to the Tally:
+
+  contribution :: Event -> TallyContrib
+
+
+** Creating the global tally
+
+   addTally :: Tally -> TallyContrib -> Tally
+
+
+   tally :: GlobalTally
+   computeTally :: [TallyContrib] -> Tally
+   computeTally initTally contribs = foldl addTally initTally contribs
