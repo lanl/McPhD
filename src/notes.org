@@ -5,7 +5,8 @@
 
 * General notes:
 
-Treat a particle that might be dead as a Maybe Particle? Or make Alive/Dead into a monad.
+Treat a particle that might be dead as a Maybe Particle? Or make
+Alive/Dead into a monad.
 
 The only times I need the final complete state of the particle in an
 Event are when it dies. Treat these differently then Events. Fates?
@@ -43,8 +44,6 @@ So, I get the final Step; Then I stop the unfold.
 Put Events and Fates in the same data structure:
 
   Step = (Motion, Event | Fate p)
-
-
 
 * Deciding what to do to a particle
 
@@ -130,3 +129,47 @@ How about parts of the tally?
    tally :: GlobalTally
    computeTally :: [TallyContrib] -> Tally
    computeTally initTally contribs = foldl addTally initTally contribs
+
+* Unfolding versus iterating
+
+** Unfolding
+
+When all steps can succeed:
+
+  step :: Particle -> (Event, Particle)
+
+I can't unfold this because I need Maybe (Event, Particle).
+
+I can have a test on events for final ones:
+
+  is_final :: Event -> Bool
+
+but unfold works by feeding the resulting particle back into step, so
+I can't apply is_final and decide to return Nothing.
+
+This is why I need a dead state for the particle.
+
+Using Maybe:
+
+  ParticleM = Maybe Particle
+
+  step :: Particle -> (Event, Particle)
+
+  stepM :: Maybe Particle -> Maybe (Event, Particle)
+  stepM Just p = Just $ step p
+  stepM Nothing = Nothing
+
+  stepM = liftM step  ??
+
+
+Using a status type:
+
+
+
+
+
+** Iterating
+
+  (Event, Particle) -> (Event, Particle)
+
+can be iterated, provided I add an inital event, like "Born"

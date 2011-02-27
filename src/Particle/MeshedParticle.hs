@@ -12,6 +12,9 @@ data MeshedParticle i p = MeshedParticle {
     } deriving (Show)
 
 
+data MeshEnvironment = MeshEnvironment { getMesh :: SimpleCartesian, getOpacity
+
+
 data MeshedLimiter i p =
     Scatter Momentum
         | Escape (MeshedParticle i p)

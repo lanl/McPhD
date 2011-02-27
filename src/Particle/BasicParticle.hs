@@ -1,9 +1,5 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE TypeFamilies #-}
-
--- | A module demonstrating random transport of a simple particle in a
--- mesh indexed with CellIndex.
-
 module Particle.BasicParticle where
 
 import Particle.Classes
@@ -17,19 +13,20 @@ import System.Random.Mersenne.Pure64
 -- * Particle and Event datatypes
 
 -- | BasicParticle is a RandomParticle moving in space and time.
-data BasicParticle = BasicParticle { 
-      bpPos    :: Space.Position   -- ^ Position in space
-    , bpDir    :: Space.Direction  -- ^ Direction of travel
-    , bpSpeed  :: Space.Speed      -- ^ Magnitude of velocity
-    , bpTime   :: Space.Time       -- ^ Time in flight
-    , bpRand   :: PureMT           -- ^ Random number generator
-    } deriving Show
+data BasicParticle = BasicParticle
+                     {
+                       bpPos    :: Space.Position   -- ^ Position in space
+                     , bpDir    :: Space.Direction  -- ^ Direction of travel
+                     , bpSpeed  :: Space.Speed      -- ^ Magnitude of velocity
+                     , bpTime   :: Space.Time       -- ^ Time in flight
+                     , bpRand   :: PureMT           -- ^ Random number generator
+                     } deriving Show
 
 
-data BasicEnvironment = BasicEnvironment 
-    { 
-      basicEnvTime :: Space.Time -- ^ End of time step.
-    }
+data BasicEnvironment =  BasicEnvironment
+  {
+    basicEnvTime :: Space.Time -- ^ End of time step.
+  }
 
 -- For these particles, the environment is equal to the context.
 data BasicContext = BasicContext { basicContextTime :: Space.Time }
@@ -45,10 +42,13 @@ data BasicEvent = StepEnd { eventPosition :: Space.Position }
 data PositionTally = PositionTally { tallyPosition :: Space.Position }
 
 -- The global tally is the sum of positions and a count of contributions
-data GlobalPositionTally = GlobalPositionTally { positionSum :: Space.Position,  count :: Int }
+data GlobalPositionTally = GlobalPositionTally
+                           {
+                             positionSum :: Space.Position,
+                             count :: Int
+                           }
 
 -- * Class Instances
-
 
 instance Approx BasicParticle where
   within_eps epsilon a b =
@@ -60,18 +60,18 @@ instance Approx BasicParticle where
       ]
 
 instance InSpace BasicParticle where
-  position  = bpPos
+  position = bpPos
   direction = bpDir
-  move p d  = p { bpPos = newPos }
+  move p d = p { bpPos = newPos }
       where newPos = Space.translate (position p) (direction p) d
 
 instance InTime BasicParticle where
-  time     = bpTime
+  time = bpTime
   tick p t = p { bpTime = newTime }
       where newTime = bpTime p + t
-            
+
 instance InSpaceTime BasicParticle where
-  speed     = bpSpeed
+  speed = bpSpeed
 
 instance RandomParticle BasicParticle where
   type Random BasicParticle = PureMT
@@ -85,10 +85,10 @@ instance Particle BasicParticle where
   type ContextT BasicParticle     = BasicContext
   type EnvironmentT BasicParticle = BasicEnvironment
   type EventT BasicParticle       = BasicEvent
-      
+
   -- | Environment = Context
   environment c _ = getEnvironment c
-      
+
   -- | Get the properties and dispatch to implementation
   step environment particle = (event, particle')
     where time_left = (basicEnvTime environment) - (time particle)
@@ -103,10 +103,11 @@ instance Event BasicEvent where
 instance Tally GlobalPositionTally where
     type TallyPart GlobalPositionTally = PositionTally
     combine global event = GlobalPositionTally sum' count'
-        where sum' = Space.Position $ (Space.pos $ positionSum global) + (Space.pos $ tallyPosition event)
+        where sum' = Space.Position $ (Space.pos $ positionSum global) +
+                     (Space.pos $ tallyPosition event)
               count' = count global + 1
 
-    
+
 -- | Create a particle with given position, direction, distance and random seed.
 createParticle :: Space.Position
                -> Space.Direction

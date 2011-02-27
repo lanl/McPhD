@@ -17,13 +17,13 @@ class Particle p where
   type ContextT p     :: * -- ^ Conditions govern. particle motion.
   type EnvironmentT p :: * -- ^ Local conditions relevant to each step.
   type EventT p       :: * -- ^ Results of step operations.
-  
+
   -- | Get the current environment from the context and particle
   -- state.
   environment :: ContextT p -> p -> EnvironmentT p
 
   -- | Step the particle, producing an event and new particle.
-  step :: EnvironmentT p -> p -> (EventT p, p) 
+  step :: EnvironmentT p -> p -> (EventT p, p)
 
 
 -- | An InSpace particle also has methods for extracting it's space
@@ -32,24 +32,24 @@ class (Particle p) => InSpace p where
   position  :: p -> Space.Position
   direction :: p -> Space.Direction
   move      :: p -> Space.Distance -> p
-  
+
 -- | An InTime particle has an internal clock and a method for
 -- advancing it.
 class (Particle p) => InTime p where
   time :: p -> Space.Time
   tick :: p -> Space.Time -> p
-  
+
 
 -- | InSpaceTime particles have a speed can can be advanced by
 -- specifying either the time or distance of travel. These functions
 -- have default values which use the appropiate methods from InSpace and InTime.
 class (InSpace p, InTime p) => InSpaceTime p where
   speed       :: p -> Space.Speed
-  
+
   advanceTime :: p -> Space.Time -> p
   advanceTime p t = tick (move p d) t where
       d = Space.distanceToTime t (speed p)
-  
+
   advanceDistance :: p -> Space.Distance -> p
   advanceDistance p d = tick (move p d) t where
       t = Space.timeToDistance d (speed p)
@@ -60,8 +60,8 @@ class (Particle p) => RandomParticle p where
     type Random p :: *
     getRandom :: p -> Random p
     sample    :: p -> (Double, p)
-    
-    
+
+
 -- | Events produce EventTally data, which is a contribution to a
 -- global tally.
 class Event e where
@@ -69,11 +69,7 @@ class Event e where
     contribute :: e -> EventTally e
     is_final :: e -> Bool
 
-
--- | Tallies are collections of contributions into a global total. 
+-- | Tallies are collections of contributions into a global total.
 class Tally t where
     type TallyPart t :: *
     combine :: t -> TallyPart t -> t
-
-
-    

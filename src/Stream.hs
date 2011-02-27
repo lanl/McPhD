@@ -2,14 +2,14 @@
 
 module Stream where
 
-import Events.Event
-import Data.List
+import Particle.Classes
 
-class Steppable s where
-    type Particle :: *
-    step :: s -> Maybe (Event Particle, s)
+stream :: (Particle p) => ContextT p -> p -> [EventT p]
+stream context particle =
+  let environment' = environment context
+  in iterate next_step particle
+     where next_step particle =
+             let env = environment' particle
 
-type Stream = [Event Particle]
 
-makeStream :: (Steppable s) => s -> Stream
-makeStream s = unfoldr step s
+tally :: (Event e, Tally t) => t -> [e] -> t

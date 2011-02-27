@@ -27,28 +27,47 @@ import NumUnit
 data Coord = X | Y | Z deriving (Show, Eq, Ord, Ix)
 -- coords = listArray (X,Z) "xyz" :: Array Coord Char
 
+class VectorType v where
+  vector :: v -> Vector3
+
+class ScalarType s where
+  scalar :: s -> Double
+
 -- | Position, a 3D vector
 newtype Position = Position { pos :: Vector3 } deriving (Eq, Show, Num, Approx)
--- | Momentum, a 3D vector
+instance VectorType Position where
+  vector = pos
 
+-- | Momentum, a 3D vector
 newtype Momentum = Momentum { mom :: Vector3 } deriving (Eq, Show, Num, Approx)
+instance VectorType Momentum where
+  vector = mom
 
 -- | Motion, a 3D vector
 newtype Motion = Motion { mot :: Vector3 } deriving (Eq, Show, Num, Approx)
+instance VectorType Motion where
+  vector = mot
 
 -- | Distance, scalar
 newtype Distance = Distance { dis :: Double  } deriving (Eq, Show, Num, Ord, Approx)
+instance ScalarType Distance where
+  scalar = dis
 
 -- | Direction, a 3D vector of magnitude 1.
 newtype Direction = Direction { dir :: Vector3 }
                   deriving (Eq, Show, Num, Approx, NumUnit)
+instance VectorType Direction where
+  vector = dir
 
 -- | Time, elapsed time from beginning of streaming
 newtype Time = Time { time :: Double } deriving (Eq, Show, Num, Ord, Approx)
+instance ScalarType Time where
+  scalar = time
 
 -- | A scalar representing the magnitude of velocity.
 newtype Speed = Speed { speed :: Double } deriving (Eq, Show, Num, Ord, Approx)
-
+instance ScalarType Speed where
+  scalar = speed
 
 -- * Construction and manupulation of space quantities
 
