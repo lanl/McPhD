@@ -2,16 +2,16 @@
 -- Data types for Three-dimensonal space in Cartesian coordinates
 
 module Space3DCartesian(Distance (..)
-                        , Position (..)
-                        , Momentum (..)
-                        , Motion (..), motion
-                        , Direction (), dir, direction, direction_unsafe, (*->), (+->)
-                        , Time (..)
-                        , Speed (..)
-                        , timeToDistance
-                        , distanceToTime
-                        , translate
-                        ) where
+			, Position (..)
+			, Momentum (..)
+			, Motion (..), motion
+			, Direction (), dir, direction, direction_unsafe, (*->), (+->)
+			, Time (..)
+			, Speed (..)
+			, timeToDistance
+			, distanceToTime
+			, translate
+			) where
 
 import Data.Vector.V3
 import Data.Vector.Class
@@ -55,7 +55,7 @@ instance ScalarType Distance where
 
 -- | Direction, a 3D vector of magnitude 1.
 newtype Direction = Direction { dir :: Vector3 }
-                  deriving (Eq, Show, Num, Approx, NumUnit)
+		  deriving (Eq, Show, Num, Approx, NumUnit)
 instance VectorType Direction where
   vector = dir
 
@@ -97,9 +97,9 @@ infix 6 +->
 
 -- | Translates object along the direction vector
 translate :: Position -- ^ Initial position
-          -> Direction -- ^ Direction vector
-          -> Distance  -- ^ Movement distance
-          -> Position  -- ^ New position
+	  -> Direction -- ^ Direction vector
+	  -> Distance  -- ^ Movement distance
+	  -> Position  -- ^ New position
 translate position direction distance = position +-> (direction *-> distance)
 
 

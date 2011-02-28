@@ -21,5 +21,8 @@ import System.Random.Mersenne.Pure64
 import Data.Vector.V3
 import Control.Applicative
 
+import Stream
+import Tallies
+
 
 tests = []
