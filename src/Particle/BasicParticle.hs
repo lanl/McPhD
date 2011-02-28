@@ -1,5 +1,6 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeSynonymInstances #-}
 module Particle.BasicParticle where
 
 import Particle.Classes
@@ -15,17 +16,17 @@ import System.Random.Mersenne.Pure64
 
 -- For these particles, the context is the end of the timestep.
 data BContext = BContext
-		{
-		  -- | End of the time step.
-		  basicContextTime :: Space.Time
-		}
+                {
+                  -- | End of the time step.
+                  basicContextTime :: Space.Time
+                }
 
 -- The environment is the same as the context.
 data BEnv = BEnv
-	    {
-	      -- | End of the time step.
-	      basicEnvTime :: Space.Time
-	    }
+            {
+              -- | End of the time step.
+              basicEnvTime :: Space.Time
+            }
 
 
 
@@ -33,13 +34,13 @@ data BEnv = BEnv
 
 -- | BasicParticle is a RandomParticle moving in space and time.
 data BasicParticle = BasicParticle
-		     {
-		       bpPos    :: Space.Position   -- ^ Position in space
-		     , bpDir    :: Space.Direction  -- ^ Direction of travel
-		     , bpSpeed  :: Space.Speed      -- ^ Magnitude of velocity
-		     , bpTime   :: Space.Time       -- ^ Time in flight
-		     , bpRand   :: PureMT           -- ^ Random number generator
-		     } deriving Show
+                     {
+                       bpPos    :: Space.Position   -- ^ Position in space
+                     , bpDir    :: Space.Direction  -- ^ Direction of travel
+                     , bpSpeed  :: Space.Speed      -- ^ Magnitude of velocity
+                     , bpTime   :: Space.Time       -- ^ Time in flight
+                     , bpRand   :: PureMT           -- ^ Random number generator
+                     } deriving Show
 
 
 instance Approx BasicParticle where
@@ -70,31 +71,30 @@ instance RandomParticle BasicParticle where
   getRandom = bpRand
   sample p  = (sample, p')
       where (sample, newRandom) = randomDouble (getRandom p)
-	    p' = p { bpRand = newRandom }
+            p' = p { bpRand = newRandom }
 
 instance Particle BasicParticle where
-  type ContextT BasicParticle     = BContext
-  type EnvironmentT BasicParticle = BEnv
-  type EventT BasicParticle       = BasicEvent
+  type ContextT BasicParticle     = Space.Time
+  type EnvironmentT BasicParticle = Space.Time
+  type EventT BasicParticle       = Space.Position
 
-  environment (BContext t) _ = BEnv t
+  environment t _ = t
 
-  step environment particle = (event, particle')
-    where time_left = (basicEnvTime environment) - (time particle)
-	  particle' = advanceTime particle time_left
-	  event     = StepEnd $ position particle'
-
-
+  step envtime particle = (event, particle')
+    where time_left = envtime - time particle
+          particle' = advanceTime particle time_left
+          event     = position particle'
 
 -- * Events
 
 -- | Reaching the end of the time step is the only event. Record the
 -- position.
-data BasicEvent = StepEnd { eventPosition :: Space.Position }
+type BasicEvent = Space.Position
 
 instance Event BasicEvent where
-  type EventTally BasicEvent = PTally
-  contribute event = PTally (eventPosition event)
+  -- | The information we tally from each event is the (final) position.
+  type EventTally BasicEvent = Space.Position
+  contribute event = event
   is_final _ = True  -- ^ Only event is final.
 
 
@@ -102,29 +102,22 @@ instance Event BasicEvent where
 
 -- * Tallies
 
--- | The information we tally from each event is the position.
-data PTally = PTally
-	      {
-		tallyPosition :: Space.Position -- ^ Final position
-	      }
-
 -- | The global tally is the sum of positions and a count of particles
 data GPTally = GPTally
-	       {
-		 -- | Sum of final positions
-		 positionSum :: Space.Position,
+               {
+                 -- | Sum of final positions
+                 positionSum :: Space.Position,
 
-		 -- | Total number of particles
-		 count :: Int
-	       }
+                 -- | Total number of particles
+                 count :: Int
+               }
 
 instance Tally GPTally where
-    type TallyPart GPTally = PTally
+    type TallyPart GPTally = Space.Position
     empty = GPTally{positionSum=Space.Position(Vector3 0 0 0), count=0}
-    combine global event = GPTally sum' count'
-	where sum' = Space.Position $ (Space.pos $ positionSum global) +
-		     (Space.pos $ tallyPosition event)
-	      count' = count global + 1
+    combine pos gp = GPTally sum' count'
+        where sum'   = positionSum gp + pos
+              count' = count gp + 1
 
 
 
@@ -134,11 +127,11 @@ instance Tally GPTally where
 
 -- | Create a particle with given position, direction, distance and random seed.
 createParticle :: Space.Position
-	       -> Space.Direction
-	       -> Space.Speed
-	       -> Space.Time
-	       -> Seed
-	       -> BasicParticle
+               -> Space.Direction
+               -> Space.Speed
+               -> Space.Time
+               -> Seed
+               -> BasicParticle
 
 createParticle pos dir speed time seed =
   BasicParticle pos dir speed time (makePureMT seed)
@@ -146,10 +139,10 @@ createParticle pos dir speed time seed =
 -- | Create a particle with given position, time, distance remaining
 -- and cell. Sample an isotropic initial direction.
 sampleIsoParticle :: PureMT
-		     -> Space.Position
-		     -> Space.Speed
-		     -> Space.Time
-		     -> BasicParticle
+                     -> Space.Position
+                     -> Space.Speed
+                     -> Space.Time
+                     -> BasicParticle
 sampleIsoParticle rand position speed time =
   let (direction, rand') = randomDirection rand
   in BasicParticle position direction speed time rand'
