@@ -11,7 +11,7 @@ import Data.Ix
 
 -- | Size of the mesh in cells, along each axis
 data CellIndex = CellIndex { nx :: Int, ny :: Int, nz :: Int }
-	       deriving (Show, Eq, Ord, Ix)
+               deriving (Show, Eq, Ord, Ix)
 
 toTuple :: CellIndex -> (Int, Int, Int)
 toTuple (CellIndex nx ny nz) = (nx,ny,nz)
@@ -26,11 +26,11 @@ fromList _ = Nothing
 
 -- | The Cartesian directions in 3D. Used to identify faces of a cell.
 data Local_Face = Negative_X
-		| Positive_X
-		| Negative_Y
-		| Positive_Y
-		| Negative_Z
-		| Positive_Z deriving (Eq, Show)
+                | Positive_X
+                | Negative_Y
+                | Positive_Y
+                | Negative_Z
+                | Positive_Z deriving (Eq, Show)
 
 next_index :: CellIndex -> Local_Face -> CellIndex
 next_index (CellIndex nx ny nz) face =
@@ -51,8 +51,8 @@ nextIndex face = next_index (cell face) (local face)
 
 
 data SimpleMesh = SimpleMesh { maxIndex :: CellIndex -- ^ Max cell index in each dir.
-			     , cellDim  :: Vector3   -- ^ Dimensions of each cell.
-			     } deriving Show
+                             , cellDim  :: Vector3   -- ^ Dimensions of each cell.
+                             } deriving Show
 
 meshSize :: SimpleMesh -> Int
 meshSize mesh = let CellIndex x y z = maxIndex mesh in x*y*z
@@ -62,14 +62,14 @@ inMesh mesh index = inRange (CellIndex 0 0 0, maxIndex mesh) index
 
 
 data Cell = Local CellIndex
- 	  | Void deriving (Eq, Show)
+          | Void deriving (Eq, Show)
 
 -- | Convert a CellIndex to a Cell.
 toCell :: SimpleMesh
-	  -> CellIndex
-	  -> Cell
+          -> CellIndex
+          -> Cell
 toCell mesh index = if inMesh mesh index then (Local index)
-		    else Void
+                    else Void
 
 -- | Find the cell on the other side of a given face. Returns Nothing if the face
 -- is on the boundary of the mesh

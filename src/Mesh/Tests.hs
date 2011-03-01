@@ -32,9 +32,9 @@ testSize :: Assertion
 testSize = (meshSize simpleMesh) @?= 1000
 
 tests = [ testGroup "Index Tests"
-	  [ testCase "LEQ operator" testRange
-	  ],
-	  testGroup "Mesh Tests"
-	  [ testCase "Size Equality" testSize
-	  ]
-	]
+          [ testCase "LEQ operator" testRange
+          ],
+          testGroup "Mesh Tests"
+          [ testCase "Size Equality" testSize
+          ]
+        ]
