@@ -57,9 +57,9 @@ class (InSpace p, InTime p) => InSpaceTime p where
 -- | A RandomParticle has a random state associated with it. It can
 -- return this state or generate a random sample and updated particle
 class (Particle p) => RandomParticle p where
-    type Random p :: *
-    getRandom :: p -> Random p
-    sample    :: p -> (Double, p)
+  type Random p :: *
+  getRandom :: p -> Random p
+  sample    :: p -> (Double, p)
 
 
 -- * Events
@@ -67,9 +67,9 @@ class (Particle p) => RandomParticle p where
 -- | Events produce EventTally data, which is a contribution to a
 -- global tally.
 class Event e where
-    type EventTally e :: *
-    contribute :: e -> EventTally e
-    is_final :: e -> Bool
+  type EventTally e :: *
+  contribute :: e -> EventTally e
+  is_final :: e -> Bool
 
 
 
@@ -77,6 +77,6 @@ class Event e where
 
 -- | Tallies are collections of contributions into a global total.
 class Tally t where
-    type TallyPart t :: *
-    empty :: t
-    combine :: TallyPart t -> t -> t
+  type TallyPart t :: *
+  empty :: t
+  combine :: TallyPart t -> t -> t

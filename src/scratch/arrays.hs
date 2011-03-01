@@ -33,7 +33,7 @@ class GenTuple a where
 
 -- I can almost make InSpace an index type for Arrays automatically.
 newtype SpaceIndex = SpaceIndex { fromSpaceIndex :: (InSpace Int) }
-		   deriving (Show, Eq, Ord)
+                   deriving (Show, Eq, Ord)
 
 -- Make it a generalized index for easy conversion
 instance GenIndex SpaceIndex where
