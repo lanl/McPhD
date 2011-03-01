@@ -5,8 +5,11 @@
 
 module Sphere1D (sampDir
                 ,sampPos
+                ,across 
                 ,distToBdy
-                ,pickPt)
+                ,pickPt
+                ,findCell
+                ,infMesh)
     where
 
 import SoftEquiv
@@ -16,7 +19,7 @@ import Data.Array (bounds)
 import MeshBase
 
 sampDir :: FP -> FP -> FP -> Direction
-sampDir x _ _ = (Direction . Vector1 $ 2*x -1)
+sampDir x _ _ = Direction . Vector1 $ 2*x -1
 
 -- | sample a position in a sphere
 sampPos :: Mesh -> FP -> FP -> FP -> (Position,CellIdx)
@@ -37,13 +40,19 @@ pickPt r r1 r2 r3 = r * maximum [r1,r2,r3] -- better max (max r1 r2) r3? avoid (
 -- b-search in the mesh
 findCell :: Mesh -> FP -> CellIdx
 findCell msh r = impl msh r f l
-    where impl msh r lo hi | lo == hi  = lo
-                           | val < r   = impl msh r (idx+1) hi
-                           | otherwise = impl msh r lo idx
+    where impl msh r lo hi | lo == hi  = idx
+                           | vlo <= r && vhi >= r = idx
+                           | vlo >= r = impl msh r lo idx
+                           | vhi <= r = impl msh r (idx+1) hi
                            where idx = (lo+hi) `quot` 2
-                                 val = xcomp . pos . low_b $ mesh msh ! idx
-          f = fst . bounds $ mesh msh
-          l = snd . bounds $ mesh msh
+                                 vlo = xcomp . pos . low_b  $ mesh msh ! idx
+                                 vhi = xcomp . pos . high_b $ mesh msh ! idx
+          (f,l) = bounds $ mesh msh
+
+across :: CellIdx -> Face -> CellIdx
+across c XLow = c - 1
+across c XHigh = c + 1
+across _ _ = error "Sphere1D.across only defined for XLow and XHigh boundaries"
 
 -- | Distance to boundary in spherical 1D coordinates. 
 {- Check for intersection with two concentric spheres with radius rHi and rLow.
@@ -62,7 +71,7 @@ findCell msh r = impl msh r f l
  -}
 distToBdy :: FP -> FP -> FP -> FP -> (FP,Face) 
 distToBdy r omega rhi rlow = 
-    if (contactInner r rlow t thetaLTpiOver2)
+    if contactInner r rlow t thetaLTpiOver2
     then (dlo, XLow)
     else (dhi, XHigh)
         where 
@@ -80,7 +89,7 @@ distToBdy r omega rhi rlow =
           xterm1 = r * tsq * oneOverOnePTSq
           yterm1 =  -r * t + r * t * tsq * oneOverOnePTSq
           -- determinant: dependence on sphere radius (rs) is here
-          det = \rs -> sqrt(rs*rs * onePTSq - r * r * tsq) * oneOverOnePTSq
+          det rs = sqrt(rs*rs * onePTSq - r * r * tsq) * oneOverOnePTSq
           dethi = det rhi
           detlo = det rlow
           -- will the ray contact the inner sphere? 
@@ -90,11 +99,11 @@ distToBdy r omega rhi rlow =
                   && (tanTheta <= tanThetaLim && thetaLTpiOver2) -- moving toward inner
                   where b = r/rlow
                         tanThetaLim = sqrt(1/(b*b-1))
-          theta = acos(omega)
+          theta = acos omega
           thetaLTpiOver2 = theta < pi/2
           t = if thetaLTpiOver2    -- work with the polar angle mapped into [0,pi/2]
-              then tan(theta)
-              else tan(pi - theta)
+              then tan theta
+              else tan (pi - theta)
           -- abbreviations
           tsq = t * t
           onePTSq = 1 + tsq
@@ -105,6 +114,13 @@ rmax :: Mesh -> FP
 rmax msh = xcomp . pos.high_b $ arr ! bmax
            where arr = mesh msh
                  bmax = snd (bounds arr)
+
+
+infMesh :: Mesh
+infMesh = Sphere1D $ listArray (1,2)
+          [(CellProps (Position 0.0) (Position 1.0) (bc1D Refl) (bc1D Transp)),
+           (CellProps (Position 1.0) (Position 2.0) (bc1D Transp) (bc1D Refl))]
+
 
 -- version
 -- $Id$

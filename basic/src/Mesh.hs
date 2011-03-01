@@ -6,6 +6,7 @@
 module Mesh (Mesh(..)  -- Mesh type now defined in MeshBase
             , bdyEvent
             , distToBdy
+            , cellAcross
             , samplePosition
             , sampleDirection
             , simpleMesh
@@ -37,6 +38,12 @@ sampleDirection :: Mesh -> FP -> FP -> FP -> Direction
 sampleDirection Sphere1D {} = Sphere1D.sampDir  
 sampleDirection Cart1D {}   = Cart1D.sampDir    
 sampleDirection Cart3D {}   = Cart3D.sampDir   
+
+cellAcross :: Mesh -> CellIdx -> Face -> CellIdx
+cellAcross Sphere1D {} = Sphere1D.across  
+cellAcross Cart1D {}   = Cart1D.across    
+cellAcross Cart3D {}   = Cart3D.across   
+
 
 -- | dispatch on mesh type to appropriate distance function
 distToBdy :: Mesh -> CellIdx -> Position -> Direction -> (FP, Face)

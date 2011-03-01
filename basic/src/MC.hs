@@ -5,7 +5,9 @@
 
 
 module MC (runParticleV
+          ,runParticleV_
           ,runParticleQ
+          ,runParticleQ_
           ,push
           )
 
@@ -21,21 +23,30 @@ import Event
 
 import Data.Function
 import Data.List
-import System.Random (getStdRandom,randomR)
 import Control.Applicative
 import Data.Tuple.Sequence (sequenceT)
 
 -- push a particle, tally what happens, report each step
 runParticleV :: Particle -> Mesh -> Material -> IO Tally
-runParticleV p mesh mat = tally <$> push p mesh mat stepMsg2
+runParticleV p mesh mat = tally_ <$> push p mesh mat stepMsg2
 
 -- ditto sans reporting
 runParticleQ :: Particle ->  Mesh -> Material -> IO Tally
-runParticleQ p mesh mat = tally <$> push p mesh mat nullPrtr
+runParticleQ p mesh mat = tally_ <$> push p mesh mat nullPrtr
 
-{- Use a particle, 'opacity', and an RNG to
- - generate a list of Event, Particle pairs.  
- - Pass a printer function to control per-step reporting.  -}
+runParticleV_ :: Mesh -> Material -> Particle -> IO Tally
+runParticleV_ mesh mat p = tally_ <$> push p mesh mat stepMsg2
+
+runParticleQ_ :: Mesh -> Material -> Particle -> IO Tally
+runParticleQ_ mesh mat p = tally_ <$> push p mesh mat nullPrtr
+
+runParticle :: Mesh -> Material -> Particle -> Tally -> IO Tally
+runParticle mesh mat p t = tally t <$> push p mesh mat nullPrtr
+
+{- Use a particle (and its RNG), a mesh, and a material to
+ - generate a list of (Event, Particle) pairs.  
+ - Pass a printer function to implement per-step reporting 
+ - (or not).  -}
 push :: Particle -> Mesh -> Material -> (Event -> Particle -> IO ())
      -> IO [(Event,Particle)]
 push p msh mat prtr = do 
@@ -43,10 +54,29 @@ push p msh mat prtr = do
   (sel_s,sel_a,ds1,ds2,ds3) <- sequenceT (rndm,rndm,rndm,rndm,rndm)
   let omega' = sampleDirection msh ds1 ds2 ds3
       evt = pickEvent p sel_s sel_a omega' mat msh
-      p' = stream p evt omega'
+      p' = stream p evt msh omega'
   if isContinuing evt
     then prtr evt p' >> ((evt,p'):) <$> (push p' msh mat prtr)
     else prtr evt p' >> return [(evt,p')]
+  where rndm = random $ pRNG p
+
+{- Use a particle (and its RNG), a mesh, and a material to
+ - generate a list of (Event, Particle) pairs. -}
+pushQ :: Particle -> Mesh -> Material -> IO [(Event,Particle)]
+pushQ p msh mat = do 
+  -- pull the random numbers needed for one MC step
+  -- (sel_s,sel_a,ds1,ds2,ds3) <- sequenceT (rndm,rndm,rndm,rndm,rndm)
+  sel_s <- rndm
+  sel_a <- rndm
+  ds1   <- rndm
+  ds2   <- rndm
+  ds3   <- rndm
+  let omega' = sampleDirection msh ds1 ds2 ds3
+      evt    = pickEvent p sel_s sel_a omega' mat msh
+      p'     = stream p evt msh omega'
+  if isContinuing evt
+    then ((evt,p'):) <$> (pushQ p' msh mat)
+    else return [(evt,p')]
   where rndm = random $ pRNG p
 
 -- Pick event for a particle. Provide particle, two uniform random deviates
@@ -62,7 +92,7 @@ pickEvent :: Particle ->
              Event
 pickEvent p sel_s sel_a omega' matl msh = 
     let d_scat = min (-log( sel_s)/sig_s) huge -- knows div-by-0 is greater than huge
-        d_abs  = min (-log( sel_a)/sig_a) huge 
+        d_abs  = min (-log( sel_a)/sig_a) huge -- ...but smart enough to avoid sigfpe?
         (d_bdy,face)  = distToBdy msh cell x omega
         d_cen  = c * tcen where tcen = t $ pTime p
         cellt  = bdyEvent msh cell face
@@ -90,21 +120,21 @@ elasticScatterMomDep energy omega_i omega_f = Momentum ((nrg/c) *| dir (omega_i 
     where nrg = e energy
 
 -- Generate a particle at the event with the new direction 
-stream :: Particle -> Event -> Direction -> Particle
-stream p event omega' = 
+stream :: Particle -> Event -> Mesh -> Direction -> Particle
+stream p event msh omega' = 
     case event of
-      Scatter {}  -> p' {pDir=omega'}
-      Absorb {}   -> p' {pDir=omega}
-      Reflect {}  -> p' {pDir=(-omega)}
-      Transmit {} -> p' {pCell=newcell}
-      Escape {}   -> p' {pCell=0}
-      Census {}   -> p' {pTime=0}
-    where p'        = p{pPos = x', pTime = t'}
-          d         = dist event
-          x'        = pPos p + Position (d *| dir omega)
-          t'        = pTime p - Time (d/c)
-          omega     = pDir p
-          newcell   = if (xcomp . dir $ omega) > 0.0 then 1 + pCell p else pCell p - 1
+      Scatter {}   -> p' {pDir=omega'}
+      Absorb {}    -> p' {pDir=omega}
+      Reflect {}   -> p' {pDir=(-omega)}
+      Transmit _ f -> p' {pCell=newcell f}
+      Escape {}    -> p' {pCell=0}
+      Census {}    -> p' {pTime=0}
+    where p'      = p{pPos = x', pTime = t'}
+          d       = dist event
+          x'      = pPos p + Position (d *| dir omega)
+          t'      = pTime p - Time (d/c)
+          omega   = pDir p
+          newcell = cellAcross msh (pCell p)
 
 -- for printing out steps
 stepMsg2 :: Event -> Particle -> IO ()

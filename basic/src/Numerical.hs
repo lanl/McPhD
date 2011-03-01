@@ -53,8 +53,8 @@ newtype CellIdx = CellIdx {idx :: Idx } deriving (Eq,Show,Num,Ord,Ix,Integral,Re
 newtype RNG = RNG { random :: (IO FP)} 
 
 -- for testing, we'll need greater control of the RNG
-rand :: (IO FP)
-rand = getStdRandom (randomR (0.0 :: FP,1.0))
+rand :: RNG
+rand = RNG $ getStdRandom (randomR (0.0 :: FP,1.0))
 
 
 -- version

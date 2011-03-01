@@ -6,11 +6,8 @@
 module MeshBase (Mesh(..))
     where
 
--- import SoftEquiv
 import Physical
--- import Event
 import Cell 
--- import Data.Array (bounds)
 
 -- | Mesh properties for each cell
 data Mesh = Sphere1D { mesh :: Array CellIdx CellProperties } -- assume cells ordered by radius
