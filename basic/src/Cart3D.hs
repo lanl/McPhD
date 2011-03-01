@@ -5,6 +5,7 @@
 
 module Cart3D (sampPos
               ,sampDir
+              ,across
               ,distToBdy)
     where
 
@@ -20,6 +21,8 @@ sampDir = undefined
 sampPos :: Mesh -> FP -> FP -> FP -> (Position,CellIdx)
 sampPos = undefined
 
+across :: CellIdx -> Face -> CellIdx
+across = undefined
 
 -- | Distance to boundary in cartesian 3D coordinates
 {- Create a list of pairs of distance to high & low faces divided by direction
