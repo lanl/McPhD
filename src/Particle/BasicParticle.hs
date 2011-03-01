@@ -119,12 +119,12 @@ data GPTally = GPTally
                }
 
 instance Tally GPTally where
-    type TallyPart GPTally = PTally
-    empty = GPTally{positionSum=Space.Position(Vector3 0 0 0), count=0}
-    combine global event = GPTally sum' count'
-        where sum' = Space.Position $ (Space.pos $ positionSum global) +
-                     (Space.pos $ tallyPosition event)
-              count' = count global + 1
+  type TallyPart GPTally = PTally
+  empty = GPTally{positionSum=Space.Position(Vector3 0 0 0), count=0}
+  combine event global = GPTally sum' count'
+    where sum' = Space.Position $ (Space.pos $ positionSum global) +
+                 (Space.pos $ tallyPosition event)
+          count' = count global + 1
 
 
 
