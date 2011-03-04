@@ -23,23 +23,24 @@ flag test
   default: True
 
 Library
-   ghc-options: -Wall -fno-warn-name-shadowing -fno-warn-orphans
+   ghc-options: -Wall -fno-warn-name-shadowing -fno-warn-orphans -fwarn-tabs
    hs-source-dirs:
       ./src
    build-depends:
        base > 3 && <= 5,
-       AC-Vector == 2.3.1
-       , array == 0.3.0.0
-       , mersenne-random-pure64 == 0.2
-       , haskell98
+       AC-Vector == 2.*
+       , random
        , tuple
+       , array == 0.3.*
+       , mersenne-random-pure64 == 0.2.*
+       , containers
    exposed-modules: MC 
    other-modules:
 
 executable  basic
   hs-source-dirs:
     ./src
-  ghc-options: -Wall -fno-warn-name-shadowing -fno-warn-orphans
+  ghc-options: -Wall -fno-warn-name-shadowing -fno-warn-orphans -fwarn-tabs
   other-modules:
   DataTypes
   Constants
@@ -47,7 +48,19 @@ executable  basic
   main-is:       Main.hs
   if flag(test)
     ghc-options: -fhpc
-    build-depends: base >=3 && <=5, hpc, containers,random
+    build-depends: base >=3 && <=5, 
+                   hpc, 
+                   containers, 
+                   tuple, 
+                   random,
+                   mersenne-random-pure64 == 0.2.*,
+                   array == 0.3.*,
+                   HUnit == 1.2.*,
+                   test-framework-quickcheck2,
+                   test-framework-hunit,
+                   test-framework,
+                   QuickCheck
+                   
   else
     buildable: False
 
