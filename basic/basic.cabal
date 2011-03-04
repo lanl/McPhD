@@ -49,6 +49,7 @@ executable  basic
   if flag(test)
     ghc-options: -fhpc
     build-depends: base >=3 && <=5, 
+                   haskell98,
                    hpc, 
                    containers, 
                    tuple, 
