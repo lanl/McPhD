@@ -10,9 +10,6 @@ module Numerical (FP
                  , CellIdx(..)
                  , Tag
                  , xcomp, ycomp, zcomp
-                 , RandSeed
-                 , RNG(..)
-                 , rand
                  , module Data.Word
                  , module Data.Vector.V1
                  , module Data.Vector.Class
@@ -22,7 +19,6 @@ module Numerical (FP
 import Data.Vector.Class (vmag,(*|))
 import Data.Word 
 import Data.Array (Ix,(!),listArray,Array)
-import System.Random (getStdRandom,randomR)
 
 -- should have some way of more easily (and consistently) switching between 1D 
 -- and 3D. 
@@ -46,16 +42,7 @@ type FP   = Double
 type Idx  = Word32
 type Tag  = Word32 -- used for tagging things uniquely within their type
 
-type RandSeed = FP
-
 newtype CellIdx = CellIdx {idx :: Idx } deriving (Eq,Show,Num,Ord,Ix,Integral,Real,Enum)
-
-newtype RNG = RNG { random :: (IO FP)} 
-
--- for testing, we'll need greater control of the RNG
-rand :: RNG
-rand = RNG $ getStdRandom (randomR (0.0 :: FP,1.0))
-
 
 -- version
 -- $Id$
