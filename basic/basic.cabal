@@ -62,3 +62,22 @@ executable  basic
   else
     buildable: False
 
+executable TestSuite
+  hs-source-dirs: ./src/ ./src/Test
+  ghc-options: -Wall -fwarn-tabs -fno-warn-name-shadowing -fno-warn-orphans
+  other-modules:
+  main-is: TestSuite.hs
+  if flag(test)
+    ghc-options: -fhpc
+    build-depends: base >=3 && <=5
+                   , hpc
+                   , AC-Vector == 2.*
+                   , array == 0.3.*
+                   , mersenne-random-pure64 == 0.2.*
+                   , HUnit == 1.2.*
+                   , test-framework-hunit
+                   , test-framework-quickcheck2
+                   , test-framework
+                   , QuickCheck
+  else
+    buildable: False
