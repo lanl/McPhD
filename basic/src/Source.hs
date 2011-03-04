@@ -3,34 +3,32 @@
 -- Feb 15, 2011
 -- (c) Copyright 2011 LANSLLC, all rights reserved
 
-module Source 
-    (genParticles)
+module Source (genParticles)
     where
 
 import Particle
+import PRNG
 import Physical
 import Mesh
-import Control.Applicative ((<$>))
-import Data.Tuple.Sequence (sequenceT)
+import System.Random (split)
 
 -- generates particles uniformly over a spatial domain
 genParticles :: Word32 ->   -- how many particles to generate
                 Mesh ->    
                 RNG ->
-               IO [Particle]
-genParticles 0 msh rng = return []
-genParticles n msh rng = do
-  (ps1,ps2,ps3,ds1,ds2,ds3) <- sequenceT (rndm,rndm,rndm,rndm,rndm,rndm)
-  let (x,c) = samplePosition msh ps1 ps2 ps3
-      d     = sampleDirection msh ds1 ds2 ds3
-      p     = Particle x d t e ew c rng tag
-  (p:) <$> (genParticles (n-1) msh rng)
-  where -- d = Direction 1.0
-        t = Time 1.0
-        e = Energy 1.0
-        ew = EnergyWeight 1.0
-        tag = (n - 1)::Word32
-        rndm = random rng
+               [Particle]
+genParticles 0 _ _ = []
+genParticles n msh rng = 
+  let (ps1,ps2,ps3,ds1,ds2,ds3,rng') = getSixRNs rng 
+      (g1,g2) = split rng'
+      (x,c)   = samplePosition msh ps1 ps2 ps3
+      d       = sampleDirection msh ds1 ds2 ds3
+      p       = Particle x d t e ew c g1 tag
+  in p:genParticles (n-1) msh g2
+  where t   = Time 1.0
+        e   = Energy 1.0
+        ew  = EnergyWeight 1.0
+        tag = n::Word32
 
 -- version
 -- $Id$
