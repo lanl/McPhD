@@ -20,8 +20,8 @@ sampDir x1 _ _ = Direction . Vector1 $ 2.0 * x1 - 1.0
 sampPos :: Mesh -> FP -> FP -> FP -> (Position,CellIdx)
 sampPos msh x1 _ _ = (Position . Vector1 $ x, findCell msh x)
     where x = (hi-lo)*x1 + lo
-          lo = xcomp . pos . low_b $ mesh msh ! f
-          hi = xcomp . pos . high_b $ mesh msh ! l
+          lo = xcomp . pos . lowB $ mesh msh ! f
+          hi = xcomp . pos . highB $ mesh msh ! l
           (f,l) = bounds $ mesh msh
 
 across :: CellIdx -> Face -> CellIdx
@@ -37,8 +37,8 @@ findCell msh x =  impl msh x f l
                            | vlo >= x = impl msh x lo idx
                            | vhi <= x = impl msh x (idx+1) hi
                            where idx = (lo+hi) `quot` 2
-                                 vlo = xcomp . pos . low_b  $ mesh msh ! idx
-                                 vhi = xcomp . pos . high_b $ mesh msh ! idx
+                                 vlo = xcomp . pos . lowB  $ mesh msh ! idx
+                                 vhi = xcomp . pos . highB $ mesh msh ! idx
           (f,l) = bounds $ mesh msh
           
 -- | Distance to boundary in cartesian 1D coordinates
