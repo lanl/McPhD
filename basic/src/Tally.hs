@@ -12,7 +12,7 @@ module Tally (tally
              -- ,MomentumTally
              -- ,EnergyTally
              )
-    where
+  where
 
 import qualified Data.Map as Map 
 import Numerical
@@ -23,24 +23,21 @@ import Event (Event(..))
 data Tally = Tally { globalEvts  :: EventCount 
                    , deposition  :: PhysicsTally} deriving Show
 
--- want these to be array-based
-type MomentumTally  = Map.Map CellIdx Momentum
-type EnergyTally    = Map.Map CellIdx EnergyWeight
 type PhysicsTally   = Map.Map CellIdx (Momentum,EnergyWeight)
 
-data EventCount = EventCount { n_scatter  :: !Int -- NOTE: Strict counters are always a good idea
-                             , n_absorb   :: !Int
-                             , n_transmit :: !Int
-                             , n_reflect  :: !Int
-                             , n_escape   :: !Int
-                             , n_census   :: !Int
+data EventCount = EventCount { nScatter  :: !Int 
+                             , nAbsorb   :: !Int
+                             , nTransmit :: !Int
+                             , nReflect  :: !Int
+                             , nEscape   :: !Int
+                             , nCensus   :: !Int
                              } deriving (Show,Eq)
 
 tally :: Tally -> [(Event,Particle)] -> Tally
-tally t walk = foldr tallyImpl t walk
+tally = foldr tallyImpl 
 
 tally_ :: [(Event,Particle)] -> Tally
-tally_ walk = foldr tallyImpl emptyTally walk
+tally_ = foldr tallyImpl emptyTally 
 
 tallyImpl :: (Event,Particle) -> Tally -> Tally 
 tallyImpl (e,p) t = Tally (countEvent e eC) (tDep (e,pCell p) d) 
@@ -56,12 +53,12 @@ plusME :: (Momentum,EnergyWeight) -> (Momentum,EnergyWeight) -> (Momentum,Energy
 plusME (dp1,e1) (dp2,e2) = (dp1+dp2,e1+e2) 
 
 countEvent :: Event -> EventCount -> EventCount
-countEvent Scatter {}  ctr = ctr { n_scatter  = 1 + n_scatter  ctr}
-countEvent Absorb {}   ctr = ctr { n_absorb   = 1 + n_absorb   ctr}
-countEvent Transmit {} ctr = ctr { n_transmit = 1 + n_transmit ctr}
-countEvent Escape {}   ctr = ctr { n_escape   = 1 + n_escape   ctr}
-countEvent Reflect {}  ctr = ctr { n_reflect  = 1 + n_reflect  ctr}
-countEvent Census {}   ctr = ctr { n_census   = 1 + n_census   ctr}
+countEvent Scatter {}  ctr = ctr { nScatter  = 1 + nScatter  ctr}
+countEvent Absorb {}   ctr = ctr { nAbsorb   = 1 + nAbsorb   ctr}
+countEvent Transmit {} ctr = ctr { nTransmit = 1 + nTransmit ctr}
+countEvent Escape {}   ctr = ctr { nEscape   = 1 + nEscape   ctr}
+countEvent Reflect {}  ctr = ctr { nReflect  = 1 + nReflect  ctr}
+countEvent Census {}   ctr = ctr { nCensus   = 1 + nCensus   ctr}
 
 merge :: Tally -> Tally -> Tally
 merge t1 t2 = Tally {globalEvts = addEventCounts (globalEvts t1) (globalEvts t2)
@@ -77,13 +74,12 @@ emptyEvtCount :: EventCount
 emptyEvtCount  = EventCount 0 0 0 0 0 0 
 
 addEventCounts :: EventCount -> EventCount ->EventCount
-addEventCounts c1 c2 = EventCount {n_scatter = n_scatter c1 + n_scatter c2
-                                  ,n_absorb = n_absorb c1 + n_absorb c2
-                                  ,n_transmit = n_transmit c1 + n_transmit c2
-                                  ,n_reflect = n_reflect c1 + n_reflect c2
-                                  ,n_escape = n_escape c1 + n_escape c2
-                                  ,n_census = n_census c1 + n_census c2
-                                  }
+addEventCounts c1 c2 = EventCount {nScatter = nScatter c1 + nScatter c2
+                                  ,nAbsorb = nAbsorb c1 + nAbsorb c2
+                                  ,nTransmit = nTransmit c1 + nTransmit c2
+                                  ,nReflect = nReflect c1 + nReflect c2
+                                  ,nEscape = nEscape c1 + nEscape c2
+                                  ,nCensus = nCensus c1 + nCensus c2 }
 
 -- version
 -- $Id$
