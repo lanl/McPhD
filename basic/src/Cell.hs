@@ -15,10 +15,10 @@ data BoundaryConditions = BCs { xbc :: BoundaryCondition
 
 -- hope this works in 1D and 3D
 data CellProperties = CellProps {
-      low_b   :: Position -- claiming we cd rep a rectangular cell with two vertices
-    , high_b  :: Position
-    , low_bc  :: BoundaryConditions
-    , high_bc :: BoundaryConditions
+      lowB   :: Position -- claiming we cd rep a rectangular cell with two vertices
+    , highB  :: Position
+    , lowBC  :: BoundaryConditions
+    , highBC :: BoundaryConditions
 } deriving (Show)
 
 
@@ -26,7 +26,7 @@ data Face = XLow | XHigh | YLow | YHigh | ZLow | ZHigh deriving (Show,Eq)
 
 -- | convenience function: set up 1D B.C. without typing all the None's 
 bc1D :: BoundaryCondition -> BoundaryConditions
-bc1D bc = (BCs bc None None) 
+bc1D bc = BCs bc None None
 
 
 -- version
