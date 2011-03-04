@@ -76,6 +76,6 @@ class Event e where
 
 -- | Tallies are collections of contributions into a global total.
 class Tally t where
-  type TallyPart t :: *
+  type EventTally t :: *
   empty :: t
-  combine :: TallyPart t -> t -> t
+  combine :: EventTally t -> t -> t
