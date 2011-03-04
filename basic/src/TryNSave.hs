@@ -8,9 +8,8 @@ module TryNSave (writeTally)
 
 import Tally
 
-writeTally :: Tally -> String -> IO ()
-writeTally t name = do
-  writeFile name (show t)
+writeTally :: String -> Tally -> IO ()
+writeTally name t = writeFile name $ show t
 
 
 -- version

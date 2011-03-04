@@ -45,8 +45,8 @@ findCell msh r = impl msh r f l
                            | vlo >= r = impl msh r lo idx
                            | vhi <= r = impl msh r (idx+1) hi
                            where idx = (lo+hi) `quot` 2
-                                 vlo = xcomp . pos . low_b  $ mesh msh ! idx
-                                 vhi = xcomp . pos . high_b $ mesh msh ! idx
+                                 vlo = xcomp . pos . lowB  $ mesh msh ! idx
+                                 vhi = xcomp . pos . highB $ mesh msh ! idx
           (f,l) = bounds $ mesh msh
 
 across :: CellIdx -> Face -> CellIdx
@@ -111,15 +111,15 @@ distToBdy r omega rhi rlow =
 
 -- maximum value of r
 rmax :: Mesh -> FP
-rmax msh = xcomp . pos.high_b $ arr ! bmax
+rmax msh = xcomp . pos. highB $ arr ! bmax
            where arr = mesh msh
                  bmax = snd (bounds arr)
 
 
 infMesh :: Mesh
 infMesh = Sphere1D $ listArray (1,2)
-          [(CellProps (Position 0.0) (Position 1.0) (bc1D Refl) (bc1D Transp)),
-           (CellProps (Position 1.0) (Position 2.0) (bc1D Transp) (bc1D Refl))]
+          [CellProps (Position 0.0) (Position 1.0) (bc1D Refl) (bc1D Transp),
+           CellProps (Position 1.0) (Position 2.0) (bc1D Transp) (bc1D Refl)]
 
 
 -- version

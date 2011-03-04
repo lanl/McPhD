@@ -11,9 +11,9 @@ module SoftEquiv where
  - evaluate True. If the value is zero, evaluate whether the reference is
  - less than the tolerance. -}
 softEquiv :: (Num a, Ord a) => a -> a -> a -> Bool
-softEquiv val ref tol | val == 0       = abs(ref) < tol
+softEquiv val ref tol | val == 0       = abs ref < tol
                       -- | abs(val) < tol = abs(ref) < tol
-                      | otherwise      = abs(val - ref) < tol * abs(val)
+                      | otherwise      = abs(val - ref) < tol * abs val
 
 
 -- version

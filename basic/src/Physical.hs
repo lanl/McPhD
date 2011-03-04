@@ -39,7 +39,7 @@ newtype Temperature = Temperature { temp :: FP }    deriving (Eq,Show,Num)
 dOnRay ::  (VecT -> FP) -> Position -> Direction -> FP
 dOnRay comp p o | ocomp /= 0.0 = pcomp/ocomp
                 | otherwise = huge
-                where ocomp = (comp.dir $ o); pcomp = (comp.pos $ p)
+                where ocomp = comp.dir $ o; pcomp = comp.pos $ p
 
 -- version
 -- $Id$

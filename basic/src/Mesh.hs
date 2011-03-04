@@ -52,23 +52,23 @@ distToBdy msh cell psn drn =
       Sphere1D {} -> Sphere1D.distToBdy r omega rhi rlo
           where r     = v1x (pos psn)
                 omega = v1x (dir drn)
-                rhi   = xcomp (pos $ high_b ((mesh msh) ! cell))
-                rlo   = xcomp (pos $ low_b  ((mesh msh) ! cell))
+                rhi   = xcomp (pos $ highB (mesh msh ! cell))
+                rlo   = xcomp (pos $ lowB  (mesh msh ! cell))
       Cart3D {} -> Cart3D.distToBdy x o bl bh
       Cart1D {} -> Cart1D.distToBdy x o bl bh
       where x  = psn
             o  = drn
-            bl = high_b ((mesh msh) ! cell)
-            bh = low_b  ((mesh msh) ! cell)
+            bl = highB (mesh msh ! cell)
+            bh = lowB  (mesh msh ! cell)
 
 -- | look up type of boundary from mesh 
 bdyType :: Mesh -> CellIdx -> Face -> BoundaryCondition
-bdyType msh cell XLow  = xbc $ low_bc  ((mesh msh) ! cell)
-bdyType msh cell XHigh = xbc $ high_bc ((mesh msh) ! cell)
-bdyType msh cell YLow  = ybc $ low_bc  ((mesh msh) ! cell)
-bdyType msh cell YHigh = ybc $ high_bc ((mesh msh) ! cell)
-bdyType msh cell ZLow  = zbc $ low_bc  ((mesh msh) ! cell)
-bdyType msh cell ZHigh = zbc $ high_bc ((mesh msh) ! cell)
+bdyType msh cell XLow  = xbc $ lowBC  (mesh msh ! cell)
+bdyType msh cell XHigh = xbc $ highBC (mesh msh ! cell)
+bdyType msh cell YLow  = ybc $ lowBC  (mesh msh ! cell)
+bdyType msh cell YHigh = ybc $ highBC (mesh msh ! cell)
+bdyType msh cell ZLow  = zbc $ lowBC  (mesh msh ! cell)
+bdyType msh cell ZHigh = zbc $ highBC (mesh msh ! cell)
 
 -- | Given a boundary condition, return the corresponding event ctor
 bdyTypeToEvent :: BoundaryCondition -> (FP->Face->Event)
@@ -80,8 +80,8 @@ bdyTypeToEvent None = error "Cannot associate null boundary with an event"
 -- instance, handy for testing. 
 simpleMesh :: Mesh
 simpleMesh = Sphere1D $ listArray (1,2)
-             [(CellProps (Position 0.0) (Position 1.0) (bc1D Vac) (bc1D Transp)),
-              (CellProps (Position 1.0) (Position 2.0) (bc1D Transp) (bc1D Vac))]
+             [CellProps (Position 0.0) (Position 1.0) (bc1D Vac) (bc1D Transp),
+              CellProps (Position 1.0) (Position 2.0) (bc1D Transp) (bc1D Vac)]
 
                                      
 -- version
