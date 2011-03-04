@@ -72,7 +72,6 @@ class Event e where
   is_final :: e -> Bool
 
 
-
 -- * Tallies
 
 -- | Tallies are collections of contributions into a global total.
