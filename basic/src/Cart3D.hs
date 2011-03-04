@@ -12,9 +12,9 @@ module Cart3D (sampPos
 import Physical
 import Cell 
 import MeshBase
-import Data.Function
-import Data.List
- 
+-- import Data.Function
+import Data.List (minimumBy)
+import Data.Ord (comparing)
 sampDir :: FP -> FP -> FP -> Direction
 sampDir = undefined
 
@@ -44,7 +44,7 @@ distToBdy psn drn b_low b_high =
     in closestFace (filter (\(a,_) -> a>=0) dnfs)
 
 closestFace :: [(FP,Face)] -> (FP,Face)
-closestFace = minimumBy (compare `on` fst)
+closestFace = minimumBy (comparing fst)
 
 
 -- version
