@@ -30,20 +30,20 @@ runManyP msh mat ntot = let
 runManyP2 :: Mesh -> Material -> Word32 -> Tally
 runManyP2 msh mat n = fst $ foldr history (emptyTally,prand) [1..n]
      where history i (cumTally,rng) = (merge cumTally newTally,rng')
-               where (!p,!rng') = genAParticle i msh rng
+               where (!p,!rng') = genParticle i msh rng
                      !newTally = runParticle msh mat p
 
 runManyP3 :: Mesh -> Material -> Word32 -> Tally
 runManyP3 msh mat n = fst $ foldl history (emptyTally,prand) [1..n]
      where history (cumTally,rng) i = (merge cumTally newTally,rng')
-               where (p,rng') = genAParticle i msh rng
+               where (p,rng') = genParticle i msh rng
                      newTally = runParticle msh mat p
 
 runManyP4 :: Mesh -> Material -> RNG -> Word32 -> Tally
 runManyP4 msh mat rng 0 = emptyTally
 runManyP4 msh mat rng n = 
     merge newTally $ runManyP4 msh mat rng' (n-1)
-    where (p,rng') = genAParticle n msh rng
+    where (p,rng') = genParticle n msh rng
           newTally = runParticle msh mat p
 
 -- previous chump wasn't tail recursive...sweet!! ~10x --strictness hurts here
@@ -51,7 +51,7 @@ runManyP4 msh mat rng n =
 runManyP5 :: Mesh -> Material -> RNG -> Tally -> Word32 -> Tally
 runManyP5 msh mat rng t 0 = t
 runManyP5 msh mat rng t n = 
-    let (p,rng') = genAParticle n msh rng
+    let (p,rng') = genParticle n msh rng
         newTally = runParticle msh mat p
         t' = merge newTally t
     in runManyP5 msh mat rng' t' (n-1)
@@ -59,7 +59,7 @@ runManyP5 msh mat rng t n =
 runManyP6 :: Mesh -> Material -> Word32 -> Tally
 runManyP6 msh mat n = fst $ foldl' history (emptyTally,prand) [1..n]
      where history (cumTally,rng) i = (merge cumTally newTally,rng')
-               where (p,rng') = genAParticle i msh rng
+               where (p,rng') = genParticle i msh rng
                      newTally = runParticle msh mat p
 
 -- mshType = Cart1D
