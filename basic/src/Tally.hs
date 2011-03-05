@@ -3,6 +3,8 @@
 -- Feb 03, 2011
 -- (c) Copyright 2011 LANSLLC, all rights reserved
 
+{-# LANGUAGE BangPatterns #-}
+
 module Tally (tally
              ,tally_
              ,Tally
@@ -31,7 +33,7 @@ data EventCount = EventCount { nScatter  :: !Int
                              , nReflect  :: !Int
                              , nEscape   :: !Int
                              , nCensus   :: !Int
-                             } deriving (Show,Eq)
+                             } deriving (Eq)
 
 tally :: Tally -> [(Event,Particle)] -> Tally
 tally = foldr tallyImpl 
@@ -53,16 +55,18 @@ plusME :: (Momentum,EnergyWeight) -> (Momentum,EnergyWeight) -> (Momentum,Energy
 plusME (dp1,e1) (dp2,e2) = (dp1+dp2,e1+e2) 
 
 countEvent :: Event -> EventCount -> EventCount
-countEvent Scatter {}  ctr = ctr { nScatter  = 1 + nScatter  ctr}
-countEvent Absorb {}   ctr = ctr { nAbsorb   = 1 + nAbsorb   ctr}
+countEvent Scatter  {} ctr = ctr { nScatter  = 1 + nScatter  ctr}
+countEvent Absorb   {} ctr = ctr { nAbsorb   = 1 + nAbsorb   ctr}
 countEvent Transmit {} ctr = ctr { nTransmit = 1 + nTransmit ctr}
-countEvent Escape {}   ctr = ctr { nEscape   = 1 + nEscape   ctr}
-countEvent Reflect {}  ctr = ctr { nReflect  = 1 + nReflect  ctr}
-countEvent Census {}   ctr = ctr { nCensus   = 1 + nCensus   ctr}
+countEvent Escape   {} ctr = ctr { nEscape   = 1 + nEscape   ctr}
+countEvent Reflect  {} ctr = ctr { nReflect  = 1 + nReflect  ctr}
+countEvent Census   {} ctr = ctr { nCensus   = 1 + nCensus   ctr}
 
 merge :: Tally -> Tally -> Tally
-merge t1 t2 = Tally {globalEvts = addEventCounts (globalEvts t1) (globalEvts t2)
-                    ,deposition = Map.unionWith plusME (deposition t1) (deposition t2)}
+merge t1 t2 =
+    let newEC = addEventCounts (globalEvts t1) (globalEvts t2)
+        newDep = Map.unionWith plusME (deposition t1) (deposition t2)
+    in Tally {globalEvts = newEC,deposition = newDep}
 
 emptyTally :: Tally
 emptyTally     = Tally emptyEvtCount emptyPhysTally
@@ -80,6 +84,15 @@ addEventCounts c1 c2 = EventCount {nScatter = nScatter c1 + nScatter c2
                                   ,nReflect = nReflect c1 + nReflect c2
                                   ,nEscape = nEscape c1 + nEscape c2
                                   ,nCensus = nCensus c1 + nCensus c2 }
+
+instance Show EventCount where
+  show e = "Event Count"++
+           "\n# scat:  " ++ (show $ nScatter e) ++
+           "\n# abs:   " ++ (show $ nAbsorb e) ++
+           "\n# trans: " ++ (show $ nTransmit e) ++
+           "\n# esc:   " ++ (show $ nEscape e) ++
+           "\n# refl:  " ++ (show $ nReflect e) ++
+           "\n# cen:   " ++ (show $ nCensus e)
 
 -- version
 -- $Id$
