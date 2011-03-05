@@ -12,13 +12,11 @@ import RandomValues
 -- Its dependencies
 import Space3DCartesian
 import Data.Vector.Class
+import Approx
 
-approx :: Double -> Double -> Bool
-approx a b = abs (a-b) < epsilon where
-  epsilon = 1e-8
-
+-- | Property: randomDirection_compute returns normalized direction vectors.
 prop_UnitLength :: Double -> Double -> Bool
-prop_UnitLength a b = let v = randomDirection_compute a b in approx (vmag (dir v)) 1.0
+prop_UnitLength a b = let v = randomDirection_compute a b in (vmag (dir v)) ~== 1.0
 
 
 
