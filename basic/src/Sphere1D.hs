@@ -28,9 +28,9 @@ sampPos msh x1 x2 x3 = (pos,cell)
           cell = findCell msh r
           r    = pickPt (rmax msh) x1 x2 x3
 
--- | Sample a distribution with PDF r^2 dr cf. Kalos & Whitlock, Monte Carlo Methods
--- Vol. 1, section 3.4.2; ISBN 0-471-89839-2. Also, prefactor? 
--- Input: radius and three uniform random deviates on [0,1]
+-- | Sample a distribution with PDF r^2 dr cf. Kalos & Whitlock, Monte Carlo 
+-- Methods, Vol. 1, section 3.4.2; ISBN 0-471-89839-2.  
+-- Input: radius and three uniform random deviates on [0,1)
 -- returns radial coordinate of a point in sphere of radius r. 
 pickPt :: FP ->              -- radius
           FP -> FP -> FP ->  -- three random [0,1]
