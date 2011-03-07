@@ -3,7 +3,6 @@ module Particle.Test.Arbitrary where
 
 import Test.QuickCheck
 
-import Particle.RandomParticle
 import Mesh.SimpleCartesian
 import Space3DCartesian
 import RandomValues
@@ -41,11 +40,3 @@ instance Arbitrary Speed where
 
 -- instance Arbitrary Opacity where
 --   arbitrary = Opacity <$> abs <$> arbitrary
-
-instance Arbitrary RandomParticle where
-  arbitrary = createParticle
-              <$> arbitrary
-              <*> arbitrary
-              <*> arbitrary
-              <*> arbitrary
-              <*> arbitrary
