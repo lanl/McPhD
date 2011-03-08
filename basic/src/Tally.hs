@@ -27,6 +27,9 @@ data Tally = Tally { globalEvts  :: EventCount
 
 type PhysicsTally   = Map.Map CellIdx (Momentum,EnergyWeight)
 
+-- trying to find a way to make PhysicsTally strict 
+-- newtype PhysicsTally   = PTally {physTally :: Map.Map CellIdx (Momentum,EnergyWeight)} deriving (Show)
+
 data EventCount = EventCount { nScatter  :: !Int 
                              , nAbsorb   :: !Int
                              , nTransmit :: !Int
@@ -64,8 +67,8 @@ countEvent Census   {} ctr = ctr { nCensus   = 1 + nCensus   ctr}
 
 merge :: Tally -> Tally -> Tally
 merge t1 t2 =
-    let newEC = addEventCounts (globalEvts t1) (globalEvts t2)
-        newDep = Map.unionWith plusME (deposition t1) (deposition t2)
+    let !newEC = addEventCounts (globalEvts t1) (globalEvts t2)
+        !newDep = Map.unionWith plusME (deposition t1) (deposition t2)
     in Tally {globalEvts = newEC,deposition = newDep}
 
 emptyTally :: Tally
