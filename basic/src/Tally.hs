@@ -21,8 +21,9 @@ import Numerical
 import Physical
 import Particle
 import Event (Event(..))
+import Control.DeepSeq
 
-data Tally = Tally { globalEvts  :: EventCount 
+data Tally = Tally { globalEvts  :: !EventCount 
                    , deposition  :: PhysicsTally} deriving Show
 
 type PhysicsTally   = Map.Map CellIdx (Momentum,EnergyWeight)
@@ -67,9 +68,9 @@ countEvent Census   {} ctr = ctr { nCensus   = 1 + nCensus   ctr}
 
 merge :: Tally -> Tally -> Tally
 merge t1 t2 =
-    let !newEC = addEventCounts (globalEvts t1) (globalEvts t2)
-        !newDep = Map.unionWith plusME (deposition t1) (deposition t2)
-    in Tally {globalEvts = newEC,deposition = newDep}
+    let newEC  = addEventCounts (globalEvts t1) (globalEvts t2)
+        newDep = Map.unionWith plusME (deposition t1) (deposition t2)
+    in newDep `deepseq` Tally {globalEvts = newEC,deposition = newDep}
 
 emptyTally :: Tally
 emptyTally     = Tally emptyEvtCount emptyPhysTally

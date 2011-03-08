@@ -19,17 +19,19 @@ module Physical (Position(..)
                 , module Numerical
                 , module Constants)
     where
-      
+
+import Control.DeepSeq
+
 import Numerical
 import Constants
 
 newtype Position     = Position     { pos :: VecT } deriving (Eq, Show,Num)
 newtype Direction    = Direction    { dir :: VecT } deriving (Eq, Show,Num)
-newtype Momentum     = Momentum     { mom :: VecT } deriving (Eq, Show,Num)
+newtype Momentum     = Momentum     { mom :: VecT } deriving (Eq, Show,Num,NFData)
 newtype Velocity     = Velocity     { vel :: VecT } deriving (Eq, Show,Num)
 newtype Energy       = Energy       { e :: FP }     deriving (Eq,Show,Num)
 newtype Time         = Time         { t :: FP }     deriving (Eq, Show,Num)
-newtype EnergyWeight = EnergyWeight {ew :: FP }     deriving (Eq, Show,Num)
+newtype EnergyWeight = EnergyWeight {ew :: FP }     deriving (Eq, Show,Num,NFData)
 
 -- | opacity, derived (perhaps) from density * cross-section [cm^-1]
 newtype Opacity = Opacity { sigma :: FP }           deriving (Eq,Show,Num)

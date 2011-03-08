@@ -1,4 +1,5 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-} -- allow newtype to derive Num
+{-# LANGUAGE StandaloneDeriving #-}
 -- Numerical.hs
 -- T. M. Kelley
 -- Jan 28, 2011
@@ -16,6 +17,7 @@ module Numerical (FP
                  , module Data.Array)
     where
 
+import Control.DeepSeq
 import Data.Vector.Class (vmag,(*|))
 import Data.Word 
 import Data.Array (Ix,(!),listArray,Array)
@@ -23,6 +25,8 @@ import Data.Array (Ix,(!),listArray,Array)
 -- should have some way of more easily (and consistently) switching between 1D 
 -- and 3D. 
 import Data.Vector.V1
+
+deriving instance NFData Vector1
 
 type VecT = Vector1
 xcomp,ycomp,zcomp :: VecT -> FP
@@ -42,7 +46,7 @@ type FP   = Double
 type Idx  = Word32
 type Tag  = Word32 -- used for tagging things uniquely within their type
 
-newtype CellIdx = CellIdx {idx :: Idx } deriving (Eq,Show,Num,Ord,Ix,Integral,Real,Enum)
+newtype CellIdx = CellIdx {idx :: Idx } deriving (Eq,Show,Num,Ord,Ix,Integral,Real,Enum,NFData)
 
 -- version
 -- $Id$

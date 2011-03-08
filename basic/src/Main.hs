@@ -16,8 +16,8 @@ import Data.List (foldl')
 main :: IO ()
 main = do
   n <- parseCL
-  -- let tally = runManyP infMesh simpleMat n
-  let tally = runManyP2 infMesh simpleMat n
+  let tally = runManyP infMesh simpleMat n
+  -- let tally = runManyP2 infMesh simpleMat n
   -- let tally = runManyP5 infMesh simpleMat prand emptyTally n
   -- let tally = runManyP6 infMesh simpleMat n
   writeTally "tally1" tally
@@ -27,7 +27,7 @@ runManyP :: Mesh -> Material -> Word32 -> Tally
 runManyP msh mat ntot = let 
   ps = genParticles ntot msh prand
   tallies = map (runParticle msh mat) ps
-  in foldr merge emptyTally tallies
+  in foldl' merge emptyTally tallies
 
 -- one at a time
 runManyP2 :: Mesh -> Material -> Word32 -> Tally
@@ -59,7 +59,7 @@ runManyP5 msh mat rng t n =
 
 runManyP6 :: Mesh -> Material -> Word32 -> Tally
 runManyP6 msh mat n = fst $ foldl' history (emptyTally,prand) [1..n]
-     where history (cumTally,rng) i = (merge cumTally newTally,rng')
+     where history (!cumTally,!rng) i = (merge cumTally newTally,rng')
                where (p,rng') = genParticle i msh rng
                      newTally = runParticle msh mat p
 

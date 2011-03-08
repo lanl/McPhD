@@ -34,6 +34,7 @@ Library
        , array == 0.3.*
        , mersenne-random-pure64 == 0.2.*
        , containers
+       , deepseq
    exposed-modules: MC 
    other-modules:
 
