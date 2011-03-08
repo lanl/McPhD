@@ -13,16 +13,45 @@ import Test.QuickCheck
 import Particle.BasicParticle
 
 -- Its dependencies
-import Space3DCartesian
-import RandomValues
+import Particle.Test.Arbitrary
+import Particle.Classes
+import Space3DCartesian as Space
 import Approx
-import NumUnit
-import System.Random.Mersenne.Pure64
+
 import Data.Vector.V3
 import Control.Applicative
 
-import Stream
-import Tallies
 
+-- * Testing environment
+-- | Environment:
+test_environment = Space.Time 1.0
 
-tests = []
+-- | Uniform particle origin:
+origin = Space.Position ( Vector3 0.0 0.0 0.0 )
+
+-- | Arbitrary BasicParticles
+instance Arbitrary BasicParticle where
+  arbitrary = createParticle
+              <$> arbitrary
+              <*> arbitrary
+              <*> arbitrary
+              <*> arbitrary
+              <*> arbitrary
+
+-- | Property: Particle clock should == 1.0 after one step.
+prop_ParticleTime :: BasicParticle -> Bool
+prop_ParticleTime p =
+  let (_, p') = step test_environment p
+  in bpTime p' ~== Space.Time 1.0
+
+-- | Property: Distance traveled from orgin should be correct wrt speed & time.
+prop_Distance :: BasicParticle -> Bool
+prop_Distance p = undefined
+
+tests =
+  [
+    testGroup "Step Operations"
+    [
+      testProperty "Correct final time" prop_ParticleTime
+    ]
+  ]

@@ -98,6 +98,16 @@ instance Event BasicEvent where
   is_final _ = True  -- ^ Only event is final.
 
 
+-- | Compute the distance to and result of the event:
+toBasicEvent :: Space.Time
+                -> BasicParticle
+                -> (Space.Distance, (Space.Position, BasicParticle) )
+toBasicEvent envtime particle = (distance, (event, particle'))
+  where time_left = envtime - time particle
+        particle' = advanceTime particle time_left
+        distance  = Space.distanceToTime time_left ( speed particle )
+        event     = position particle'
+
 
 
 -- * Tallies
@@ -113,7 +123,7 @@ data GPTally = GPTally
                }
 
 instance Tally GPTally where
-    type TallyPart GPTally = Space.Position
+    type TallyEvent GPTally = Space.Position
     empty = GPTally{positionSum=Space.Position(Vector3 0 0 0), count=0}
     combine pos gp = GPTally sum' count'
         where sum'   = positionSum gp + pos

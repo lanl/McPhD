@@ -2,6 +2,7 @@
 
 module Stream where
 
+import Particle.Classes
 import Data.List
 
 -- Make a plain step function from context and the get environment

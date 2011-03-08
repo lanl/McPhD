@@ -12,6 +12,7 @@ import RandomStreaming
 
 -- Its dependencies
 import Particle.RandomParticle
+import Particle.Test.ArbitraryParticles
 import Particle.Test.Arbitrary ()
 import Mesh.SimpleCartesian
 import Space3DCartesian
@@ -72,7 +73,7 @@ finalParticle = InFlight {
                          v3z = -0.18021864859351883
                        }
              , rpSpeed = Speed { speed = 1.0 }
-             , rpTime = Time {time = 1.0}
+             , rpTime = Time {getTime = 1.0}
              , rpRand = rand
   }
 

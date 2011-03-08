@@ -60,9 +60,9 @@ instance VectorType Direction where
   vector = dir
 
 -- | Time, elapsed time from beginning of streaming
-newtype Time = Time { time :: Double } deriving (Eq, Show, Num, Ord, Approx)
+newtype Time = Time { getTime :: Double } deriving (Eq, Show, Num, Ord, Approx)
 instance ScalarType Time where
-  scalar = time
+  scalar = getTime
 
 -- | A scalar representing the magnitude of velocity.
 newtype Speed = Speed { speed :: Double } deriving (Eq, Show, Num, Ord, Approx)

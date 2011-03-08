@@ -58,14 +58,21 @@ On each step:
 
 Need a way of labeling limiters aside from the constructors in the Limiter type.
 
+Something like a pre-event and actual event. Or I could compute the
+_outcome_ of each event as well, and so the Event data would contain
+everything it needed. E.g. momentum deposition.
+
+Pair each event when computed with it's distance. Then choose the
+winning (shortest) distance and put it's event on the list.
+
 There's a pair of functions here for each limiter:
 
-  distance_to_limiter :: Context -> Particle -> Distance
-  apply_limiter       :: Context -> Particle -> (Limiter, Particle)
+  distance_to_limiter :: Environment -> Particle -> Distance
+  apply_limiter       :: Environment -> Particle -> (Limiter, Particle)
 
-What is the context? Opacity, at least. Make it a parameter?
+What is the environment? Opacity, at least. Make it a parameter?
 
-Is there a context for stepping? If I want scatter to be an event
+Is there a environment for stepping? If I want scatter to be an event
 which applies to random particle, then I need the opacity to compute the distance.
 
 I need opacity to compute distance to scatter, but not to apply
@@ -81,12 +88,12 @@ it. This is mixing up my seperation between RandomParticle and MeshedParticle.
 
 So what are the right levels to compose algorithms?
 
-| Simulates                | Context   | Particle Data             | Events                 |
-|--------------------------+-----------+---------------------------+------------------------|
-| Motion in Space          | Space     | Position, Direction, etc. | None?                  |
-| Motion in Time           | Time Step | Clock                     | Termination            |
-| Scattering, Absorption   | Opacity   | RandomState               | Scattering, Absorption |
-| Motion in Discrete Space | Mesh      | Cell Index                | Face crossing, Esacpe. |
+| Simulates                | Environment | Particle Data             | Events                 |
+|--------------------------+-------------+---------------------------+------------------------|
+| Motion in Space          | Space       | Position, Direction, etc. | None?                  |
+| Motion in Time           | Time Step   | Clock                     | Termination            |
+| Scattering, Absorption   | Opacity     | RandomState               | Scattering, Absorption |
+| Motion in Discrete Space | Mesh        | Cell Index                | Face crossing, Esacpe. |
 
 
 What would I like the resulting code to look like?

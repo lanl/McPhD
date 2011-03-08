@@ -14,6 +14,7 @@ import Particle.RandomParticle
 -- Its dependencies
 import Space3DCartesian
 import RandomValues
+import Particle.Test.ArbitraryParticles
 import Approx
 import NumUnit
 import System.Random.Mersenne.Pure64
@@ -28,5 +29,5 @@ origin = Position (Vector3 0 0 0)
 rand :: PureMT
 rand = pureMT $ fromIntegral (0::Integer)
 
-tests = [ ]
 
+tests = [ ]
