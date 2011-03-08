@@ -16,9 +16,12 @@ import Data.List (foldl')
 main :: IO ()
 main = do
   n <- parseCL
-  let tally = runManyP5 infMesh simpleMat prand emptyTally n
+  -- let tally = runManyP infMesh simpleMat n
+  let tally = runManyP2 infMesh simpleMat n
+  -- let tally = runManyP5 infMesh simpleMat prand emptyTally n
   -- let tally = runManyP6 infMesh simpleMat n
   writeTally "tally1" tally
+
 
 runManyP :: Mesh -> Material -> Word32 -> Tally
 runManyP msh mat ntot = let 
@@ -26,12 +29,12 @@ runManyP msh mat ntot = let
   tallies = map (runParticle msh mat) ps
   in foldr merge emptyTally tallies
 
--- one at a time, please 
+-- one at a time
 runManyP2 :: Mesh -> Material -> Word32 -> Tally
 runManyP2 msh mat n = fst $ foldr history (emptyTally,prand) [1..n]
      where history i (cumTally,rng) = (merge cumTally newTally,rng')
-               where (!p,!rng') = genParticle i msh rng
-                     !newTally = runParticle msh mat p
+               where (p,rng') = genParticle i msh rng
+                     newTally = runParticle msh mat p
 
 runManyP3 :: Mesh -> Material -> Word32 -> Tally
 runManyP3 msh mat n = fst $ foldl history (emptyTally,prand) [1..n]
@@ -46,14 +49,12 @@ runManyP4 msh mat rng n =
     where (p,rng') = genParticle n msh rng
           newTally = runParticle msh mat p
 
--- previous chump wasn't tail recursive...sweet!! ~10x --strictness hurts here
--- But wasn't runManyP3 tail recursive? foldl'?
 runManyP5 :: Mesh -> Material -> RNG -> Tally -> Word32 -> Tally
 runManyP5 msh mat rng t 0 = t
 runManyP5 msh mat rng t n = 
-    let (p,rng') = genParticle n msh rng
-        newTally = runParticle msh mat p
-        t' = merge newTally t
+    let (!p,!rng') = genParticle n msh rng
+        !newTally = runParticle msh mat p
+        !t' = merge newTally t
     in runManyP5 msh mat rng' t' (n-1)
 
 runManyP6 :: Mesh -> Material -> Word32 -> Tally
