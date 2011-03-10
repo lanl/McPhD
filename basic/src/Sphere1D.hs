@@ -109,6 +109,15 @@ distToBdy r omega rhi rlow =
           onePTSq = 1 + tsq
           oneOverOnePTSq = 1/onePTSq
 
+newCoord :: Position -> Direction -> FP -> (Position,Direction)
+newCoord r o d = (Position . Vector1 $ r', Direction . Vector1 $ o')
+  where r' = sqrt (x*x + y*y)
+        o' = cos (theta - asin (d/r'*s))
+        theta = acos . xcomp . dir $ o
+        s = sin theta 
+        x = (xcomp . pos) r + d * (xcomp . dir) o
+        y = d * s
+
 -- maximum value of r
 rmax :: Mesh -> FP
 rmax msh = xcomp . pos. highB $ arr ! bmax
