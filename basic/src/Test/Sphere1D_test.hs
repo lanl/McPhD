@@ -38,13 +38,20 @@ prop_SurfaceCross :: Positive FP -> Positive FP -> Positive FP -> Unit -> Bool
 prop_SurfaceCross (Positive r1) (Positive r2) (Positive r3) (Unit phi_interp) =
   let rmin : r : [rmax] = sort [r1, r2, r3]
       phi   = 2*pi*phi_interp -- Angle of particle motion, measured from positive r.
-      eta   = abs $ sin phi
       omega = cos phi
-      (_, face) = distToBdy r omega rmin rmax
-  in test face r rmin eta omega where
-    test XLow  r rmin eta omega = (eta <  r/rmin) && (omega <  0)
-    test XHigh r rmin eta omega = (eta >= r/rmin) || (omega >= 0)
-    test _ _ _ _ _  = False
+      (_, face)  = distToBdy r omega rmax rmin
+      innerCross = crossSphere rmin r phi
+  in test face innerCross where
+    test XLow  True  = True
+    test XHigh False = True
+    test _ _  = False
+
+
+crossSphere :: FP -> FP -> FP -> Bool
+crossSphere rmin r phi = 
+  let eta   = abs $ sin phi
+      omega = cos phi
+  in (r * eta < rmin) && (omega < 0)
 
 
 
