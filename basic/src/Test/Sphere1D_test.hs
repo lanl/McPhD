@@ -36,7 +36,7 @@ prop_SamplesInCell a b c =
 -- Property: Particle crosses inner surface when sin(phi) < -r_i / r and cos(phi) < 0.
 prop_SurfaceCross :: Positive FP -> Positive FP -> Positive FP -> Unit -> Bool
 prop_SurfaceCross (Positive r1) (Positive r2) (Positive r3) (Unit phi_interp) =
-  let rmin : r : [rmax] = sort [r1, r2, r3]
+  let [rmin, r, rmax] = sort [r1, r2, r3]
       phi   = 2*pi*phi_interp -- Angle of particle motion, measured from positive r.
       omega = cos phi
       (_, face)  = distToBdy r omega rmax rmin
