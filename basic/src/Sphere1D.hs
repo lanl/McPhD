@@ -9,7 +9,8 @@ module Sphere1D (sampDir
                 ,distToBdy
                 ,pickPt
                 ,findCell
-                ,infMesh)
+                ,infMesh
+                ,contactInner)
     where
 
 import SoftEquiv
@@ -92,13 +93,6 @@ distToBdy r omega rhi rlow =
           det rs = sqrt(rs*rs * onePTSq - r * r * tsq) * oneOverOnePTSq
           dethi = det rhi
           detlo = det rlow
-          -- will the ray contact the inner sphere? 
-          contactInner :: FP -> FP -> FP -> Bool -> Bool
-          contactInner r rlow tanTheta thetaLTpiOver2 = rlow > 0 
-                  && not (softEquiv b 1.0 1e-11)  -- not _on_ the inner sphere
-                  && (tanTheta <= tanThetaLim && thetaLTpiOver2) -- moving toward inner
-                  where b = r/rlow
-                        tanThetaLim = sqrt(1/(b*b-1))
           theta = acos omega
           thetaLTpiOver2 = theta < pi/2
           t = if thetaLTpiOver2    -- work with the polar angle mapped into [0,pi/2]
@@ -108,6 +102,17 @@ distToBdy r omega rhi rlow =
           tsq = t * t
           onePTSq = 1 + tsq
           oneOverOnePTSq = 1/onePTSq
+
+-- will the ray contact the inner sphere? 
+contactInner :: FP -> FP -> FP -> Bool -> Bool
+contactInner r rlow tanTheta thetaLTpiOver2 = 
+    not thetaLTpiOver2          &&  -- moving toward inner
+    rlow > 0                    &&
+    not (softEquiv b 1.0 1e-11) &&  -- not _on_ the inner sphere
+    (tanTheta <= tanThetaLim )      -- sufficiently low angle
+        where b = r/rlow
+              tanThetaLim = sqrt(1/(b*b-1))
+
 
 newCoord :: Position -> Direction -> FP -> (Position,Direction)
 newCoord r o d = (Position . Vector1 $ r', Direction . Vector1 $ o')
