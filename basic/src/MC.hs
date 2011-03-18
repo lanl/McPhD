@@ -3,7 +3,7 @@
 -- Dec 06, 2010
 -- Copyright (c) 2010 LANSLLC all rights reserved.
 
-module MC (runParticle)
+module MC (runParticle, pickEvent)
     where
 
 import Physical

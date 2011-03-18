@@ -1,3 +1,58 @@
 module Test.MC_test where
 
+-- Testing libraries
+import Test.Framework (testGroup)
+import Test.Framework.Providers.HUnit
+import Test.Framework.Providers.QuickCheck2 (testProperty)
+import Test.HUnit
+import Test.QuickCheck
+import Test.TestingTools
+
+-- The library under test
+import MC
+
+-- It's dependencies
+import Mesh
+import Particle
+import Numerical
+import Physical
+import Material
+import Event
+import PRNG
+
+getEvent :: Mesh -> Material -> Particle -> Unit -> Unit -> Direction -> Event
+getEvent mesh matl p (Unit s1) (Unit s2) direction = pickEvent p s1 s2 direction matl mesh
+ 
+meshSize :: (CellIdx, CellIdx)
+meshSize = (1,2)
+
+mshType  = Sphere1D
+testMesh :: Mesh
+testMesh = mshType $ listArray meshSize
+           [
+            CellProps  (Position 0.0) (Position 1.0) (bc1D Refl) (bc1D Transp)
+           , CellProps (Position 1.0) (Position 2.0) (bc1D Transp) (bc1D Refl)
+           ]
+
+
 -- | In a test problem without scattering, all events should be face crossings
+noScatteringMaterial = Material $ listArray meshSize $ repeat (MatState (Opacity 0.0) (Opacity 0.0) (Velocity 0.0) (Temperature 1.0))
+  
+propFunction :: Mesh -> Material -> RNG -> Tag -> Unit -> Unit -> Bool
+propFunction mesh matl rng tag u1 u2 = 
+  let particle = sampleParticle mesh rng tag
+      event    = getEvent mesh matl particle u1 u2 (pDir particle) 
+  in case event of
+       Escape   _ _ -> True
+       Reflect  _ _ -> True
+       Transmit _ _ -> True
+       _            -> False
+
+prop_AllSurfaceCrossings = propFunction testMesh noScatteringMaterial
+
+
+tests = [ testGroup "Events"
+          [ 
+           testProperty "No scattering or census -> All crossings" prop_AllSurfaceCrossings
+          ]
+        ]

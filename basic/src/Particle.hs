@@ -21,6 +21,7 @@ data Particle = Particle {
   , pRNG    :: RNG
   , pTag    :: Tag
   } deriving (Show)
+             
 
 
 -- version
