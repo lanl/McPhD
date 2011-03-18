@@ -18,18 +18,18 @@ import Data.List (minimumBy)
 import Data.Ord (comparing)
 
 runParticle :: Mesh -> Material -> Particle -> Tally
-runParticle mesh mat p = tally_ $ push p mesh mat 
+runParticle mesh matl p = tally_ $ push p mesh matl
 
 {- Use a particle (and its RNG), a mesh, and a material to
  - generate a list of (Event, Particle) pairs. -}
 push :: Particle -> Mesh -> Material -> [(Event,Particle)]
-push p msh mat =  
+push p msh matl =  
   let (sel_s,sel_a,ds1,ds2,ds3,rng') = getFiveRNs $ pRNG p
       omega' = sampleDirection msh ds1 ds2 ds3
-      evt    = pickEvent p sel_s sel_a omega' mat msh
+      evt    = pickEvent p sel_s sel_a omega' matl msh
       p'     = stream p evt msh omega' rng' in
   if isContinuing evt
-    then (evt,p'): push p' msh mat
+    then (evt,p'): push p' msh matl
     else [(evt,p')]
 
 -- Pick event for a particle. Provide particle, two uniform random deviates
