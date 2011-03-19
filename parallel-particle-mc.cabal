@@ -42,8 +42,6 @@ executable TestSuite
   hs-source-dirs: ./src/ ./src/Test
   ghc-options: -Wall -fwarn-tabs -fno-warn-name-shadowing -fno-warn-orphans
   other-modules:
-    Particle.Test.RandomParticle_test
-    Test.RandomValues_test
     Mesh.Tests
   main-is: TestSuite.hs
   if flag(test)
@@ -60,6 +58,3 @@ executable TestSuite
                    , QuickCheck
   else
     buildable: False
-
-
-

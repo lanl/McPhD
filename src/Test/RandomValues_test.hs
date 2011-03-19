@@ -10,7 +10,7 @@ import Test.Framework.Providers.QuickCheck2 (testProperty)
 import RandomValues
 
 -- Its dependencies
-import Space3DCartesian
+import SpaceTime.Space3DCartesian
 import Data.Vector.Class
 import Approx
 
@@ -21,4 +21,3 @@ prop_UnitLength a b = let v = randomDirection_compute a b in (vmag (dir v)) ~== 
 
 
 tests = [testGroup "Random Directions" [testProperty "unit length" prop_UnitLength] ]
-        

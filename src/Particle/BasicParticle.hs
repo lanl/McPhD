@@ -5,34 +5,17 @@ module Particle.BasicParticle where
 
 import Particle.Classes
 
-import qualified  Space3DCartesian as Space
+import qualified SpaceTime.Space3DCartesian as Space
 import Data.Vector.V3
 import RandomValues
 import Approx
 
 import System.Random.Mersenne.Pure64
 
--- * Context and Environment
-
--- For these particles, the context is the end of the timestep.
-data BContext = BContext
-                {
-                  -- | End of the time step.
-                  basicContextTime :: Space.Time
-                }
-
--- The environment is the same as the context.
-data BEnv = BEnv
-            {
-              -- | End of the time step.
-              basicEnvTime :: Space.Time
-            }
-
-
 
 -- * Particle definition and instance declarations
 
--- | BasicParticle is a RandomParticle moving in space and time.
+-- | BasicParticle is a particle with random state moving in space and time.
 data BasicParticle = BasicParticle
                      {
                        bpPos    :: Space.Position   -- ^ Position in space

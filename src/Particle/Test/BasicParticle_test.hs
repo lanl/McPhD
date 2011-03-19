@@ -15,7 +15,7 @@ import Particle.BasicParticle
 -- Its dependencies
 import Particle.Test.Arbitrary
 import Particle.Classes
-import Space3DCartesian as Space
+import SpaceTime.Space3DCartesian as Space
 import Approx
 
 import Data.Vector.V3

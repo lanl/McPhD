@@ -17,3 +17,8 @@ instance Space Cart3D where
   type Distance  Cart3D = DisT
   stream (Location (PosT pos) (DirT dir)) (DisT dist) =
     Location (PosT $ pos + (dir |* dist)) (DirT dir)
+
+instance SpaceTime Cart3D where
+  type Time  Cart3D = Double
+  type Speed Cart3D = Double
+  timeFromDistance ::

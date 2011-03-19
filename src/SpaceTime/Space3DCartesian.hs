@@ -1,17 +1,18 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 -- Data types for Three-dimensonal space in Cartesian coordinates
 
-module Space3DCartesian(Distance (..)
-                        , Position (..)
-                        , Momentum (..)
-                        , Motion (..), motion
-                        , Direction (), dir, direction, direction_unsafe, (*->), (+->)
-                        , Time (..)
-                        , Speed (..)
-                        , timeToDistance
-                        , distanceToTime
-                        , translate
-                        ) where
+module SpaceTime.Space3DCartesian(
+  Distance (..)
+  , Position (..)
+  , Momentum (..)
+  , Motion (..), motion
+  , Direction (), dir, direction, direction_unsafe, (*->), (+->)
+  , Time (..)
+  , Speed (..)
+  , timeToDistance
+  , distanceToTime
+  , translate
+  ) where
 
 import Data.Vector.V3
 import Data.Vector.Class

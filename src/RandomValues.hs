@@ -2,7 +2,7 @@
 
 module RandomValues where
 
-import Space3DCartesian
+import SpaceTime.Space3DCartesian
 
 import System.Random.Mersenne.Pure64
 import Data.Vector.V3
@@ -15,7 +15,7 @@ makePureMT = pureMT . fromIntegral . toInt
 
 -- | Compute a random direction vector from a two random doubles
 randomDirection_compute :: Double -> Double -> Direction
-randomDirection_compute a b = let 
+randomDirection_compute a b = let
   theta = a * pi
   phi   = b * 2*pi
   x = (sin theta) * (cos phi)
@@ -43,9 +43,9 @@ randomExponential lambda g = let
 
 -- | Get N samples from the given random function and PureMT
 sampleN :: (PureMT -> (a, PureMT)) -> PureMT -> Int -> [a]
-sampleN generator rand n 
+sampleN generator rand n
   | n <= 0 = []
-  | otherwise = 
+  | otherwise =
     let (value, rand') = generator rand
     in value : ( sampleN generator rand' (n-1) )
 

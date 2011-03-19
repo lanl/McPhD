@@ -4,7 +4,7 @@
 -}
 module Particle.Classes where
 
-import qualified Space3DCartesian as Space
+import qualified SpaceTime.Space3DCartesian as Space
 
 -- * Particles
 
