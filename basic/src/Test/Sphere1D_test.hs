@@ -7,6 +7,7 @@ import Test.Framework.Providers.HUnit
 import Test.Framework.Providers.QuickCheck2 (testProperty)
 import Test.HUnit
 import Test.QuickCheck
+import Test.TestingTools
 
 -- The library under test
 import Sphere1D
@@ -17,13 +18,9 @@ import Physical
 import Data.Vector.V1
 import Cell
 
+
 import Data.List
 import Data.Functor
-
--- | A newtype for aribtrary FP values in (0,1)
-newtype Unit = Unit FP deriving (Show)
-instance Arbitrary Unit where
-  arbitrary = Unit <$> choose (0.0, 1.0)
 
 
 -- Property: Positions sampled in a cell are in that cell.
@@ -39,7 +36,7 @@ prop_SurfaceCross (Positive r1) (Positive r2) (Positive r3) (Unit phi_interp) =
   let rmin : r : [rmax] = sort [r1, r2, r3]
       phi   = 2*pi*phi_interp -- Angle of particle motion, measured from positive r.
       omega = cos phi
-      (_, face)  = distToBdy r omega rmax rmin
+      (_, face)  = distToBdy r (negate omega) rmax rmin
       innerCross = crossSphere rmin r phi
   in test face innerCross where
     test XLow  True  = True

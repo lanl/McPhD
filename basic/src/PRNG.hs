@@ -5,6 +5,7 @@
 {-# LANGUAGE BangPatterns #-}
                                                                                 
 module PRNG (RNG
+            ,mkRNG
             ,random
             ,getFiveRNs
             ,getSixRNs
@@ -15,6 +16,9 @@ import System.Random(mkStdGen,StdGen,random,Random)
 import Numerical
 
 type RNG = StdGen
+
+mkRNG :: Int -> RNG
+mkRNG = mkStdGen
 
 getFiveRNs :: RNG -> (FP,FP,FP,FP,FP,RNG)
 getFiveRNs g = let (!r5,!g5) = random g4
