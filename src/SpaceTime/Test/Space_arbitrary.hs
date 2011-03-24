@@ -1,5 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
-module SpaceTime.Test.Cartesian_arbitrary where
+module SpaceTime.Test.Space_arbitrary where
 
 import Test.QuickCheck
 import Control.Applicative
@@ -8,8 +8,12 @@ import Data.Vector.V1
 import Data.Vector.V2
 import Data.Vector.V3
 import SpaceTime.Cartesian
+import SpaceTime.Spherical1D
 
 import Test.Vector_arbitrary
+
+
+{- TODO: Arbitrary direction vectors must be unit vectors! -}
 
 {-- I can make particular Cartesian instances into Arbitrary instances
 --}
@@ -26,5 +30,6 @@ instance Arbitrary (Cartesian Vector3) where
 -- instance (Vector v) => Arbitrary (Cartesian v) where
 --     arbitrary = Cartesian <$> arbitrary <*> arbitrary
 
-
+instance Arbitrary Spherical1D where
+  arbitrary = Spherical1D <$> arbitrary <*> arbitrary
 

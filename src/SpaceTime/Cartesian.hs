@@ -14,6 +14,8 @@ can be expressed in terms of the scalar multiplication and vector
 addition operatons of this vector.
 --}
 
+{-- TODO: Direction should be a unit vector --}
+
 -- A data type for Cartesian spaces over a vector type
 data Cartesian v = Cartesian { position :: v, direction :: v } deriving (Eq, Show)
 
