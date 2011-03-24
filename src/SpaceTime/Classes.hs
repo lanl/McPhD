@@ -2,7 +2,7 @@
 
 module SpaceTime.Classes where
 
-class Space s where
+class (Eq s) => Space s where
   type Distance s :: *
   stream :: s -> Distance s -> s
 
