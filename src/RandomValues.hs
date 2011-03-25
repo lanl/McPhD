@@ -12,16 +12,18 @@ newtype Seed = Seed { toInt :: Integer }
 makePureMT :: Seed -> PureMT
 makePureMT = pureMT . fromIntegral . toInt
 
-
--- | Compute a random direction vector from a two random doubles
-randomDirection_compute :: Double -> Double -> Direction
-randomDirection_compute a b = let
+normalizedVector3_compute :: Double -> Double -> Vector3
+normalizedVector3_compute a b = let
   theta = a * pi
   phi   = b * 2*pi
   x = (sin theta) * (cos phi)
   y = (sin theta) * (sin phi)
   z = (cos theta)
-  in (direction $ Vector3 x y z)
+  in Vector3 x y z  
+
+-- | Compute a random direction vector from a two random doubles
+randomDirection_compute :: Double -> Double -> Direction
+randomDirection_compute a b = direction $ normalizedVector3_compute a b
 
 -- | Compute a random Direction from a PureMT
 randomDirection :: PureMT -> (Direction, PureMT)
