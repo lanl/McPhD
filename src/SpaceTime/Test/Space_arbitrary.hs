@@ -10,7 +10,7 @@ import Data.Vector.V3
 import SpaceTime.Cartesian
 import SpaceTime.Spherical1D
 
-import Test.Vector_arbitrary
+import Test.Numeric_arbitrary
 
 
 {- TODO: Arbitrary direction vectors must be unit vectors! -}

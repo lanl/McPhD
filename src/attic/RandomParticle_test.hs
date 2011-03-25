@@ -16,7 +16,7 @@ import Space3DCartesian
 import RandomValues
 import Particle.Test.ArbitraryParticles
 import Approx
-import NumUnit
+import Mag
 import System.Random.Mersenne.Pure64
 import Data.Vector.V3
 import Control.Applicative

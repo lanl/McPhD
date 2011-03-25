@@ -23,7 +23,7 @@ import Data.Vector.V2
 import Data.Vector.V3
 
 -- Arbitrary instances
-import Test.Vector_arbitrary
+import Test.Numeric_arbitrary
 import SpaceTime.Test.Space_arbitrary
 
 import Approx

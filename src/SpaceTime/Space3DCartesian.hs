@@ -20,7 +20,7 @@ import Data.Vector.Class
 import Data.Array.IArray
 
 import Approx
-import NumUnit
+import Mag
 
 -- * Data types
 
@@ -55,8 +55,7 @@ instance ScalarType Distance where
   scalar = dis
 
 -- | Direction, a 3D vector of magnitude 1.
-newtype Direction = Direction { dir :: Vector3 }
-                  deriving (Eq, Show, Num, Approx, NumUnit)
+newtype Direction = Direction { dir :: Vector3 } deriving (Eq, Show, Num, Approx, Mag)
 instance VectorType Direction where
   vector = dir
 
