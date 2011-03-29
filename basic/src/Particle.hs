@@ -12,14 +12,14 @@ import Physical
 import PRNG
 
 data Particle = Particle {
-    pPos    :: Position
-  , pDir    :: Direction
-  , pTime   :: Time
-  , pEnergy :: Energy
-  , pWeight :: EnergyWeight
-  , pCell   :: CellIdx
-  , pRNG    :: RNG
-  , pTag    :: Tag
+    pPos    :: !Position
+  , pDir    :: !Direction
+  , pTime   :: !Time
+  , pEnergy :: !Energy
+  , pWeight :: !EnergyWeight
+  , pCell   :: !CellIdx
+  , pRNG    :: !RNG
+  , pTag    :: !Tag
   } deriving (Show)
              
 

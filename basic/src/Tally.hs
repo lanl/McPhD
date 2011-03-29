@@ -26,6 +26,9 @@ import Control.DeepSeq
 data Tally = Tally { globalEvts  :: !EventCount 
                    , deposition  :: PhysicsTally} deriving Show
 
+instance NFData Tally where
+  rnf (Tally gevts dep) = gevts `seq` dep `deepseq` ()
+
 type PhysicsTally   = Map.Map CellIdx (Momentum,EnergyWeight)
 
 -- trying to find a way to make PhysicsTally strict 

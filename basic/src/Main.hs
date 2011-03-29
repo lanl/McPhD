@@ -10,23 +10,41 @@ import Source
 import Control.Monad
 import TryNSave
 
-import System (getArgs)
+import System.Environment (getArgs, withArgs)
 import Data.List (foldl')
+import Control.Parallel.Strategies
+import Control.Parallel
+-- import Criterion.Main
 
 main :: IO ()
 main = do
-  n <- parseCL
-  let tally = runManyP infMesh simpleMat n
+  (n, rest) <- parseCL
+  test (parBuffer 10 rdeepseq) n
+-- The following are Criterion tests, comparing different strategies:
+{-
+  withArgs rest $
+    defaultMain [
+      bench "tally-seq"    (test r0 n),
+      bench "tally-par-5"  (test (parBuffer  5 rdeepseq) n),
+      bench "tally-par-10" (test (parBuffer 10 rdeepseq) n),
+      bench "tally-par-20" (test (parBuffer 20 rdeepseq) n),
+      bench "tally-par-50" (test (parBuffer 50 rdeepseq) n)
+    ]
+-}
+
+-- Test run, abstracting over the strategy being used.
+test :: Strategy [Tally] -> Word32 -> IO ()
+test s n = do
+  let tally = runManyP s infMesh simpleMat n
   -- let tally = runManyP2 infMesh simpleMat n
   -- let tally = runManyP5 infMesh simpleMat prand emptyTally n
   -- let tally = runManyP6 infMesh simpleMat n
   writeTally "tally1" tally
 
-
-runManyP :: Mesh -> Material -> Word32 -> Tally
-runManyP msh mat ntot = let 
+runManyP :: Strategy [Tally] -> Mesh -> Material -> Word32 -> Tally
+runManyP s msh mat ntot = let
   ps = genParticles ntot msh prand
-  tallies = map (runParticle msh mat) ps
+  tallies = (`using` s) . map (runParticle msh mat) $ ps
   in foldl' merge emptyTally tallies
 
 -- one at a time
@@ -78,14 +96,14 @@ simpleMat =
     [ MatState (Opacity 0.1) (Opacity 2.0) (Velocity 0.0) (Temperature 1.0),
       MatState (Opacity 1.0) (Opacity 0.5) (Velocity 0.0) (Temperature 2)]
 
-parseCL :: IO Word32
+parseCL :: IO (Word32, [String])
 parseCL = do
   args <- getArgs
-  let n  = head args
-      wn = read n :: Word32
+  let (n:ns) = args
+      wn     = read n
   if wn <= 0
      then error ("first command line argument (n) must be greater than zero,"++
               "you specified n = " ++ show wn ++ " which is obviously <= 0.")
-     else return wn
+     else return (wn,ns)
      
 -- End of file
