@@ -3,6 +3,7 @@
 -- Feb 15, 2011
 -- (c) Copyright 2011 LANSLLC, all rights reserved
 
+{-# LANGUAGE BangPatterns #-}
 module Source (genParticles
               ,genParticle)
     where
@@ -21,10 +22,10 @@ genParticles :: Word32 ->   -- how many particles to generate
 genParticles 0 _ _ = []
 genParticles n msh rng = 
   let (ps1,ps2,ps3,ds1,ds2,ds3,rng') = getSixRNs rng 
-      (g1,g2) = split rng'
-      (x,c)   = samplePosition msh ps1 ps2 ps3
-      d       = sampleDirection msh ds1 ds2 ds3
-      p       = Particle x d t e ew c g1 tag
+      (g1,g2)   = split rng'
+      (x,c)     = samplePosition msh ps1 ps2 ps3
+      d         = sampleDirection msh ds1 ds2 ds3
+      !p        = Particle x d t e ew c g1 tag
   in p:genParticles (n-1) msh g2
   where t   = Time 1.0
         e   = Energy 1.0
