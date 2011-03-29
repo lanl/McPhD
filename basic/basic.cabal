@@ -35,6 +35,7 @@ Library
        , mersenne-random-pure64 == 0.2.*
        , containers
        , deepseq
+       , parallel >= 2
    exposed-modules: MC 
    other-modules:
 
