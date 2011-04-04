@@ -15,20 +15,21 @@ import Test.Numeric_arbitrary
 
 {- TODO: Arbitrary direction vectors must be unit vectors! -}
 
-{-- I can make particular Cartesian instances into Arbitrary instances
---}
-instance Arbitrary (Cartesian Vector1) where  
-    arbitrary = Cartesian <$> arbitrary <*> arbitrary
-    
-instance Arbitrary (Cartesian Vector2) where  
-    arbitrary = Cartesian <$> arbitrary <*> arbitrary
-
-instance Arbitrary (Cartesian Vector3) where  
-    arbitrary = Cartesian <$> arbitrary <*> arbitrary
-
 {-- ???: How would I make all instances of Cartesian into Arbitrary instances? --}
+
+-- !!!: The following instance calls "arbitrary" on the
+-- vectors. Not every vector is automatically an instance
+-- of the "Arbitrary" class. So your constraint isn't right:
+--
 -- instance (Vector v) => Arbitrary (Cartesian v) where
 --     arbitrary = Cartesian <$> arbitrary <*> arbitrary
+--
+-- This one works. There isn't actually a need for the
+-- "Vector" constraint, although you might want to put it
+-- there ...
+
+instance (Arbitrary v) => Arbitrary (Cartesian v) where
+  arbitrary = Cartesian <$> arbitrary <*> arbitrary
 
 instance Arbitrary Spherical1D where
   arbitrary = Spherical1D <$> arbitrary <*> arbitrary
