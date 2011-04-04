@@ -12,10 +12,14 @@ module SpaceTime.Space3DCartesian(
   , timeToDistance
   , distanceToTime
   , translate
+  , randomDirection
+  , randomExponential
   ) where
 
 import Data.Vector.V3
 import Data.Vector.Class
+import System.Random.Mersenne.Pure64
+import RandomValues
 
 import Data.Array.IArray
 
@@ -108,4 +112,20 @@ timeToDistance (Distance distance) (Speed speed) = Time (distance / speed)
 
 distanceToTime :: Time -> Speed -> Distance
 distanceToTime (Time time) (Speed speed) = Distance (time * speed)
+
+
+
+-- | Compute a random Direction from a PureMT
+randomDirection :: PureMT -> (Direction, PureMT)
+randomDirection g = let
+  (a, g')  = randomDouble g
+  (b, g'') = randomDouble g'
+  in (direction $ sampleNormalVector3 a b, g'')
+
+-- | Sample an exponential Distance from a PureMT
+randomExponential :: Double -> PureMT -> (Distance, PureMT)
+randomExponential lambda g = let
+  (a, g') = randomDouble g
+  in (Distance $ sampleExponential lambda a, g')
+
 

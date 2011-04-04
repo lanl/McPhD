@@ -5,6 +5,7 @@ import Test.QuickCheck
 
 import Mesh.SimpleCartesian
 import SpaceTime.Space3DCartesian
+import RandomNumbers
 import RandomValues
 import Data.Vector.V3
 
@@ -34,7 +35,7 @@ instance Arbitrary Distance where
 instance Arbitrary Time where
   arbitrary = Time <$> abs <$> arbitrary
 
--- Need > 0 for speed.
+-- Need > 0 for speed. TODO: Use Positive modifier
 instance Arbitrary Speed where
   arbitrary = Speed <$> abs <$> (0.1+) <$> arbitrary
 

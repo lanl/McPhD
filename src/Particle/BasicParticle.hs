@@ -8,6 +8,7 @@ import Particle.Classes
 import qualified SpaceTime.Space3DCartesian as Space
 import Data.Vector.V3
 import RandomValues
+import RandomNumbers
 import Approx
 
 import System.Random.Mersenne.Pure64
@@ -137,5 +138,5 @@ sampleIsoParticle :: PureMT
                      -> Space.Time
                      -> BasicParticle
 sampleIsoParticle rand position speed time =
-  let (direction, rand') = randomDirection rand
+  let (direction, rand') = Space.randomDirection rand
   in BasicParticle position direction speed time rand'
