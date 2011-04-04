@@ -3,7 +3,7 @@
 -- Dec 06, 2010
 -- Copyright (c) 2010 LANSLLC all rights reserved.
 
-module MC (runParticle, pickEvent)
+module MC (runParticle, pickEvent)  -- Added pickEvent here for testing only. Is there a better way?
     where
 
 import Physical
