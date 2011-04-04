@@ -36,7 +36,7 @@ instance Arbitrary Vector3 where
 instance (Arbitrary n, Random n, Mag n) => Arbitrary (Normalized n) where
   arbitrary = normalize <$> arbitrary
 --  arbitrary = normalize <$> arbitraryNonZero   {- ???: This doesn't typecheck. See next question -}
-  
+
 
 -- A function to use pattern matching to strip away the NonZero constructor.
 stripNonZero :: (NonZero a) -> a
@@ -47,5 +47,11 @@ stripNonZero (NonZero d) = d
 arbitraryNonZero = stripNonZero <$> arbitrary
 
 instance Arbitrary (Normalized Vector1) where
-    arbitrary = normalize <$> Vector1 <$> arbitraryNonZero
-    
+  arbitrary = normalize <$> Vector1 <$> arbitraryNonZero
+
+instance Arbitrary (Normalized Vector2) where
+  arbitrary = normalVector2 <$> arbitrary
+
+
+instance Arbitrary (Normalized Vector3) where
+  arbitrary = undefined

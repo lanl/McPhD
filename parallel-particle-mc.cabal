@@ -47,6 +47,7 @@ executable TestSuite
   if flag(test)
     ghc-options: -fhpc
     build-depends: base >=3 && <=5
+                   , random
                    , hpc
                    , AC-Vector == 2.*
                    , array == 0.3.*

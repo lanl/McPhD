@@ -18,6 +18,4 @@ import Approx
 prop_UnitLength :: Double -> Double -> Bool
 prop_UnitLength a b = let v = randomDirection_compute a b in (vmag (dir v)) ~== 1.0
 
-
-
 tests = [testGroup "Random Directions" [testProperty "unit length" prop_UnitLength] ]

@@ -6,6 +6,9 @@ import SpaceTime.Space3DCartesian
 
 import System.Random.Mersenne.Pure64
 import Data.Vector.V3
+import Vectors
+
+-- import Data.Vector.V3
 import Data.List (unfoldr)
 
 newtype Seed = Seed { toInt :: Integer }
@@ -16,10 +19,7 @@ normalizedVector3_compute :: Double -> Double -> Vector3
 normalizedVector3_compute a b = let
   theta = a * pi
   phi   = b * 2*pi
-  x = (sin theta) * (cos phi)
-  y = (sin theta) * (sin phi)
-  z = (cos theta)
-  in Vector3 x y z  
+  in sphericalToNormalVector3 phi theta
 
 -- | Compute a random direction vector from a two random doubles
 randomDirection_compute :: Double -> Double -> Direction
