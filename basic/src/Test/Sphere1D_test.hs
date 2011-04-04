@@ -30,25 +30,28 @@ prop_SamplesInCell a b c =
   in (findCell infMesh $ v1x (pos position)) == cell
 
 
--- Property: Particle crosses inner surface when r*sin(phi) < -r_i and cos(phi) < 0.
-prop_SurfaceCross :: Positive FP -> Positive FP -> Positive FP -> Unit -> Bool
+-- Property: Face crossing is XLow iff ray crosses inner sphere.
+prop_SurfaceCross :: Positive FP -> Positive FP -> Positive FP -> Unit FP -> Bool
 prop_SurfaceCross (Positive r1) (Positive r2) (Positive r3) (Unit phi_interp) =
   let rmin : r : [rmax] = sort [r1, r2, r3]
       phi   = 2*pi*phi_interp -- Angle of particle motion, measured from positive r.
       omega = cos phi
-      (_, face)  = distToBdy r (negate omega) rmax rmin
+      (_, face)  = distToBdy r (negate omega) rmax rmin  
       innerCross = crossSphere rmin r phi
-  in test face innerCross where
-    test XLow  True  = True
-    test XHigh False = True
-    test _ _  = False
+  in case (face, innerCross) of
+    (XLow,  True)  -> True
+    (XHigh, False) -> True
+    (_,_)          -> False
 
-
+{-- A ray crosses a sphere it is outside of when:
+    r_ray*|sin(phi)| < r_sphere, and 
+    cos(phi) < 0.  
+--}
 crossSphere :: FP -> FP -> FP -> Bool
-crossSphere rmin r phi =
-  let eta   = abs $ sin phi
-      omega = cos phi
-  in (r * eta < rmin) && (omega < 0)
+crossSphere r_sphere r_ray phi =
+    let r_min = r_ray * (abs $ sin phi)
+        omega = cos phi
+  in (r_min < r_sphere) && (omega < 0)
 
 
 
