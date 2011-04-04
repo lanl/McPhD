@@ -23,7 +23,7 @@ instance Arbitrary Cell where
   arbitrary = Local <$> arbitrary
 
 instance Arbitrary Direction where
-  arbitrary = randomDirection_compute <$> arbitrary <*> arbitrary
+    arbitrary = direction <$> (sampleNormalVector3 <$> arbitrary <*> arbitrary)
 
 instance Arbitrary Position where
   arbitrary = Position <$> ( Vector3 <$> arbitrary <*> arbitrary <*> arbitrary )

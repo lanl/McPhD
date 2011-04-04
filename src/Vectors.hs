@@ -13,7 +13,6 @@ polarToNormalVector2 phi = Vector2 (cos phi) (sin phi)
 sphericalToVector3 :: Double -> Double -> Double -> Vector3
 sphericalToVector3 radius phi theta = radius *| (sphericalToNormalVector3 phi theta)
 
-
 sphericalToNormalVector3 :: Double -> Double -> Vector3
 sphericalToNormalVector3 phi theta = let
   x = (sin theta) * (cos phi)

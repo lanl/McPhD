@@ -9,18 +9,13 @@ import System.Random
 import Data.Vector.V1
 import Data.Vector.V2
 import Data.Vector.V3
+import Numerics
 import Mag
 
 import Control.Applicative
 
--- | A newtype for aribtrary RealFloat values in (0,1)
-newtype Unit n = Unit n deriving (Show)
-
-instance (Arbitrary n, Random n, RealFloat n) => Arbitrary (Unit n) where
-    arbitrary = Unit <$> choose (0.0, 1.0)
-
-
--- TODO: Replace these with one for Vectors using [arbitrary] and vpack?
+instance (Arbitrary n, Random n, RealFloat n) => Arbitrary (UnitInterval n) where
+    arbitrary = UnitInterval <$> choose (0.0, 1.0)
 
 instance Arbitrary Vector1 where
   arbitrary = Vector1 <$> arbitrary
@@ -36,20 +31,11 @@ instance Arbitrary Vector3 where
 instance (Arbitrary n, Ord n, Num n, Mag n) =>
          Arbitrary (Normalized n) where
   arbitrary = (\ (NonZero a) -> normalize a) <$> arbitrary
-  -- arbitrary = normalize <$> arbitrary
---  arbitrary = normalize <$> arbitraryNonZero   {- ???: This doesn't typecheck. See next question -}
 
 -- !!!: The version above typechecks. Also see below.
 
-
--- A function to use pattern matching to strip away the NonZero constructor.
-stripNonZero :: (NonZero a) -> a
-stripNonZero (NonZero d) = d
-
-{- ???: The type of this function is turning out to be Gen Data.Vector.Class.Scalar instead of Gen a -}
--- arbitraryNonZero :: Gen a {- Doesn't typecheck. -}
 arbitraryNonZero :: (Arbitrary a, Ord a, Num a) => Gen a
-arbitraryNonZero = stripNonZero <$> arbitrary
+arbitraryNonZero = (\ (NonZero a) -> a) <$> arbitrary
 
 -- !!!: It can't possibly typecheck with the signature "Gen a".
 -- That'd mean you could generate a value of any time with it.
@@ -69,8 +55,7 @@ instance Arbitrary (Normalized Vector1) where
   arbitrary = normalize <$> Vector1 <$> arbitraryNonZero
 
 instance Arbitrary (Normalized Vector2) where
-  arbitrary = normalVector2 <$> arbitrary
-
+  arbitrary = normalVector2 <$> (2*pi*) <$> arbitrary
 
 instance Arbitrary (Normalized Vector3) where
   arbitrary = undefined

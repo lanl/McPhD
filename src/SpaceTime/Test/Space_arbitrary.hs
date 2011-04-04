@@ -13,8 +13,6 @@ import SpaceTime.Spherical1D
 import Test.Numeric_arbitrary
 
 
-{- TODO: Arbitrary direction vectors must be unit vectors! -}
-
 {-- ???: How would I make all instances of Cartesian into Arbitrary instances? --}
 
 -- !!!: The following instance calls "arbitrary" on the
@@ -27,6 +25,8 @@ import Test.Numeric_arbitrary
 -- This one works. There isn't actually a need for the
 -- "Vector" constraint, although you might want to put it
 -- there ...
+
+{- TODO: Arbitrary direction vectors must be unit vectors! -}
 
 instance (Arbitrary v) => Arbitrary (Cartesian v) where
   arbitrary = Cartesian <$> arbitrary <*> arbitrary

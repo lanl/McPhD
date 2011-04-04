@@ -108,4 +108,4 @@ normalVector3 phi theta = Normalized $ sphericalToNormalVector3 phi theta
 
 
 -- A data type with hidden constructor to enforce normalization
-data (Mag a) => Normalized a = Normalized { normalized_value :: a }
+data (Eq a, Show a, Mag a) => Normalized a = Normalized { normalized_value :: a } deriving (Eq, Show)

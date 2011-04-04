@@ -108,3 +108,4 @@ timeToDistance (Distance distance) (Speed speed) = Time (distance / speed)
 
 distanceToTime :: Time -> Speed -> Distance
 distanceToTime (Time time) (Speed speed) = Distance (time * speed)
+
