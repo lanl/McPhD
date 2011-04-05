@@ -19,12 +19,14 @@ module SpaceTime.Space3DCartesian(
 import Data.Vector.V3
 import Data.Vector.Class
 import System.Random.Mersenne.Pure64
-import RandomValues
-
 import Data.Array.IArray
+import Test.QuickCheck.Modifiers
 
+
+import Numerics
+import Sampling
+import NormalizedValues
 import Approx
-import Mag
 
 -- * Data types
 
@@ -59,6 +61,7 @@ instance ScalarType Distance where
   scalar = dis
 
 -- | Direction, a 3D vector of magnitude 1.
+-- TODO: Replace this with a Normalized Vector3
 newtype Direction = Direction { dir :: Vector3 } deriving (Eq, Show, Num, Approx, Mag)
 instance VectorType Direction where
   vector = dir
@@ -116,16 +119,20 @@ distanceToTime (Time time) (Speed speed) = Distance (time * speed)
 
 
 -- | Compute a random Direction from a PureMT
+-- TODO: Make a typedef for (a,b) which is a functor.
 randomDirection :: PureMT -> (Direction, PureMT)
 randomDirection g = let
-  (a, g')  = randomDouble g
-  (b, g'') = randomDouble g'
-  in (direction $ sampleNormalVector3 a b, g'')
+  (a, g')   = randomDouble g
+  unitary_a = unsafe_makeUnitary a
+  (b, g'')  = randomDouble g'
+  unitary_b = unsafe_makeUnitary b
+  v = sampleNormalVector3 unitary_a unitary_b 
+  in (direction $ normalized_value v , g'')
 
 -- | Sample an exponential Distance from a PureMT
 randomExponential :: Double -> PureMT -> (Distance, PureMT)
 randomExponential lambda g = let
   (a, g') = randomDouble g
-  in (Distance $ sampleExponential lambda a, g')
+  in (Distance $ sampleExponential (Positive lambda) (UnitInterval a), g')
 
 

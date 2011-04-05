@@ -1,14 +1,20 @@
 {-# LANGUAGE FlexibleInstances, UndecidableInstances, OverlappingInstances #-}
-module Mag (Mag
+module NormalizedValues (Mag
            , Normalized ()  -- Exporting type but not constructor.
+           , normalized_value
            , normalize
            , magnitude
            , magnitude2
+           , normalVector1
+           , sampleNormalVector1
            , normalVector2
+           , sampleNormalVector2
            , normalVector3
+           , sampleNormalVector3
            ) where
 
 import Vectors
+import Numerics
 
 import Data.Vector.Class
 import Data.Vector.V3
@@ -100,12 +106,21 @@ the extensibility of the Normalized type and Mag class-}
 normalVector1 :: Double -> Normalized Vector1
 normalVector1 x = let Normalized n = normalize x in Normalized $ Vector1 n
 
-normalVector2 :: Double -> Normalized Vector2
-normalVector2 phi = Normalized $ polarToNormalVector2 phi
+sampleNormalVector1 :: UnitInterval Double -> Normalized Vector1
+sampleNormalVector1 (UnitInterval x) = normalize $ Vector1 (x-0.5)
 
-normalVector3 :: Double -> Double -> Normalized Vector3
-normalVector3 phi theta = Normalized $ sphericalToNormalVector3 phi theta
+normalVector2 :: AzimuthAngle -> Normalized Vector2
+normalVector2 = Normalized . polarToNormalCartesian
+
+sampleNormalVector2 :: UnitInterval Double -> Normalized Vector2
+sampleNormalVector2 = Normalized . polarToNormalCartesian . sampleAzimuthAngle
+
+normalVector3 :: AzimuthAngle -> ZenithAngle -> Normalized Vector3
+normalVector3 phi theta = Normalized $ sphericalToNormalCartesian phi theta
+
+sampleNormalVector3 :: UnitInterval Double -> UnitInterval Double -> Normalized Vector3
+sampleNormalVector3 x y = Normalized $ sphericalToNormalCartesian (sampleAzimuthAngle x) (sampleZenithAngle y)
 
 
 -- A data type with hidden constructor to enforce normalization
-data (Eq a, Show a, Mag a) => Normalized a = Normalized { normalized_value :: a } deriving (Eq, Show)
+newtype (Eq a, Show a, Mag a) => Normalized a = Normalized { normalized_value :: a } deriving (Eq, Show)

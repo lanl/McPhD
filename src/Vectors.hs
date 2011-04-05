@@ -1,20 +1,21 @@
 module Vectors where
 
+import Numerics
 import Data.Vector.V2
 import Data.Vector.V3
 import Data.Vector.Class
 
-polarToVector2 :: Double -> Double -> Vector2
-polarToVector2 radius phi = radius *| polarToNormalVector2 phi
+polarToCartesian :: Radius -> AzimuthAngle -> Vector2
+polarToCartesian (Radius radius) phi = radius *| polarToNormalCartesian phi
 
-polarToNormalVector2 :: Double -> Vector2
-polarToNormalVector2 phi = Vector2 (cos phi) (sin phi)
+polarToNormalCartesian :: AzimuthAngle -> Vector2
+polarToNormalCartesian (AzimuthAngle phi) = Vector2 (cos phi) (sin phi)
 
-sphericalToVector3 :: Double -> Double -> Double -> Vector3
-sphericalToVector3 radius phi theta = radius *| (sphericalToNormalVector3 phi theta)
+sphericalToCartesian :: Radius -> AzimuthAngle -> ZenithAngle -> Vector3
+sphericalToCartesian (Radius radius) phi theta = radius *| (sphericalToNormalCartesian phi theta)
 
-sphericalToNormalVector3 :: Double -> Double -> Vector3
-sphericalToNormalVector3 phi theta = let
+sphericalToNormalCartesian :: AzimuthAngle -> ZenithAngle -> Vector3
+sphericalToNormalCartesian (AzimuthAngle phi) (ZenithAngle theta) = let
   x = (sin theta) * (cos phi)
   y = (sin theta) * (sin phi)
   z = (cos theta)

@@ -3,7 +3,7 @@ module SpaceTime.Cartesian where
 
 import SpaceTime.Classes
 import Data.Vector.Class
-import Mag
+import NormalizedValues
 
 {-- The cartesian spaces for 1,2 and 3 dimensions are all very
 similar, differning only in the dimensionality of the vector used to
