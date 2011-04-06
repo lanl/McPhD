@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleInstances, UndecidableInstances, OverlappingInstances #-}
 module NormalizedValues (Mag
            , Normalized ()  -- Exporting type but not constructor.
+           , unsafe_makeNormal
            , normalized_value
            , normalize
            , magnitude
@@ -119,8 +120,16 @@ normalVector3 :: AzimuthAngle -> ZenithAngle -> Normalized Vector3
 normalVector3 phi theta = Normalized $ sphericalToNormalCartesian phi theta
 
 sampleNormalVector3 :: UnitInterval Double -> UnitInterval Double -> Normalized Vector3
-sampleNormalVector3 x y = Normalized $ sphericalToNormalCartesian (sampleAzimuthAngle x) (sampleZenithAngle y)
+sampleNormalVector3 x y = Normalized $
+                          sphericalToNormalCartesian
+                          (sampleAzimuthAngle x)
+                          (sampleZenithAngle y)
 
 
 -- A data type with hidden constructor to enforce normalization
-newtype (Eq a, Show a, Mag a) => Normalized a = Normalized { normalized_value :: a } deriving (Eq, Show)
+newtype (Eq a, Show a, Mag a) => Normalized a =
+  Normalized { normalized_value :: a } deriving (Eq, Show)
+
+
+unsafe_makeNormal :: (Mag a, Eq a, Show a) => a -> Normalized a
+unsafe_makeNormal = Normalized

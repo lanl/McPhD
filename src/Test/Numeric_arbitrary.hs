@@ -14,16 +14,33 @@ import NormalizedValues
 
 import Control.Applicative
 
-instance (Arbitrary n, Random n, RealFloat n) => 
+instance (Arbitrary n, Random n, RealFloat n) =>
     Arbitrary (UnitInterval n) where
       arbitrary = UnitInterval <$> choose (0.0, 1.0)
 
 
+{-- ???: Generating Overlapping instances with the Normalized
+instances below. I'm surprised that the compiler doesn't choose
+the more specific version in this case.
+
+Example instances:
+
+      instance (Arbitrary n, Ord n, Num n, NormalizedValues.Mag n) =>
+               Arbitrary (NormalizedValues.Normalized n)
+
+and
+
+      instance Arbitrary (NormalizedValues.Normalized Vector2)
+
+I can live without the default version.
+
+--}
+
 -- Default for Normalized Arbitrary instances uses normalize function
 -- from class Mag and requires a NonZero argument
-instance (Arbitrary n, Ord n, Num n, Mag n) => 
-    Arbitrary (Normalized n) where
-  arbitrary = (\ (NonZero a) -> normalize a) <$> arbitrary
+-- instance (Arbitrary n, Ord n, Num n, Mag n) =>
+--     Arbitrary (Normalized n) where
+--   arbitrary = (\ (NonZero a) -> normalize a) <$> arbitrary
 
 instance Arbitrary Vector1 where
   arbitrary = Vector1 <$> arbitrary
@@ -33,20 +50,16 @@ instance Arbitrary Vector2 where
 
 instance Arbitrary Vector3 where
   arbitrary = Vector3 <$> arbitrary <*> arbitrary <*> arbitrary
-  
+
 instance Arbitrary AzimuthAngle where
   arbitrary = sampleAzimuthAngle <$> arbitrary
-  
+
 instance Arbitrary ZenithAngle where
   arbitrary = sampleZenithAngle <$> arbitrary
 
--- A wrapper around arbitrary for NonZero a which returns a regular Gen a.
-arbitraryNonZero :: (Arbitrary a, Ord a, Num a) => Gen a
-arbitraryNonZero = (\ (NonZero a) -> a) <$> arbitrary
+instance Arbitrary Radius where
+  arbitrary = sampleRadius <$> arbitrary
 
--- A wrapper around arbitrary for UnitInterval values which returns a Gen a.
-arbitraryUnitInterval :: (Arbitrary a, Ord a, Random a, RealFloat a) => Gen a
-arbitraryUnitInterval = (\ (UnitInterval a) -> a) <$> arbitrary
 
 -- !!!: It can't possibly typecheck with the signature "Gen a".
 -- That'd mean you could generate a value of any time with it.
@@ -63,11 +76,10 @@ arbitraryUnitInterval = (\ (UnitInterval a) -> a) <$> arbitrary
 -- it, as the inlined version I've used above works just as well.
 
 instance Arbitrary (Normalized Vector1) where
-  arbitrary = normalize <$> Vector1 <$> arbitraryNonZero
+  arbitrary = normalize <$> Vector1 <$> (\ (NonZero a) -> a) <$> arbitrary
 
 instance Arbitrary (Normalized Vector2) where
   arbitrary = normalVector2 <$> arbitrary
 
 instance Arbitrary (Normalized Vector3) where
   arbitrary = normalVector3 <$> arbitrary <*> arbitrary
-

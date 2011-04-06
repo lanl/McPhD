@@ -15,7 +15,8 @@ addition operatons of this vector.
 {-- TODO: Direction should be a unit vector --}
 
 -- A data type for Cartesian spaces over a vector type
-data Cartesian v = Cartesian { position :: v, direction :: v } deriving (Eq, Show)
+data Cartesian v = Cartesian { position :: v, direction :: v }
+                 deriving (Eq, Show)
 
 -- When the vector type is Vector, we can define a common streaming operator
 instance (Vector v) => Space (Cartesian v) where

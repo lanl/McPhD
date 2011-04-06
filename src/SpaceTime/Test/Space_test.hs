@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances, FlexibleContexts, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances, FlexibleContexts #-}
 
 module SpaceTime.Test.Space_test where
 
@@ -26,8 +26,6 @@ import Data.Vector.V3
 import Test.Numeric_arbitrary
 import SpaceTime.Test.Space_arbitrary
 
-import Approx
-
 -- Property: Moving no distance leaves location unchanged.
 prop_ZeroDistance :: (Num (Distance s), Space s) => s -> Bool
 prop_ZeroDistance location = (location == stream location 0)
@@ -37,9 +35,17 @@ tests =
   [
     testGroup "Stream Operations"
     [
-      testProperty "Zero distance -> Same location in 1D" (prop_ZeroDistance :: Cartesian Vector1 -> Bool)
-    , testProperty "Zero distance -> Same location in 2D" (prop_ZeroDistance :: Cartesian Vector2 -> Bool)
-    , testProperty "Zero distance -> Same location in 3D" (prop_ZeroDistance :: Cartesian Vector3 -> Bool)
-    , testProperty "Zero distance -> Same location in 1DSpherical" (prop_ZeroDistance :: Spherical1D -> Bool)
+      testProperty
+      "Zero distance -> Same location in 1D"
+      (prop_ZeroDistance :: Cartesian Vector1 -> Bool)
+    , testProperty
+      "Zero distance -> Same location in 2D"
+      (prop_ZeroDistance :: Cartesian Vector2 -> Bool)
+    , testProperty
+      "Zero distance -> Same location in 3D"
+      (prop_ZeroDistance :: Cartesian Vector3 -> Bool)
+    , testProperty
+      "Zero distance -> Same location in 1DSpherical"
+      (prop_ZeroDistance :: Spherical1D -> Bool)
     ]
   ]
