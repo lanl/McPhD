@@ -12,6 +12,8 @@ For each new type, there are various functions defined:
 
 --}
 
+import Approx
+
 -- | A newtype for aribtrary values in (0,1)
 newtype UnitInterval n = UnitInterval n deriving (Show, Eq, Ord)
 
@@ -69,3 +71,6 @@ unsafe_makeRadius = Radius
 
 sampleRadius :: UnitInterval Double -> Radius
 sampleRadius (UnitInterval x) = (Radius . negate . log) x
+
+instance Approx Radius where
+  within_eps epsilon (Radius r1) (Radius r2) = within_eps epsilon r1 r2

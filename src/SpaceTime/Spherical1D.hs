@@ -23,6 +23,7 @@ import SpaceTime.Classes
 import Numerics
 import NormalizedValues
 import Data.Vector.V2
+import Approx
 
 data Spherical1D = Spherical1D { position :: Radius, direction :: Normalized Vector2 }
                  deriving (Eq, Show)
@@ -38,3 +39,8 @@ instance Space Spherical1D where
             cos_phi'   = 1 / sqrt (tan_phi' * tan_phi' + 1)
             sin_phi'   = tan_phi' * cos_phi'
             direction' = unsafe_makeNormal $ Vector2 cos_phi' sin_phi'
+
+
+instance Approx Spherical1D where
+  within_eps epsilon (Spherical1D r1 d1) (Spherical1D r2 d2) =
+    (within_eps epsilon r1 r2) && (within_eps epsilon d1 d2)

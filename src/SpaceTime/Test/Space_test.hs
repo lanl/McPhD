@@ -27,8 +27,8 @@ import Test.Numeric_arbitrary
 import SpaceTime.Test.Space_arbitrary
 
 -- Property: Moving no distance leaves location unchanged.
-prop_ZeroDistance :: (Num (Distance s), Space s) => s -> Bool
-prop_ZeroDistance location = (location == stream location 0)
+prop_ZeroDistance :: (Num (Distance s), Space s, Approx s) => s -> Bool
+prop_ZeroDistance location = (location ~== stream location 0)
 
 
 tests =

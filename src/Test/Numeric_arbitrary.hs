@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FlexibleInstances, OverlappingInstances #-}
 module Test.Numeric_arbitrary where
 
 import Test.QuickCheck
@@ -38,9 +38,9 @@ I can live without the default version.
 
 -- Default for Normalized Arbitrary instances uses normalize function
 -- from class Mag and requires a NonZero argument
--- instance (Arbitrary n, Ord n, Num n, Mag n) =>
---     Arbitrary (Normalized n) where
---   arbitrary = (\ (NonZero a) -> normalize a) <$> arbitrary
+instance (Arbitrary n, Ord n, Num n, Mag n) =>
+    Arbitrary (Normalized n) where
+  arbitrary = (\ (NonZero a) -> normalize a) <$> arbitrary
 
 instance Arbitrary Vector1 where
   arbitrary = Vector1 <$> arbitrary

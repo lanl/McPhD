@@ -16,6 +16,7 @@ module NormalizedValues (Mag
 
 import Vectors
 import Numerics
+import Approx
 
 import Data.Vector.Class
 import Data.Vector.V3
@@ -84,10 +85,28 @@ instance Mag Double where
 -- You might even be able to do without the instance for Double ...
 
 -- ???: This one requires UndecidableInstances. What am I getting into here?
-instance Vector a => Mag a where
+{-- ???: Going ahead and removing this instance declaration until I
+understand the issues better. -}
+-- instance Vector a => Mag a where
+--   normalize    = Normalized . vnormalise
+--   magnitude    = vmag
+--   magnitude2 d = vdot d d
+
+instance Mag Vector1 where
   normalize    = Normalized . vnormalise
   magnitude    = vmag
   magnitude2 d = vdot d d
+
+instance Mag Vector2 where
+  normalize    = Normalized . vnormalise
+  magnitude    = vmag
+  magnitude2 d = vdot d d
+
+instance Mag Vector3 where
+  normalize    = Normalized . vnormalise
+  magnitude    = vmag
+  magnitude2 d = vdot d d
+
 
 -- !!!: As I said above, such instances are problematic. GHC never considers
 -- the part left of the => when picking an instance. So in principle, this
@@ -127,9 +146,11 @@ sampleNormalVector3 x y = Normalized $
 
 
 -- A data type with hidden constructor to enforce normalization
-newtype (Eq a, Show a, Mag a) => Normalized a =
-  Normalized { normalized_value :: a } deriving (Eq, Show)
+newtype Normalized a = Normalized { normalized_value :: a } deriving (Eq, Show)
 
-
-unsafe_makeNormal :: (Mag a, Eq a, Show a) => a -> Normalized a
+unsafe_makeNormal :: (Mag a) => a -> Normalized a
 unsafe_makeNormal = Normalized
+
+instance (Mag a, Approx a) => Approx (Normalized a) where
+  within_eps epsilon (Normalized a) (Normalized b) =
+    within_eps epsilon a b
