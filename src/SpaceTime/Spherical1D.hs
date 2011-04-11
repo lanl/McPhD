@@ -25,21 +25,23 @@ import NormalizedValues
 import Data.Vector.V2
 import Approx
 
-data Spherical1D = Spherical1D { position :: Radius, direction :: Normalized Vector2 }
+data Spherical1D = Spherical1D { sph1d_position :: Radius, sph1d_direction :: Normalized Vector2 }
                  deriving (Eq, Show)
 
 instance Space Spherical1D where
   type Distance Spherical1D = Double
+  type Position Spherical1D = Radius
+  type Direction Spherical1D = Normalized Vector2
   stream (Spherical1D (Radius r) direction) dist =
-    Spherical1D  r' direction'
+    Spherical1D  (Radius r') direction'
       where cos_phi    = (v2x . normalized_value) direction
             sin_phi    = (v2y . normalized_value) direction
-            r'         = Radius $ sqrt (r*r + dist*dist + 2*r*dist*cos_phi)
-            tan_phi'   = r * sin_phi / (dist + r * cos_phi)
-            cos_phi'   = 1 / sqrt (tan_phi' * tan_phi' + 1)
-            sin_phi'   = tan_phi' * cos_phi'
+            r'         = sqrt (r*r + dist*dist + 2*r*dist*cos_phi)
+            cos_phi'   = (cos_phi*r + dist) / r'
+            sin_phi'   = sin_phi*r/r'
             direction' = unsafe_makeNormal $ Vector2 cos_phi' sin_phi'
-
+  position  = sph1d_position
+  direction = sph1d_direction
 
 instance Approx Spherical1D where
   within_eps epsilon (Spherical1D r1 d1) (Spherical1D r2 d2) =
