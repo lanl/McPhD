@@ -25,6 +25,8 @@ makeUnitary x
 unsafe_makeUnitary :: (RealFloat n) => n -> UnitInterval n
 unsafe_makeUnitary x = UnitInterval x
 
+type Var = UnitInterval Double
+
 
 {- A type for Azimuthal Angles limited to -pi < phi < pi.  Generally
 intrepted as the angle from positive x, depending on the context.-}
@@ -59,7 +61,7 @@ sampleZenithAngle (UnitInterval a) = ZenithAngle (pi*a)
 
 
 {- A type for Radii, Limted to 0 < r -}
-newtype Radius = Radius Double deriving (Show, Eq, Ord)
+newtype Radius = Radius {get_radius :: Double } deriving (Show, Eq, Ord)
 
 makeRadius :: Double -> Maybe Radius
 makeRadius x
@@ -74,3 +76,5 @@ sampleRadius (UnitInterval x) = (Radius . negate . log) x
 
 instance Approx Radius where
   within_eps epsilon (Radius r1) (Radius r2) = within_eps epsilon r1 r2
+  
+  

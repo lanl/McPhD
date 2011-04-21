@@ -7,7 +7,6 @@ import Particle.Classes
 
 import qualified SpaceTime.Space3DCartesian as Space
 import Data.Vector.V3
-import RandomValues
 import RandomNumbers
 import Approx
 

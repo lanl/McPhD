@@ -7,11 +7,11 @@ module NormalizedValues (Mag
            , magnitude
            , magnitude2
            , normalVector1
-           , sampleNormalVector1
+           , generateNormalVector1
            , normalVector2
-           , sampleNormalVector2
+           , generateNormalVector2
            , normalVector3
-           , sampleNormalVector3
+           , generateNormalVector3
            ) where
 
 import Vectors
@@ -147,20 +147,20 @@ the extensibility of the Normalized type and Mag class-}
 normalVector1 :: Double -> Normalized Vector1
 normalVector1 x = let Normalized n = normalize x in Normalized $ Vector1 n
 
-sampleNormalVector1 :: UnitInterval Double -> Normalized Vector1
-sampleNormalVector1 (UnitInterval x) = normalize $ Vector1 (x-0.5)
+generateNormalVector1 :: Var -> Normalized Vector1
+generateNormalVector1 (UnitInterval x) = normalize $ Vector1 (x-0.5)
 
 normalVector2 :: AzimuthAngle -> Normalized Vector2
 normalVector2 = Normalized . polarToNormalCartesian
 
-sampleNormalVector2 :: UnitInterval Double -> Normalized Vector2
-sampleNormalVector2 = Normalized . polarToNormalCartesian . sampleAzimuthAngle
+generateNormalVector2 :: Var -> Normalized Vector2
+generateNormalVector2 = Normalized . polarToNormalCartesian . sampleAzimuthAngle
 
 normalVector3 :: AzimuthAngle -> ZenithAngle -> Normalized Vector3
 normalVector3 phi theta = Normalized $ sphericalToNormalCartesian phi theta
 
-sampleNormalVector3 :: UnitInterval Double -> UnitInterval Double -> Normalized Vector3
-sampleNormalVector3 x y = Normalized $
+generateNormalVector3 :: Var -> Var -> Normalized Vector3
+generateNormalVector3 x y = Normalized $
                           sphericalToNormalCartesian
                           (sampleAzimuthAngle x)
                           (sampleZenithAngle y)

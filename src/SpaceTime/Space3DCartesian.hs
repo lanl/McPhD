@@ -24,7 +24,8 @@ import Test.QuickCheck.Modifiers
 
 
 import Numerics
-import Sampling
+import RandomSamples
+import Generators
 import NormalizedValues
 import Approx
 
@@ -122,17 +123,15 @@ distanceToTime (Time time) (Speed speed) = Distance (time * speed)
 -- TODO: Make a typedef for (a,b) which is a functor.
 randomDirection :: PureMT -> (Direction, PureMT)
 randomDirection g = let
-  (a, g')   = randomDouble g
-  unitary_a = unsafe_makeUnitary a
-  (b, g'')  = randomDouble g'
-  unitary_b = unsafe_makeUnitary b
-  v = sampleNormalVector3 unitary_a unitary_b 
+  (a, g')   = sampleVar g
+  (b, g'')  = sampleVar g'
+  v = generateNormalVector3 a b 
   in (direction $ normalized_value v , g'')
 
 -- | Sample an exponential Distance from a PureMT
 randomExponential :: Double -> PureMT -> (Distance, PureMT)
 randomExponential lambda g = let
   (a, g') = randomDouble g
-  in (Distance $ sampleExponential (Positive lambda) (UnitInterval a), g')
+  in (Distance $ generateExponential (Positive lambda) (UnitInterval a), g')
 
 

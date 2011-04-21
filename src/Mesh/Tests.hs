@@ -8,7 +8,7 @@ import Test.HUnit
 
 -- The library under test
 import Mesh.SimpleCartesian
-import Mesh.Spherical
+import Mesh.Spherical 
 
 -- Its dependencies
 import Data.Vector.V3

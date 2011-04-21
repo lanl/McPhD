@@ -7,7 +7,6 @@ import Mesh.SimpleCartesian
 import SpaceTime.Space3DCartesian
 import NormalizedValues
 import RandomNumbers
-import RandomValues
 import Data.Vector.V3
 import Test.Numeric_arbitrary
 
@@ -26,7 +25,7 @@ instance Arbitrary Cell where
   arbitrary = Local <$> arbitrary
 
 instance Arbitrary Direction where
-    arbitrary = direction <$> normalized_value  <$> (sampleNormalVector3 <$> arbitrary <*> arbitrary)
+    arbitrary = direction <$> normalized_value <$> (generateNormalVector3 <$> arbitrary <*> arbitrary)
 
 instance Arbitrary Position where
   arbitrary = Position <$> ( Vector3 <$> arbitrary <*> arbitrary <*> arbitrary )

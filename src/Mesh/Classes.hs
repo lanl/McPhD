@@ -4,8 +4,9 @@
 -}
 module Mesh.Classes (SpaceMesh (..)) where
 
+import System.Random.Mersenne.Pure64
 
-import Numerics
+import Numerics ()
 import SpaceTime.Classes
 
 -- | A class for describing operations on meshes.
@@ -26,5 +27,5 @@ class SpaceMesh m where
   -- | Allow position to be within epsilon of in, as long as direction is pointing inward.
   is_approx_in    :: m -> MeshCell m -> MeshSpace m -> Double -> Bool
 
-  unuiform_sample :: m -> MeshCell m -> (UnitInterval Double) -> (UnitInterval Double) -> MeshSpace m
+  uniform_sample  :: m -> MeshCell m -> PureMT -> (MeshSpace m, PureMT)
   

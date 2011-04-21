@@ -180,3 +180,40 @@ Using a status type:
   (Event, Particle) -> (Event, Particle)
 
 can be iterated, provided I add an inital event, like "Born"
+
+
+
+* Generating and Using Random quantities:
+
+** Generating data types
+
+  I've defined Var = UnitInterval Double in Numerics.hs
+
+  With each new data type define a function like:
+
+  =generateFoo :: Var -> Foo=.
+
+  This converts variants into Foos. Some will require more than one:
+
+  =generateBar :: Var -> Var -> Bar=,
+
+  e.g. a Normalized 3-Vector will require 2 variants.
+
+** Sampling data types
+
+   Elsewhere, define sampling functions like:
+
+   =sampleFoo :: PureMT -> (Foo, PureMT)=
+
+   These will all be pretty similar, since they generate one or more
+   Variants and call the appropiate generate function and return the
+   new PureMT.
+
+** Arbitrary instances
+
+   The generateX functions should also be useful for defining Arbitrary instances.
+
+
+
+
+  

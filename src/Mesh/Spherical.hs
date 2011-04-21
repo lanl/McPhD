@@ -9,6 +9,7 @@ import Mesh.Classes
 import SpaceTime.Classes
 import SpaceTime.Spherical1D
 import Numerics
+import RandomSamples ()
        
 data SphericalMeshCell = SphericalMeshCell { index :: Int }  | Void
 data SphericalDirection = Inward | Outward
@@ -42,5 +43,15 @@ instance SpaceMesh SphericalMesh where
   cell_neighbors mesh cell = [(Inward, inward_cell mesh cell), (Outward, outward_cell mesh cell)]
   cell_boundary = undefined
   
-      
+  is_in = undefined
+  is_approx_in = undefined
+  uniform_sample = undefined
   
+      
+  -- uniform_sample mesh cell rand =
+  --   let (r, rand') = sample_unit_sphere rand
+  --       rindex = index cell
+  --       rmin = get_radius $ (radii mesh) !! (rindex-1)
+  --       rmax = get_radius $ (radii mesh) !! rindex
+  --       position = Radius $ rmin + (rmax-rmin)*r
+  --       (direction, rand'') = sampleNormalVector2 
