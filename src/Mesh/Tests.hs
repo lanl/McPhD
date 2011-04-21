@@ -1,4 +1,4 @@
--- | Module for testing mesh types associated data type
+-- | Module for testing mesh types
 module Mesh.Tests (tests) where
 
 -- Testing libraries
@@ -8,6 +8,7 @@ import Test.HUnit
 
 -- The library under test
 import Mesh.SimpleCartesian
+import Mesh.Spherical
 
 -- Its dependencies
 import Data.Vector.V3

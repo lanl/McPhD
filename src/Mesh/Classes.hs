@@ -4,19 +4,27 @@
 -}
 module Mesh.Classes (SpaceMesh (..)) where
 
-import Space3DCartesian
 
--- | A class for describing operations on meshes. Still multi-parameter though.
+import Numerics
+import SpaceTime.Classes
+
+-- | A class for describing operations on meshes.
 class SpaceMesh m where
-  type MeshCell m     :: *
-  type MeshFace m     :: *
-  size            :: m -> Integer  
-  cell_find       :: m -> Position -> Direction -> MeshCell m -- ^ Potentially O(mesh_size) lookup
-  cell_volume     :: m -> MeshCell m -> Double
+  type MeshCell  m :: *
+  type MeshFace  m :: *
+  type MeshSpace m :: *
+  size            :: m -> Int
+  cell_find       :: m -> MeshSpace m -> Maybe (MeshCell m) -- ^ Potentially O(mesh_size) lookup
   cell_neighbor   :: m -> MeshCell m -> MeshFace m -> MeshCell m      -- ^ Neighbor across a given face
   cell_neighbors  :: m -> MeshCell m -> [(MeshFace m, MeshCell m)]    -- ^ All neighbors, with faces
-  -- | Get the distance to exit a cell, the face, and the next cell
-  cell_exit       :: m -> MeshCell m -> Position -> MeshFace m -> (Distance, MeshFace m, MeshCell m)
+  
+  -- | Get the distance to exit a cell, and the face.
+  cell_boundary   :: m -> MeshCell m -> MeshSpace m -> MeshFace m -> (Distance s, MeshFace m)
+  
+  is_in           :: m -> MeshCell m -> MeshSpace m -> Bool
+  
+  -- | Allow position to be within epsilon of in, as long as direction is pointing inward.
+  is_approx_in    :: m -> MeshCell m -> MeshSpace m -> Double -> Bool
 
--- | Todo: How to do random sampling of positions in cell? 
---     Assume uniform? Include Direction in result?
+  unuiform_sample :: m -> MeshCell m -> (UnitInterval Double) -> (UnitInterval Double) -> MeshSpace m
+  

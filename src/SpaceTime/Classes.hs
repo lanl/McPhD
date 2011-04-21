@@ -2,13 +2,13 @@
 
 module SpaceTime.Classes where
 
-import Approx
+import Approx ()
 
 
 class Space s where
-  type Distance s :: *
-  type Position s :: *
+  type Position s  :: *
   type Direction s :: *
+  type Distance s  :: *
   stream    :: s -> Distance s -> s
   position  :: s -> Position s
   direction :: s -> Direction s
