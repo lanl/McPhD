@@ -1,18 +1,19 @@
 -- | Module for testing mesh types
-module Mesh.Tests (tests) where
+module Mesh.Test.Mesh_test (tests) where
 
 -- Testing libraries
 import Test.Framework (testGroup)
 import Test.Framework.Providers.HUnit
 import Test.HUnit
 
--- The library under test
+-- The libraries under test
 import Mesh.SimpleCartesian
-import Mesh.Spherical 
+import Mesh.Spherical
 
--- Its dependencies
+-- Their dependencies
 import Data.Vector.V3
 import Data.Ix
+import Numerics
 
 
 -- * CellIndex tests
@@ -31,6 +32,10 @@ simpleMesh = SimpleMesh cellIndex (Vector3 0.1 0.2 0.3)
 
 testSize :: Assertion
 testSize = (meshSize simpleMesh) @?= 1000
+
+-- * Spherical 1D Mesh tests
+spherical_mesh :: SphericalMesh
+spherical_mesh = SphericalMesh $ fmap Radius [1..100]
 
 tests = [ testGroup "Index Tests"
           [ testCase "LEQ operator" testRange

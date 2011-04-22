@@ -39,6 +39,8 @@ noScatteringMaterial = Material $ listArray meshSize $ repeat (MatState (Opacity
 -- | In a test problem without scattering, all events should be face crossings
 prop_AllSurfaceCrossings = propFunction testMesh noScatteringMaterial
 
+-- | This function can be used to create multiple property functions
+-- by closing over the mesh and material variables.
 propFunction :: Mesh -> Material -> RNG -> Tag -> Unit FP -> Unit FP -> Bool
 propFunction mesh matl rng tag u1 u2 = 
   let particle = sampleParticle mesh rng tag
@@ -48,6 +50,13 @@ propFunction mesh matl rng tag u1 u2 =
        Reflect  _ _ -> True
        Transmit _ _ -> True
        _            -> False
+
+-- sampleAndGetEvent :: Mesh -> Material -> RNG -> Tag -> Event
+-- sampleAndGetEvent mesh matl rng tag =
+--     let (u1, rng')  = (Unit x, rng') where (x, rng')  = randomDouble rng
+--         (u2, rng'') = (Unit y rng'') where (y, rng'') = randomDouble rng'
+--         particle = sampleParticle mesh rng'' tag
+--     in getEvent mesh matl particle u1 u2 (pDir particle)
 
 
 

@@ -41,8 +41,6 @@ flag test
 executable TestSuite
   hs-source-dirs: ./src/ ./src/Test
   ghc-options: -Wall -fwarn-tabs -fno-warn-name-shadowing -fno-warn-orphans
-  other-modules:
-    Mesh.Tests
   main-is: TestSuite.hs
   if flag(test)
     ghc-options: -fhpc

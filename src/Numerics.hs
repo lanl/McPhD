@@ -1,16 +1,16 @@
-module Numerics where
 {-- A module for various numeric definitions useful in building
 domain-specific numeric types
 
 For each new type, there are various functions defined:
 
-  makeX :: Double -> Maybe X   which creates an X in the input is acceptable
-  unsafe_makeX :: Double -> X  make an X which may be invalid. User beware!
-  sampleX :: UnitInterval Double -> X   Compute an X from a value in [0,1].
+  makeFoo        :: Double -> Maybe Foo  Create a Foo if the input is acceptable
+  unsafe_makeFoo :: Double -> Foo        Create a Foo which may be invalid. User beware!
+  generateFoo    :: Var    -> Foo        Maps Var vaules uniformaly onto Foos
 
   This looks like an opportunity for a new class.
 
 --}
+module Numerics where
 
 import Approx
 
@@ -25,6 +25,7 @@ makeUnitary x
 unsafe_makeUnitary :: (RealFloat n) => n -> UnitInterval n
 unsafe_makeUnitary x = UnitInterval x
 
+-- | The type for uniform variants.
 type Var = UnitInterval Double
 
 
@@ -40,7 +41,7 @@ makeAzimuthAngle x
 unsafe_makeAzimuthAngle :: Double -> AzimuthAngle
 unsafe_makeAzimuthAngle = AzimuthAngle
 
-sampleAzimuthAngle :: UnitInterval Double -> AzimuthAngle
+sampleAzimuthAngle :: Var -> AzimuthAngle
 sampleAzimuthAngle (UnitInterval a) = AzimuthAngle (pi*(2*a - 1))
 
 
@@ -56,7 +57,7 @@ makeZenithAngle z
 unsafe_makeZenithAngle :: Double -> ZenithAngle
 unsafe_makeZenithAngle = ZenithAngle
 
-sampleZenithAngle :: UnitInterval Double -> ZenithAngle
+sampleZenithAngle :: Var -> ZenithAngle
 sampleZenithAngle (UnitInterval a) = ZenithAngle (pi*a)
 
 
@@ -71,7 +72,7 @@ makeRadius x
 unsafe_makeRadius :: Double -> Radius
 unsafe_makeRadius = Radius
 
-sampleRadius :: UnitInterval Double -> Radius
+sampleRadius :: Var -> Radius
 sampleRadius (UnitInterval x) = (Radius . negate . log) x
 
 instance Approx Radius where

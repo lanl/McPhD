@@ -1,3 +1,4 @@
+-- | Contains utitlities for creating random samples.
 module RandomNumbers where
 
 import System.Random.Mersenne.Pure64

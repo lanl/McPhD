@@ -25,7 +25,7 @@ class SpaceMesh m where
   is_in           :: m -> MeshCell m -> MeshSpace m -> Bool
   
   -- | Allow position to be within epsilon of in, as long as direction is pointing inward.
-  is_approx_in    :: m -> MeshCell m -> MeshSpace m -> Double -> Bool
+  is_approx_in    :: m -> MeshCell m -> MeshSpace m -> Bool
 
   uniform_sample  :: m -> MeshCell m -> PureMT -> (MeshSpace m, PureMT)
   
