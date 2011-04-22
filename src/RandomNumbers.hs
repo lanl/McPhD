@@ -4,7 +4,7 @@ module RandomNumbers where
 import System.Random.Mersenne.Pure64
 import Data.List
 
-newtype Seed = Seed { toInt :: Integer }
+newtype Seed = Seed { toInt :: Integer } deriving (Show)
 makePureMT :: Seed -> PureMT
 makePureMT = pureMT . fromIntegral . toInt
 
@@ -17,8 +17,8 @@ sampleN generator rand n
           (values, rand'') = sampleN generator rand' (n-1)
       in (value : values, rand'')
 
--- | This looks dangerous, since it doesn't return the new random
--- state.
+-- | This is dangerous, since it doesn't return the new random state
+-- for use in subsequent calculations.
 samples :: (PureMT -> (a, PureMT)) -> PureMT -> [a]
 samples generator rand = unfoldr (Just . generator) rand
 
