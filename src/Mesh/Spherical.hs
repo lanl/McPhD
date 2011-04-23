@@ -40,10 +40,11 @@ cell_max _ Void = undefined
 cell_max mesh cell = (radii mesh) !! ( index cell ) 
 
 outer_cell :: SphericalMesh -> SphericalMeshCell
-outer_cell = SphericalMeshCell . size
+outer_cell mesh = SphericalMeshCell $ size mesh -1
 
 outer_radius :: SphericalMesh -> Radius
 outer_radius mesh = cell_max mesh (outer_cell mesh)
+
 
 instance SpaceMesh SphericalMesh where
   type MeshCell  SphericalMesh = SphericalMeshCell
@@ -53,7 +54,7 @@ instance SpaceMesh SphericalMesh where
   
   -- This is too simple; we should use direction to break equality
   -- Also, it looks like line noise.
-  cell_find mesh location = SphericalMeshCell <$> ( fst <$> ( find ( ( > position location) . snd) (zip [1..] (radii mesh))))
+  cell_find mesh location = SphericalMeshCell <$> ( fst <$> ( find ( ( > position location) . snd) (zip [0..] (radii mesh))))
   
 
   cell_neighbor  mesh cell Inward = inward_cell mesh cell
