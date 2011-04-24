@@ -1,4 +1,7 @@
 {-# LANGUAGE FlexibleInstances, OverlappingInstances #-}
+
+{-- Arbitrary instances for various numeric data types for testing.
+--}
 module Test.Numeric_arbitrary where
 
 import Test.QuickCheck
@@ -59,21 +62,6 @@ instance Arbitrary ZenithAngle where
 
 instance Arbitrary Radius where
   arbitrary = sampleRadius <$> arbitrary
-
-
--- !!!: It can't possibly typecheck with the signature "Gen a".
--- That'd mean you could generate a value of any time with it.
--- Here, we inherit a number of restrictions. You make use of
--- the call to "arbitrary" at type "NonZero a". The instance
--- defined in Test.QuickCheck.Modifiers has the form
---
--- instance (Num a, Ord a, Arbitrary a) => Arbitrary (NonZero a)
---
--- This means you have to make the same restrictions for your
--- function, and also for the instance for "Normalized" above.
--- With this type signature, you can use "arbitraryNonZero",
--- but I'm not sure it's worth defining a separate function for
--- it, as the inlined version I've used above works just as well.
 
 instance Arbitrary (Normalized Vector1) where
   arbitrary = normalize <$> Vector1 <$> (\ (NonZero a) -> a) <$> arbitrary

@@ -14,6 +14,7 @@ import Particle.BasicParticle
 
 -- Its dependencies
 import Particle.Test.Arbitrary
+import Particle.Test.ArbitraryParticles
 import Particle.Classes
 import SpaceTime.Space3DCartesian as Space
 import Approx
@@ -28,15 +29,6 @@ test_environment = Space.Time 1.0
 
 -- | Uniform particle origin:
 origin = Space.Position ( Vector3 0.0 0.0 0.0 )
-
--- | Arbitrary BasicParticles
-instance Arbitrary BasicParticle where
-  arbitrary = createParticle
-              <$> arbitrary
-              <*> arbitrary
-              <*> arbitrary
-              <*> arbitrary
-              <*> arbitrary
 
 -- | Property: Particle clock should == 1.0 after one step.
 prop_ParticleTime :: BasicParticle -> Bool

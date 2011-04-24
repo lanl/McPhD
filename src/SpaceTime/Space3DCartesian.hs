@@ -67,11 +67,6 @@ newtype Direction = Direction { dir :: Vector3 } deriving (Eq, Show, Num, Approx
 instance VectorType Direction where
   vector = dir
 
--- | Time, elapsed time from beginning of streaming
-newtype Time = Time { getTime :: Double } deriving (Eq, Show, Num, Ord, Approx)
-instance ScalarType Time where
-  scalar = getTime
-
 -- | A scalar representing the magnitude of velocity.
 newtype Speed = Speed { speed :: Double } deriving (Eq, Show, Num, Ord, Approx)
 instance ScalarType Speed where
@@ -125,7 +120,7 @@ randomDirection :: PureMT -> (Direction, PureMT)
 randomDirection g = let
   (a, g')   = sampleVar g
   (b, g'')  = sampleVar g'
-  v = generateNormalVector3 a b 
+  v = generateNormalVector3 a b
   in (direction $ normalized_value v , g'')
 
 -- | Sample an exponential Distance from a PureMT
@@ -133,5 +128,3 @@ randomExponential :: Double -> PureMT -> (Distance, PureMT)
 randomExponential lambda g = let
   (a, g') = randomDouble g
   in (Distance $ generateExponential (Positive lambda) (UnitInterval a), g')
-
-

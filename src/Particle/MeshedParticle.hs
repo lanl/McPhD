@@ -3,16 +3,14 @@ module Particle.MeshedParticle where
 import Mesh.SimpleCartesian
 import Space3DCartesian
 
--- | Looking for ways to take a particle and add information about the mesh that it's on
+-- | Looking for ways to take a particle and add information about the
+-- mesh that it's on
 
 -- | Newtype for a particle, plus an index to keep track of it.
 data MeshedParticle i p = MeshedParticle {
       getIndex :: i
     , getParticle :: p
     } deriving (Show)
-
-
-data MeshEnvironment = MeshEnvironment { getMesh :: SimpleCartesian, getOpacity
 
 
 data MeshedLimiter i p =

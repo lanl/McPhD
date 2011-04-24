@@ -1,3 +1,4 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-- A module for various numeric definitions useful in building
 domain-specific numeric types
 
@@ -77,5 +78,7 @@ sampleRadius (UnitInterval x) = (Radius . negate . log) x
 
 instance Approx Radius where
   within_eps epsilon (Radius r1) (Radius r2) = within_eps epsilon r1 r2
-  
-  
+
+
+-- | Time, elapsed time from beginning of streaming
+newtype Time = Time { getTime :: Double } deriving (Eq, Show, Num, Ord, Approx)
