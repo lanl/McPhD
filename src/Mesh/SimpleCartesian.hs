@@ -89,11 +89,3 @@ findCell mesh position =
 faceOnCell :: Face -> Cell -> Bool
 faceOnCell _ Void = False
 faceOnCell (Face cell _) (Local cell') = cell == cell'
-
-
-
-
--- | Streaming distance from given position in the given direction, to
--- the first-encountered face of cell.
--- escapeDistance :: SimpleMesh -> Cell -> Position -> Direction -> (Distance, Face)
--- escapeDistance mesh cell position direction = undefined

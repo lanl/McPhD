@@ -23,7 +23,7 @@ prop_Approx p = p ~== p
 
 tests =
   [
-    testGroup "Parametric Particle Tests"
+    testGroup "Numeric Tests"
     [
       testProperty
       "Approximate identity"

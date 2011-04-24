@@ -27,7 +27,8 @@ instance (Vector v) => Space (Cartesian v) where
     type Distance  (Cartesian v) = Double
     type Position  (Cartesian v) = v
     type Direction (Cartesian v) = Normalized v
-    stream (Cartesian pos dir) dist = Cartesian (pos + (normalized_value  dir) |* dist) dir
+    stream (Cartesian pos dir) dist =
+      Cartesian (pos + (normalized_value  dir) |* dist) dir
     position = cart_position
     direction = cart_direction
 

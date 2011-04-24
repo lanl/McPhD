@@ -30,7 +30,8 @@ cellIndex :: CellIndex
 cellIndex = CellIndex 10 10 10
 
 testRange :: Assertion
-testRange = inRange (CellIndex 0 0 0, CellIndex 20 20 20) cellIndex @? "InRange operator for CellIndex"
+testRange = inRange (CellIndex 0 0 0, CellIndex 20 20 20) cellIndex @?
+            "InRange operator for CellIndex"
 
 
 -- * Simple Mesh Tests
@@ -56,7 +57,7 @@ prop_SampleInMesh :: Seed -> Bool
 prop_SampleInMesh seed =
     let (location, _) = uniform_sample spherical_mesh (makePureMT seed)
     in is_in_mesh spherical_mesh location
-      
+
 
 
 prop_FindIsInAgree :: Seed -> Bool
@@ -67,20 +68,20 @@ prop_FindIsInAgree seed =
   in case (is_in_cell spherical_mesh) <$> found_cell <*> Just location of
        Just True -> True
        _         -> False
-      
-      
-      
+
+
+
 
 tests = [ testGroup "Index Tests"
-          [ 
+          [
            testCase "LEQ operator" testRange
           ],
           testGroup "Simple Mesh Tests"
-          [ 
+          [
            testCase "Size Equality" simpleTestSize
           ],
           testGroup "Spherical Mesh Tests"
-          [ 
+          [
            testCase "Size Equality" sph1DTestSize
           , testCase "Radius Equality" sph1DTestRadius
           , testProperty "Locations sampled in mesh, are in mesh" prop_SampleInMesh
