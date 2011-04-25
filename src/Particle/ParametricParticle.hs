@@ -1,10 +1,8 @@
-{-
-A particle type which is paramaterized over space.
+{-| A particle type which is paramaterized over the space it moves in.
 -}
 module Particle.ParametricParticle where
 
 import System.Random.Mersenne.Pure64
-
 
 import SpaceTime.Classes
 import RandomNumbers
