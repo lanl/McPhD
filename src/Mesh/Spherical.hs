@@ -45,43 +45,46 @@ outer_cell mesh = SphericalMeshCell $ size mesh -1
 outer_radius :: SphericalMesh -> Radius
 outer_radius mesh = cell_max mesh (outer_cell mesh)
 
+in_cell_test :: (Radius -> Radius -> Bool)
+                -> SphericalMesh -> SphericalMeshCell -> Spherical1D
+                -> Bool
+in_cell_test comp mesh cell location =
+  let r       = position location
+      rmin    = cell_min mesh cell
+      rmax    = cell_max mesh cell
+      cos_dis = cos_Sph1Ddirection location
+    in ( (r > rmin) || ( (r `comp` rmin) && cos_dis >= 0) )  &&
+       ( (r < rmax) || ( (r `comp` rmax) && cos_dis < 0) )
+
 
 instance SpaceMesh SphericalMesh where
   type MeshCell  SphericalMesh = SphericalMeshCell
   type MeshFace  SphericalMesh = SphericalDirection
   type MeshSpace SphericalMesh = Spherical1D
+
   size = length . radii
 
   -- This is too simple; we should use direction to break equality
   -- Also, it looks like line noise.
-  cell_find mesh location = SphericalMeshCell <$> ( fst <$> ( find ( ( > position location) . snd) (zip [0..] (radii mesh))))
+  cell_find mesh location = SphericalMeshCell <$>
+                            ( fst <$> ( find ( ( > position location) . snd)
+                                        (zip [0..] (radii mesh))))
 
+  cell_neighbor mesh cell Inward = inward_cell mesh cell
+  cell_neighbor mesh cell Outward = outward_cell mesh cell
 
-  cell_neighbor  mesh cell Inward = inward_cell mesh cell
-  cell_neighbor  mesh cell Outward = outward_cell mesh cell
   cell_neighbors mesh cell = [(Inward, inward_cell mesh cell),
-                              (Outward, outward_cell mesh cell)]
+                              (Outward, outward_cell mesh cell) ]
+
   cell_boundary = undefined
 
   is_in_mesh mesh location =
     let r = position location
     in r < outer_radius mesh
 
-  is_in_cell mesh cell location =
-    let r       = position location
-        rmin    = cell_min mesh cell
-        rmax    = cell_max mesh cell
-        cos_dis = cos_Sph1Ddirection location
-    in ( (r > rmin) || (r == rmin && cos_dis >= 0) )  &&
-       ( (r < rmax) || (r == rmax && cos_dis < 0) )
+  is_in_cell = in_cell_test (==)
 
-  is_approx_in_cell mesh cell location =
-    let r       = position location
-        rmin    = cell_min mesh cell
-        rmax    = cell_max mesh cell
-        cos_dis = cos_Sph1Ddirection location
-    in ( (r > rmin) || (r ~== rmin && cos_dis >= 0) ) &&
-       ( (r < rmax) || (r ~== rmax && cos_dis < 0) )
+  is_approx_in_cell = in_cell_test (~==)
 
   uniform_sample mesh rand =
     let (radius, rand') = sample_ball1D (outer_radius mesh) rand
