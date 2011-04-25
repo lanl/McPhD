@@ -1,11 +1,11 @@
-module Particle.Test.ArbitraryParticles where
+module Particle.Test.Particles_arbitrary where
 
 import Control.Applicative
 import Test.QuickCheck
 
 
 import SpaceTime.Classes
-import Particle.Test.Arbitrary
+import Particle.Test.Space3DCartesian_arbitrary
 import Particle.BasicParticle
 import Particle.ParametricParticle
 

@@ -12,7 +12,7 @@ import Test.QuickCheck
 import Particle.ParametricParticle
 
 -- It's dependencies
-import Particle.Test.ArbitraryParticles
+import Particle.Test.Particles_arbitrary
 import Approx
 import SpaceTime.Classes
 import SpaceTime.Spherical1D

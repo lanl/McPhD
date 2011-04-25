@@ -1,5 +1,5 @@
 -- | A module for defining Arbitrary instances for testing various particles.
-module Particle.Test.Arbitrary where
+module Particle.Test.Space3DCartesian_arbitrary where
 
 import Test.QuickCheck
 
@@ -12,8 +12,7 @@ import Test.Numeric_arbitrary
 
 import Control.Applicative
 
--- * Arbitrary instances for RandomParticle attributes. These will go
--- into making random particles for QuickCheck tests.
+-- * Arbitrary instances for BasicParticle attributes.
 
 instance Arbitrary Seed where
   arbitrary = Seed <$> arbitrary
@@ -25,7 +24,9 @@ instance Arbitrary Cell where
   arbitrary = Local <$> arbitrary
 
 instance Arbitrary Direction where
-    arbitrary = direction <$> normalized_value <$> (generateNormalVector3 <$> arbitrary <*> arbitrary)
+    arbitrary = direction
+                <$> normalized_value
+                <$> (generateNormalVector3 <$> arbitrary <*> arbitrary)
 
 instance Arbitrary Position where
   arbitrary = Position <$> ( Vector3 <$> arbitrary <*> arbitrary <*> arbitrary )
@@ -39,6 +40,3 @@ instance Arbitrary Time where
 -- Need > 0 for speed. TODO: Use Positive modifier
 instance Arbitrary Speed where
   arbitrary = Speed <$> abs <$> (0.1+) <$> arbitrary
-
--- instance Arbitrary Opacity where
---   arbitrary = Opacity <$> abs <$> arbitrary

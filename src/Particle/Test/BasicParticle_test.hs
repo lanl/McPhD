@@ -8,13 +8,12 @@ import Test.Framework.Providers.QuickCheck2 (testProperty)
 import Test.HUnit
 import Test.QuickCheck
 
-
 -- The library under test
 import Particle.BasicParticle
 
 -- Its dependencies
-import Particle.Test.Arbitrary
-import Particle.Test.ArbitraryParticles
+import Particle.Test.Space3DCartesian_arbitrary
+import Particle.Test.Particles_arbitrary
 import Particle.Classes
 import SpaceTime.Space3DCartesian as Space
 import Approx

@@ -215,5 +215,6 @@ can be iterated, provided I add an inital event, like "Born"
       InstanceB.hs
       Test/
          Arbitrary.hs   -- Arbitrary instances for Foo data. Maybe split on data types.
+         InstanceA_arbitrary.hs
          InstanceA_test.hs  -- Tests for each data type
          InstanceB_test.hs
