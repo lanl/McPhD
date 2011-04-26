@@ -1,48 +1,33 @@
--- PRNG.hs
--- T. M. Kelley
--- Mar 03, 2011
--- (c) Copyright 2011 LANSLLC, all rights reserved
-{-# LANGUAGE BangPatterns #-}
-                                                                                
-module PRNG (RNG
-            ,mkRNG
-            ,random
-            ,getFiveRNs
-            ,getSixRNs
-            ,prand)
-  where
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+module PRNG where
 
-import System.Random(mkStdGen,StdGen,random,Random)
-import Numerical
+import Control.Monad.State.Strict
+import Control.Monad.Identity
+import System.Random as R
 
-type RNG = StdGen
+newtype RNG = RNG StdGen
 
 mkRNG :: Int -> RNG
-mkRNG = mkStdGen
+mkRNG = RNG . mkStdGen
 
-getFiveRNs :: RNG -> (FP,FP,FP,FP,FP,RNG)
-getFiveRNs g = let (!r5,!g5) = random g4
-                   (!r4,!g4) = random g3
-                   (!r3,!g3) = random g2
-                   (!r2,!g2) = random g1
-                   (!r1,!g1) = random g
-  in (r1,r2,r3,r4,r5,g5)
+testRNG :: RNG
+testRNG = mkRNG 42
 
-getSixRNs :: RNG -> (FP,FP,FP,FP,FP,FP,RNG)
-getSixRNs g = let  (!r6,!g6) = random g5
-                   (!r5,!g5) = random g4
-                   (!r4,!g4) = random g3
-                   (!r3,!g3) = random g2
-                   (!r2,!g2) = random g1
-                   (!r1,!g1) = random g
-  in (r1,r2,r3,r4,r5,r6,g6)
+-- QUESTION: Should we make a Random monad?
 
-prand :: RNG
-prand =  mkStdGen 42
+newtype Rnd a = Rnd (State RNG a)
+  deriving (Monad, MonadState RNG)
 
+random :: Random a => Rnd a
+random = Rnd (StateT (\ (RNG g) ->
+                      case R.random g of (x, ng) -> Identity (x, RNG ng)))
 
+randoms :: Random a => Int -> Rnd [a]
+randoms n = replicateM n PRNG.random
 
--- version
--- $Id$
+runRnd :: RNG -> Rnd a -> (a, RNG)
+runRnd g (Rnd m) = runState m g
 
--- End of file
+split :: RNG -> (RNG, RNG)
+split (RNG g) = case R.split g of
+                  (g1, g2) -> (RNG g1, RNG g2)
