@@ -45,6 +45,9 @@ instance (Arbitrary n, Ord n, Num n, Mag n) =>
     Arbitrary (Normalized n) where
   arbitrary = (\ (NonZero a) -> normalize a) <$> arbitrary
 
+-- TODO: Do you need the default for more than one type? It looks like the
+-- vector instances are all special. Do they have to be?
+
 instance Arbitrary Vector1 where
   arbitrary = Vector1 <$> arbitrary
 
