@@ -5,6 +5,7 @@
 
 {-# LANGUAGE BangPatterns #-}
 module Source (genParticles
+              ,genParticles'
               ,genParticle)
     where
 
@@ -32,6 +33,25 @@ genParticles n msh rng =
         ew  = EnergyWeight 1.0
         tag = n::Word32
 
+-- generates particles uniformly over a spatial domain
+genParticles' :: Word32 ->   -- how many particles to generate
+                Mesh ->    
+                RNG ->
+                ([Particle],RNG)
+genParticles' 0 _ g = ([],g)
+genParticles' n msh rng = 
+  let (ps1,ps2,ps3,ds1,ds2,ds3,rng') = getSixRNs rng 
+      (g1,g2) = split rng'
+      (x,c)   = samplePosition msh ps1 ps2 ps3
+      d       = sampleDirection msh ds1 ds2 ds3
+      p       = Particle x d t e ew c g1 tag
+      (ps,g3) = genParticles' (n-1) msh g2
+  in (p:ps,g3)
+  where t       = Time 1.0
+        e       = Energy 1.0
+        ew      = EnergyWeight 1.0
+        tag     = n::Word32
+
 -- generates one particle uniformly over a spatial domain
 genParticle :: Word32 ->   -- particle tag
                 Mesh ->    
@@ -42,7 +62,7 @@ genParticle n msh rng =
       (g1,g2) = split rng'
       (x,c)   = samplePosition msh ps1 ps2 ps3
       d       = sampleDirection msh ds1 ds2 ds3
-      p       = Particle x d t e ew c g1 tag
+      p       = g1 `seq` Particle x d t e ew c g1 tag
   in (p,g2)
   where t   = Time 1.0
         e   = Energy 1.0

@@ -30,6 +30,7 @@ instance NFData Tally where
   rnf (Tally gevts dep) = gevts `seq` dep `deepseq` ()
 
 type PhysicsTally   = Map.Map CellIdx (Momentum,EnergyWeight)
+-- newtype PhysicsTally   = PhysicsTally {physTally :: Map.Map !CellIdx !(Momentum,EnergyWeight)} deriving (Show)
 
 -- trying to find a way to make PhysicsTally strict 
 -- newtype PhysicsTally   = PTally {physTally :: Map.Map CellIdx (Momentum,EnergyWeight)} deriving (Show)
