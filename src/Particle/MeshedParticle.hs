@@ -6,7 +6,8 @@ import Space3DCartesian
 -- | Looking for ways to take a particle and add information about the
 -- mesh that it's on
 
--- | Newtype for a particle, plus an index to keep track of it.
+-- | Type for a meshed particle, which adds mesh information to an
+-- existing particle type.
 data MeshedParticle i p = MeshedParticle {
       getIndex :: i
     , getParticle :: p

@@ -49,49 +49,7 @@ instance Mag Radius where
 --   magnitude  d = abs d
 --   magnitude2 d = d*d
 
--- !!!: Generally, you should try to avoid instances of the form
---
--- instance A a => B a where ...
---
--- They're almost always a sign that something isn't modelled suitably for
--- the Haskell class system.
---
--- I can see several options to work around it; not all of them are adequate in
--- every situation. Here are a few:
---
--- (1) If the above definitions are the only ones that you want, then it's better
--- not to define a class Mag at all, but instead just define three functions,
--- such as:
---
--- normalize :: RealFloat a => a -> Normalized a
--- ...
---
--- with the definitions given above. But this does not seem to be the case
--- here.
---
--- (2) You can wrap the types to help the type checker:
---
--- newtype NormFloat  a = NormFloat  a
--- newtype NormVector a = NormVector a
--- instance RealFloat a => Mag (NormFloat a)  where ...
--- instance Vector a    => Mag (NormVector a) where ...
---
--- This will disambiguate the situation for the type checker, and avoid
--- the need for overlapping instances, but it will make the use of the code
--- less pleasant.
---
--- (3) If the classes have a limited number of instances you're interested
--- in, you can specialize the instance declaration to the ground types rather
--- than the global form. This is what you've done for RealFloat/Double, but
--- not for Vector.
---
--- (4) You might consider changing the class hierarchy. You could make Double
--- an instance of the Vector class and then use solution (1). That should work.
--- That being said, turning a Double into a V1 is a single constructor application.
--- You might even be able to do without the instance for Double ...
-
--- ???: This one requires UndecidableInstances. What am I getting into here?
-{-- ???: Going ahead and removing this instance declaration until I
+{-- Removing this instance declaration until I
 understand the issues better. -}
 -- instance Vector a => Mag a where
 --   normalize    = Normalized . vnormalise
@@ -129,16 +87,6 @@ instance Mag Vector3 where
 --   magnitude2 = const (1.0::Double)
 
 
--- !!!: As I said above, such instances are problematic. GHC never considers
--- the part left of the => when picking an instance. So in principle, this
--- declaration says "everything is in Mag, try to find out later that everything's
--- a vector too". In particular, something like
---
--- instance A a => C a
--- instance B a => C a
---
--- will never work. GHC will not look which of A or B hold in order to choose
--- the instance.
 
 {- Functions for making normalized vectors. There are here because I
 don't want to expose the Normalized constructor. This really hampers

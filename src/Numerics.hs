@@ -81,4 +81,6 @@ instance Approx Radius where
 
 
 -- | Time, elapsed time from beginning of streaming
-newtype Time = Time { getTime :: Double } deriving (Eq, Show, Num, Ord, Approx)
+newtype Time = Time { getTime :: Double } deriving (Eq, Show, Num, Ord)
+instance Approx Time where
+  within_eps epsilon (Time t1) (Time t2) = within_eps epsilon t1 t2

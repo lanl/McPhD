@@ -22,29 +22,6 @@ instance (Arbitrary n, Random n, RealFloat n) =>
       arbitrary = UnitInterval <$> choose (0.0, 1.0)
 
 
-{-- ???: Generating Overlapping instances with the Normalized
-instances below. I'm surprised that the compiler doesn't choose
-the more specific version in this case.
-
-Example instances:
-
-      instance (Arbitrary n, Ord n, Num n, NormalizedValues.Mag n) =>
-               Arbitrary (NormalizedValues.Normalized n)
-
-and
-
-      instance Arbitrary (NormalizedValues.Normalized Vector2)
-
-I can live without the default version.
-
---}
-
--- Default for Normalized Arbitrary instances uses normalize function
--- from class Mag and requires a NonZero argument
-instance (Arbitrary n, Ord n, Num n, Mag n) =>
-    Arbitrary (Normalized n) where
-  arbitrary = (\ (NonZero a) -> normalize a) <$> arbitrary
-
 instance Arbitrary Vector1 where
   arbitrary = Vector1 <$> arbitrary
 
@@ -63,8 +40,16 @@ instance Arbitrary ZenithAngle where
 instance Arbitrary Radius where
   arbitrary = sampleRadius <$> arbitrary
 
-instance Arbitrary (Normalized Vector1) where
-  arbitrary = normalize <$> Vector1 <$> (\ (NonZero a) -> a) <$> arbitrary
+
+
+-- Default for Normalized Arbitrary instances uses normalize function
+-- from class Mag and requires a NonZero argument
+instance (Arbitrary n, Ord n, Num n, Mag n) =>
+     Arbitrary (Normalized n) where
+         arbitrary = (\ (NonZero a) -> normalize a) <$> arbitrary
+
+-- For 2 and 3 vectors, we have specialized functions which can
+-- compute unit vectors directly
 
 instance Arbitrary (Normalized Vector2) where
   arbitrary = normalVector2 <$> arbitrary
