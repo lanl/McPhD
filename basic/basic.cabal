@@ -11,75 +11,20 @@ maintainer:          tkelley@lanl.gov
 homepage:            http://software.lanl.gov/McPhD
 build-type:          Simple
 stability:           experimental
-tested-with:         GHC==6.12.1
 -- extra-source-files:  README.txt
 
 source-repository head
   type: hg
   location: https://software.lanl.gov/McPhD/hg/source/basic
 
-flag test
-  description: Build testsuite, code coverage tests etc
-  default: True
-
-Library
-   ghc-options: -Wall -fno-warn-name-shadowing -fno-warn-orphans -fwarn-tabs
-   hs-source-dirs:
-      ./src
-   build-depends:
-       base > 3 && <= 5,
-       AC-Vector == 2.*
-       , random
-       , tuple
-       , array == 0.3.*
-       , mersenne-random-pure64 == 0.2.*
-       , containers
-       , deepseq
-       , parallel >= 2
-   exposed-modules: MC 
-   other-modules:
-
 executable  basic
-  hs-source-dirs:
-    ./src
+  hs-source-dirs:  src
   ghc-options: -Wall -fno-warn-name-shadowing -fno-warn-orphans -fwarn-tabs
-  other-modules:
-  DataTypes
-  Constants
-  MC
+  ghc-options: -rtsopts -threaded -eventlog
   main-is:       Main.hs
-  if flag(test)
-    ghc-options: -fhpc
-    build-depends: base >=3 && <=5, 
-                   haskell98,
-                   hpc, 
-                   mersenne-random-pure64 == 0.2.*,
-                   array == 0.3.*,
-                   HUnit == 1.2.*,
-                   test-framework-quickcheck2,
-                   test-framework-hunit,
-                   test-framework,
-                   QuickCheck
-                   
-  else
-    buildable: False
-
-executable TestSuite
-  hs-source-dirs: ./src/ ./src/Test
-  ghc-options: -Wall -fwarn-tabs -fno-warn-name-shadowing -fno-warn-orphans
-  other-modules:
-  main-is: TestSuite.hs
-  if flag(test)
-    ghc-options: -fhpc
-    build-depends: base >=3 && <=5
-                   , hpc
-                   , AC-Vector == 2.*
-                   , array == 0.3.*
-                   , mersenne-random-pure64 == 0.2.*
-                   , HUnit == 1.2.*
-                   , test-framework-hunit
-                   , test-framework-quickcheck2
-                   , test-framework
-                   , QuickCheck
-  else
-    buildable: False
+  build-depends: base >=4 && <=5,
+                 vector >= 0.7,
+                 random >= 1,
+                 mtl >= 1,
+                 deepseq >= 1,
+                 parallel >= 3.1
