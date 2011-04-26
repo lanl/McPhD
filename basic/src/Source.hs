@@ -1,75 +1,30 @@
--- Source.hs
--- T. M. Kelley
--- Feb 15, 2011
--- (c) Copyright 2011 LANSLLC, all rights reserved
+module Source where
 
-{-# LANGUAGE BangPatterns #-}
-module Source (genParticles
-              ,genParticles'
-              ,genParticle)
-    where
+import Control.Monad.State
+import Data.List
 
-import Particle
-import PRNG
-import Physical
 import Mesh
-import System.Random (split)
+import Particle
+import Physical
+import PRNG
 
--- generates particles uniformly over a spatial domain
-genParticles :: Word32 ->   -- how many particles to generate
-                Mesh ->    
-                RNG ->
-               [Particle]
-genParticles 0 _ _ = []
-genParticles n msh rng = 
-  let (ps1,ps2,ps3,ds1,ds2,ds3,rng') = getSixRNs rng 
-      (g1,g2)   = split rng'
-      (x,c)     = samplePosition msh ps1 ps2 ps3
-      d         = sampleDirection msh ds1 ds2 ds3
-      !p        = Particle x d t e ew c g1 tag
-  in p:genParticles (n-1) msh g2
-  where t   = Time 1.0
-        e   = Energy 1.0
-        ew  = EnergyWeight 1.0
-        tag = n::Word32
+-- | Generate a number of random particles.
+genParticles :: Mesh m => Int -> m -> RNG -> [Particle]
+genParticles n msh rng =
+  let rngs = take n (unfoldr (Just . split) rng)
+  in  map (genParticle msh) rngs
 
--- generates particles uniformly over a spatial domain
-genParticles' :: Word32 ->   -- how many particles to generate
-                Mesh ->    
-                RNG ->
-                ([Particle],RNG)
-genParticles' 0 _ g = ([],g)
-genParticles' n msh rng = 
-  let (ps1,ps2,ps3,ds1,ds2,ds3,rng') = getSixRNs rng 
-      (g1,g2) = split rng'
-      (x,c)   = samplePosition msh ps1 ps2 ps3
-      d       = sampleDirection msh ds1 ds2 ds3
-      p       = Particle x d t e ew c g1 tag
-      (ps,g3) = genParticles' (n-1) msh g2
-  in (p:ps,g3)
-  where t       = Time 1.0
-        e       = Energy 1.0
-        ew      = EnergyWeight 1.0
-        tag     = n::Word32
-
--- generates one particle uniformly over a spatial domain
-genParticle :: Word32 ->   -- particle tag
-                Mesh ->    
-                RNG ->
-                (Particle,RNG)
-genParticle n msh rng = 
-  let (ps1,ps2,ps3,ds1,ds2,ds3,rng') = getSixRNs rng 
-      (g1,g2) = split rng'
-      (x,c)   = samplePosition msh ps1 ps2 ps3
-      d       = sampleDirection msh ds1 ds2 ds3
-      p       = g1 `seq` Particle x d t e ew c g1 tag
-  in (p,g2)
-  where t   = Time 1.0
-        e   = Energy 1.0
-        ew  = EnergyWeight 1.0
-        tag = n::Word32
-
--- version
--- $Id$
-
--- End of file
+-- | Generate a single random particle.
+genParticle :: Mesh m => m -> RNG -> Particle
+genParticle msh rng =
+  fst $ runRnd rng $ do
+    (x, c) <- samplePosition  msh
+    d      <- sampleDirection msh
+    let t  :: Time
+        t  = 1
+        e  :: Energy
+        e  = 1
+        ew :: EnergyWeight
+        ew = 1
+    rng'   <- get
+    return (Particle x d t e ew c rng')
