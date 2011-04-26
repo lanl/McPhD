@@ -21,7 +21,7 @@ main = do
   (n, rest) <- parseCL
   test (parBuffer 10 rdeepseq) n
 -- The following are Criterion tests, comparing different strategies:
-
+{-
   withArgs rest $
     defaultMain [
       bench "tally-seq"    (test r0 n),
@@ -30,6 +30,7 @@ main = do
       bench "tally-par-20" (test (parBuffer 20 rdeepseq) n),
       bench "tally-par-50" (test (parBuffer 50 rdeepseq) n)
     ]
+-}
 
 -- Test run, abstracting over the strategy being used.
 test :: Strategy [Tally] -> Word32 -> IO ()
@@ -37,15 +38,8 @@ test s n = do
   let tally = runManyP s infMesh simpleMat n
   -- let tally = runManyP2 infMesh simpleMat n
   -- let tally = runManyP5 infMesh simpleMat prand emptyTally n
-  let tally = runManyP6 infMesh simpleMat n
+  -- let tally = runManyP6 infMesh simpleMat n
   writeTally "tally1" tally
-
-
-runMany :: Mesh -> Material -> Word32 -> RNG -> Tally
-runMany msh mat ntot g = let 
-  ps = genParticles ntot msh g
-  tallies = map (runParticle msh mat) ps
-  in foldl' merge emptyTally tallies
 
 runManyP :: Strategy [Tally] -> Mesh -> Material -> Word32 -> Tally
 runManyP s msh mat ntot = let
@@ -84,8 +78,8 @@ runManyP5 msh mat rng t n =
 runManyP6 :: Mesh -> Material -> Word32 -> Tally
 runManyP6 msh mat n = fst $ foldl' history (emptyTally,prand) [1..n]
      where history (!cumTally,!rng) i = (merge cumTally newTally,rng')
-               where (!p,!rng') = genParticle i msh rng
-                     !newTally = runParticle msh mat p
+               where (p,rng') = genParticle i msh rng
+                     newTally = runParticle msh mat p
 
 -- mshType = Cart1D
 mshType = Sphere1D
