@@ -41,38 +41,35 @@ class VectorType v where
 class ScalarType s where
   scalar :: s -> Double
 
+-- TODO: I have a somewhat bad feeling about these. Is it a good idea to have
+-- 3D-specific classes like this?
+
+instance VectorType Vector3 where
+  vector = id
+
+instance ScalarType Double where
+  scalar = id
+
 -- | Position, a 3D vector
-newtype Position = Position { pos :: Vector3 } deriving (Eq, Show, Num, Approx)
-instance VectorType Position where
-  vector = pos
+newtype Position = Position { pos :: Vector3 } deriving (Eq, Show, Num, Approx, VectorType)
 
 -- | Momentum, a 3D vector
-newtype Momentum = Momentum { mom :: Vector3 } deriving (Eq, Show, Num, Approx)
-instance VectorType Momentum where
-  vector = mom
+newtype Momentum = Momentum { mom :: Vector3 } deriving (Eq, Show, Num, Approx, VectorType)
 
 -- | Motion, a 3D vector
-newtype Motion = Motion { mot :: Vector3 } deriving (Eq, Show, Num, Approx)
-instance VectorType Motion where
-  vector = mot
+newtype Motion = Motion { mot :: Vector3 } deriving (Eq, Show, Num, Approx, VectorType)
 
 -- | Distance, scalar
-newtype Distance = Distance { dis :: Double  } deriving (Eq, Show, Num, Ord, Approx)
-instance ScalarType Distance where
-  scalar = dis
+newtype Distance = Distance { dis :: Double  } deriving (Eq, Show, Num, Ord, Approx, ScalarType)
 
 -- | Direction, a 3D vector of magnitude 1.
 -- TODO: Replace this with a Normalized Vector3
-newtype Direction = Direction { dir :: Vector3 } deriving (Eq, Show, Num, Approx, Mag)
-instance VectorType Direction where
-  vector = dir
+newtype Direction = Direction { dir :: Vector3 } deriving (Eq, Show, Num, Approx, Mag, VectorType)
 
 -- | A scalar representing the magnitude of velocity.
-newtype Speed = Speed { speed :: Double } deriving (Eq, Show, Num, Ord, Approx)
-instance ScalarType Speed where
-  scalar = speed
+newtype Speed = Speed { speed :: Double } deriving (Eq, Show, Num, Ord, Approx, ScalarType)
 
--- * Construction and manupulation of space quantities
+-- * Construction and manipulation of space quantities
 
 -- | Normalizes the vector when creating a Direction
 direction :: Vector3 -> Direction
@@ -99,7 +96,7 @@ infix 6 +->
 (+->) position motion = move position motion
 
 -- | Translates object along the direction vector
-translate :: Position -- ^ Initial position
+translate :: Position  -- ^ Initial position
           -> Direction -- ^ Direction vector
           -> Distance  -- ^ Movement distance
           -> Position  -- ^ New position
