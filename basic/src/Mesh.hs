@@ -1,90 +1,42 @@
--- Mesh.hs
--- T. M. Kelley
--- Jan 28, 2011
--- (c) Copyright 2011 LANSLLC, all rights reserved
+module Mesh where
 
-module Mesh (Mesh(..)  -- Mesh type now defined in MeshBase
-            , bdyEvent
-            , distToBdy
-            , cellAcross
-            , samplePosition
-            , sampleDirection
-            , simpleMesh
-            , module Cell)
-    where
+import Data.Vector as V
 
-import Physical
+import Cell
 import Event
-import Cell 
-import qualified Sphere1D as Sphere1D
-import qualified Cart1D as Cart1D
-import qualified Cart3D as Cart3D
-import MeshBase 
+import Material
+import PRNG
+import Physical
 
--- * geometric properties
--- | Given a mesh,cell, and face, determine the Event (returned as Event ctor)
-bdyEvent :: Mesh -> CellIdx -> Face -> (FP->Face->Event)
-bdyEvent msh cell face = bdyTypeToEvent $ bdyType msh cell face
+class Mesh m where
+  samplePosition     :: m -> Rnd (Position, CellIdx)
+  sampleDirection    :: m -> Rnd Direction
+  distanceToBoundary :: m -> CellIdx -> Position -> Direction -> (FP, Face)
+    -- TODO: should "distance" get its own type?
+  cells              :: m -> Vector Cell
+  cellAcross         :: m -> CellIdx -> Face -> CellIdx
 
--- * sampling on meshes
--- | sample a position in the mesh: dispatch to appropriate module
-samplePosition :: Mesh -> FP -> FP -> FP -> (Position,CellIdx)
-samplePosition msh@(Sphere1D {}) = Sphere1D.sampPos msh  
-samplePosition msh@(Cart1D {})   = Cart1D.sampPos   msh  
-samplePosition msh@(Cart3D {})   = Cart3D.sampPos   msh  
+-- | Returns the maximum index of the vector of cells.
+nrCells :: Mesh m => m -> Int
+nrCells = V.length . cells
 
--- | sample a direction: dispatch to appropriate module
-sampleDirection :: Mesh -> FP -> FP -> FP -> Direction
-sampleDirection Sphere1D {} = Sphere1D.sampDir  
-sampleDirection Cart1D {}   = Cart1D.sampDir    
-sampleDirection Cart3D {}   = Cart3D.sampDir   
+-- QUESTION: It might be better to return the length instead.
 
-cellAcross :: Mesh -> CellIdx -> Face -> CellIdx
-cellAcross Sphere1D {} = Sphere1D.across  
-cellAcross Cart1D {}   = Cart1D.across    
-cellAcross Cart3D {}   = Cart3D.across   
+material :: Mesh m => m -> CellIdx -> Material
+material msh (CellIdx cidx) = mat (cells msh ! cidx)
+
+boundaryType :: Mesh m => m -> CellIdx -> Face -> BoundaryCondition
+boundaryType msh (CellIdx cidx) Lo = lowBC  (cells msh ! cidx)
+boundaryType msh (CellIdx cidx) Hi = highBC (cells msh ! cidx)
+
+toBoundaryEvent :: BoundaryCondition -> BoundaryEvent
+toBoundaryEvent Vac    = Escape
+toBoundaryEvent Refl   = Reflect
+toBoundaryEvent Transp = Transmit
+toBoundaryEvent None   = error "Mesh.toBoundaryEventType: None boundary"
+
+boundaryEvent :: Mesh m => m -> CellIdx -> BoundaryEvent
+boundaryEvent msh cidx d face =
+  toBoundaryEvent (boundaryType msh cidx face) d face
 
 
--- | dispatch on mesh type to appropriate distance function
-distToBdy :: Mesh -> CellIdx -> Position -> Direction -> (FP, Face)
-distToBdy msh cell psn drn = 
-    case msh of 
-      Sphere1D {} -> Sphere1D.distToBdy r omega rhi rlo
-          where r     = v1x (pos psn)
-                omega = v1x (dir drn)
-                rhi   = xcomp (pos $ highB (mesh msh ! cell))
-                rlo   = xcomp (pos $ lowB  (mesh msh ! cell))
-      Cart3D {} -> Cart3D.distToBdy x o bl bh
-      Cart1D {} -> Cart1D.distToBdy x o bl bh
-      where x  = psn
-            o  = drn
-            bl = highB (mesh msh ! cell)
-            bh = lowB  (mesh msh ! cell)
-
--- | look up type of boundary from mesh 
-bdyType :: Mesh -> CellIdx -> Face -> BoundaryCondition
-bdyType msh cell XLow  = xbc $ lowBC  (mesh msh ! cell)
-bdyType msh cell XHigh = xbc $ highBC (mesh msh ! cell)
-bdyType msh cell YLow  = ybc $ lowBC  (mesh msh ! cell)
-bdyType msh cell YHigh = ybc $ highBC (mesh msh ! cell)
-bdyType msh cell ZLow  = zbc $ lowBC  (mesh msh ! cell)
-bdyType msh cell ZHigh = zbc $ highBC (mesh msh ! cell)
-
--- | Given a boundary condition, return the corresponding event ctor
-bdyTypeToEvent :: BoundaryCondition -> (FP->Face->Event)
-bdyTypeToEvent Vac = Escape
-bdyTypeToEvent Refl = Reflect
-bdyTypeToEvent Transp = Transmit
-bdyTypeToEvent None = error "Cannot associate null boundary with an event"
-
--- instance, handy for testing. 
-simpleMesh :: Mesh
-simpleMesh = Sphere1D $ listArray (1,2)
-             [CellProps (Position 0.0) (Position 1.0) (bc1D Vac) (bc1D Transp),
-              CellProps (Position 1.0) (Position 2.0) (bc1D Transp) (bc1D Vac)]
-
-                                     
--- version
--- $Id$
-
--- End of file
