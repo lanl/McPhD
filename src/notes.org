@@ -5,49 +5,49 @@
 
 * General notes:
 
-Treat a particle that might be dead as a Maybe Particle? Or make
-Alive/Dead into a monad.
+  Treat a particle that might be dead as a Maybe Particle? Or make
+  Alive/Dead into a monad.
 
-The only times I need the final complete state of the particle in an
-Event are when it dies. Treat these differently then Events. Fates?
+  The only times I need the final complete state of the particle in an
+  Event are when it dies. Treat these differently then Events. Fates?
 
-The life and times of a particle:
+  The life and times of a particle:
 
   InFlight -> InFlight
   InFlight -> Dead
 
-I need an event which takes me to the final destination. Then, I need
-to terminate the unfold.
+  I need an event which takes me to the final destination. Then, I need
+  to terminate the unfold.
 
- step :: Stuff -> Particle -> Maybe (Event, Particle)
+  step :: Stuff -> Particle -> Maybe (Event, Particle)
 
-Event should be called Step.
+  Event should be called Step.
 
- step :: Stuff -> Particle -> Maybe (Step, Particle)
+  step :: Stuff -> Particle -> Maybe (Step, Particle)
 
-So, while stepping, I decide the particle is done.
+  So, while stepping, I decide the particle is done.
 
   InFlight --> Dead.
 
-Here, Step is something like:
+  Here, Step is something like:
 
   Step = { motion :: Motion , limiter :: Limiter }
 
-The returned particle from step is Dead.
+  The returned particle from step is Dead.
 
-The next step operation on the dead particle just returns Nothing.
+  The next step operation on the dead particle just returns Nothing.
 
   step :: _ Dead = Nothing
 
-So, I get the final Step; Then I stop the unfold.
+  So, I get the final Step; Then I stop the unfold.
 
-Put Events and Fates in the same data structure:
+  Put Events and Fates in the same data structure:
 
   Step = (Motion, Event | Fate p)
 
 * Deciding what to do to a particle
 
-On each step:
+  On each step:
 
 1. Compute distances to scattering, absorption, escape, etc.
 2. Select the shortest distance
@@ -56,74 +56,74 @@ On each step:
    1. Another function to transform the particle. E.g. scatter.
    2. Construct and return the correct Limiter.
 
-Need a way of labeling limiters aside from the constructors in the Limiter type.
+   Need a way of labeling limiters aside from the constructors in the Limiter type.
 
-Something like a pre-event and actual event. Or I could compute the
-_outcome_ of each event as well, and so the Event data would contain
-everything it needed. E.g. momentum deposition.
+   Something like a pre-event and actual event. Or I could compute the
+   _outcome_ of each event as well, and so the Event data would contain
+   everything it needed. E.g. momentum deposition.
 
-Pair each event when computed with it's distance. Then choose the
-winning (shortest) distance and put it's event on the list.
+   Pair each event when computed with it's distance. Then choose the
+   winning (shortest) distance and put it's event on the list.
 
-There's a pair of functions here for each limiter:
+   There's a pair of functions here for each limiter:
 
-  distance_to_limiter :: Environment -> Particle -> Distance
-  apply_limiter       :: Environment -> Particle -> (Limiter, Particle)
+   distance_to_limiter :: Environment -> Particle -> Distance
+   apply_limiter       :: Environment -> Particle -> (Limiter, Particle)
 
-What is the environment? Opacity, at least. Make it a parameter?
+   What is the environment? Opacity, at least. Make it a parameter?
 
-Is there a environment for stepping? If I want scatter to be an event
-which applies to random particle, then I need the opacity to compute the distance.
+   Is there a environment for stepping? If I want scatter to be an event
+   which applies to random particle, then I need the opacity to compute the distance.
 
-I need opacity to compute distance to scatter, but not to apply
-it. This is mixing up my seperation between RandomParticle and MeshedParticle.
-
-
-| Event         | To Compute Distance | To Apply      | Information Needed in Event |
-|---------------+---------------------+---------------+-----------------------------|
-| Scattering    | Opacity             | Random Sample | Momentum                    |
-| Face crossing | Mesh and Cell       |               | Face/Cell index             |
-| Time step end | Time Step duration  |               | Final Particle              |
-| Absorption    | Energy Weight       |               | Final Particle              |
-
-So what are the right levels to compose algorithms?
-
-| Simulates                | Environment | Particle Data             | Events                 |
-|--------------------------+-------------+---------------------------+------------------------|
-| Motion in Space          | Space       | Position, Direction, etc. | None?                  |
-| Motion in Time           | Time Step   | Clock                     | Termination            |
-| Scattering, Absorption   | Opacity     | RandomState               | Scattering, Absorption |
-| Motion in Discrete Space | Mesh        | Cell Index                | Face crossing, Esacpe. |
+   I need opacity to compute distance to scatter, but not to apply
+   it. This is mixing up my seperation between RandomParticle and MeshedParticle.
 
 
-What would I like the resulting code to look like?
+  | Event         | To Compute Distance | To Apply      | Information Needed in Event |
+  |---------------+---------------------+---------------+-----------------------------|
+  | Scattering    | Opacity             | Random Sample | Momentum                    |
+  | Face crossing | Mesh and Cell       |               | Face/Cell index             |
+  | Time step end | Time Step duration  |               | Final Particle              |
+  | Absorption    | Energy Weight       |               | Final Particle              |
+
+  So what are the right levels to compose algorithms?
+
+  | Simulates                | Environment | Particle Data             | Events                 |
+  |--------------------------+-------------+---------------------------+------------------------|
+  | Motion in Space          | Space       | Position, Direction, etc. | None?                  |
+  | Motion in Time           | Time Step   | Clock                     | Termination            |
+  | Scattering, Absorption   | Opacity     | RandomState               | Scattering, Absorption |
+  | Motion in Discrete Space | Mesh        | Cell Index                | Face crossing, Esacpe. |
+
+
+  What would I like the resulting code to look like?
 
 * Environments and Local Properties
 
-Assume attributes are constant in space. Then the space properties are given by:
+  Assume attributes are constant in space. Then the space properties are given by:
 
   environment :: Environment -> Particle -> Properties.
 
   data Properties = { localOpacity :: Opacity,  localTemperature :: Temperature , etc... }
 
-Properties could even contain geometry of the current cell for distance calculations.
+  Properties could even contain geometry of the current cell for distance calculations.
 
   data Properties = { localOpacity :: Opacity, localCell :: Cell, etc... }
 
 * Local contributions and the Global Tally
 
-What about the tally?
+  What about the tally?
 
   data Tally = { Momentum :: MeshVector, Energy :: MeshDouble }  <- Depends on the index range.
 
-How about parts of the tally?
+  How about parts of the tally?
 
   data TallyContrib = { Momentum :: Vector, Energy :: Double, Index :: MeshIndex }  <- Depends on the mesh index
 
 
 ** Connecting events to the Tally:
 
-  contribution :: Event -> TallyContrib
+   contribution :: Event -> TallyContrib
 
 
 ** Creating the global tally
@@ -139,56 +139,54 @@ How about parts of the tally?
 
 ** Unfolding
 
-When all steps can succeed:
+   When all steps can succeed:
 
-  step :: Particle -> (Event, Particle)
+   step :: Particle -> (Event, Particle)
 
-I can't unfold this because I need Maybe (Event, Particle).
+   I can't unfold this because I need Maybe (Event, Particle).
 
-I can have a test on events for final ones:
+   I can have a test on events for final ones:
 
-  is_final :: Event -> Bool
+   is_final :: Event -> Bool
 
-but unfold works by feeding the resulting particle back into step, so
-I can't apply is_final and decide to return Nothing.
+   but unfold works by feeding the resulting particle back into step, so
+   I can't apply is_final and decide to return Nothing.
 
-This is why I need a dead state for the particle.
+   This is why I need a dead state for the particle.
 
-Using Maybe:
+   Using Maybe:
 
-  ParticleM = Maybe Particle
+   ParticleM = Maybe Particle
 
-  step :: Particle -> (Event, Particle)
+   step :: Particle -> (Event, Particle)
 
-  stepM :: Maybe Particle -> Maybe (Event, Particle)
-  stepM Just p = Just $ step p
-  stepM Nothing = Nothing
+   stepM :: Maybe Particle -> Maybe (Event, Particle)
+   stepM Just p = Just $ step p
+   stepM Nothing = Nothing
 
-  stepM = liftM step  ??
+   stepM = liftM step  ??
 
 
 ** Iterating
 
-  (Event, Particle) -> (Event, Particle)
+   (Event, Particle) -> (Event, Particle)
 
-can be iterated, provided I add an inital event, like "Born"
-
+   can be iterated, provided I add an inital event, like "Born"
 
 * Generating and Using Random quantities:
-
 ** Generating data types
 
-  I've defined Var = UnitInterval Double in Numerics.hs
+   I've defined Var = UnitInterval Double in Numerics.hs
 
-  With each new data type define a function like:
+   With each new data type define a function like:
 
-  =generateFoo :: Var -> Foo=.
+   =generateFoo :: Var -> Foo=.
 
-  This converts variants into Foos. Some will require more than one:
+   This converts variants into Foos. Some will require more than one:
 
-  =generateBar :: Var -> Var -> Bar=,
+   =generateBar :: Var -> Var -> Bar=,
 
-  e.g. a Normalized 3-Vector will require 2 variants.
+   e.g. a Normalized 3-Vector will require 2 variants.
 
 ** Sampling data types
 
@@ -204,17 +202,95 @@ can be iterated, provided I add an inital event, like "Born"
 
    The generateX functions should also be useful for defining Arbitrary instances.
 
+* Problematic instance declarations
+
+  The instance declerations in Normalized values don't fit well with
+  the type system. E.g.
+
+  instance Vector a => Mag a where ...
+
+  Can't be disambiguated in the presence of other declerations like:
+
+  instance (Normalized Vector a) => Mag a.
+
+  and
+
+  instance (RealFloat a) => Mag a
+
+  GHC won't backtrack to determine which is the correct "parent" class.
+
+
+**  Andres' comments in the code, with suggestions
+
+    Generally, you should try to avoid instances of the form
+
+    instance A a => B a where ...
+
+    They're almost always a sign that something isn't modelled
+    suitably for the Haskell class system.
+
+    I can see several options to work around it; not all of them are adequate in
+    every situation. Here are a few:
+
+    (1) If the above definitions are the only ones that you want, then it's better
+    not to define a class Mag at all, but instead just define three functions,
+    such as:
+
+    normalize :: RealFloat a => a -> Normalized a
+    ...
+
+    with the definitions given above. But this does not seem to be the case
+    here.
+
+    (2) You can wrap the types to help the type checker:
+
+    newtype NormFloat  a = NormFloat  a
+    newtype NormVector a = NormVector a
+    instance RealFloat a => Mag (NormFloat a)  where ...
+    instance Vector a    => Mag (NormVector a) where ...
+
+    This will disambiguate the situation for the type checker, and avoid
+    the need for overlapping instances, but it will make the use of the code
+    less pleasant.
+
+    (3) If the classes have a limited number of instances you're interested
+    in, you can specialize the instance declaration to the ground types rather
+    than the global form. This is what you've done for RealFloat/Double, but
+    not for Vector.
+
+    (4) You might consider changing the class hierarchy. You could make Double
+    an instance of the Vector class and then use solution (1). That should work.
+    That being said, turning a Double into a V1 is a single constructor application.
+    You might even be able to do without the instance for Double ...
+
+    ...
+
+    As I said above, such instances are problematic. GHC never considers
+    the part left of the => when picking an instance. So in principle, this
+    declaration says "everything is in Mag, try to find out later that everything's
+    a vector too". In particular, something like
+
+    instance A a => C a
+    instance B a => C a
+
+    will never work. GHC will not look which of A or B hold in order to choose
+    the instance.
+
+
+
+
+
 * Directory and file structure
 
   A common pattern in sub-directories is appearing:
 
   source/
-    Foo/
-      Classes.hs
-      InstanceA.hs
-      InstanceB.hs
-      Test/
-         Arbitrary.hs   -- Arbitrary instances for Foo data. Maybe split on data types.
-         InstanceA_arbitrary.hs
-         InstanceA_test.hs  -- Tests for each data type
-         InstanceB_test.hs
+  Foo/
+  Classes.hs
+  InstanceA.hs
+  InstanceB.hs
+  Test/
+  Arbitrary.hs   -- Arbitrary instances for Foo data. Maybe split on data types.
+  InstanceA_arbitrary.hs
+  InstanceA_test.hs  -- Tests for each data type
+  InstanceB_test.hs

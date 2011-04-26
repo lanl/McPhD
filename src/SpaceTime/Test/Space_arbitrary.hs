@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances, FlexibleContexts, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances, UndecidableInstances #-}
 module SpaceTime.Test.Space_arbitrary where
 
 import Test.QuickCheck
@@ -29,31 +29,11 @@ import Test.Numeric_arbitrary ()
 -- "Vector" constraint, although you might want to put it
 -- there ...
 
-{- TODO: Arbitrary direction vectors must be unit vectors! -}
-
-{-- ???: Generating overlapping instances for the three kinds of
- Vectors. Compiler suggests incoherent instances, which I suspect
-is not correct. -}
-
-instance (Arbitrary v, Arbitrary (Normalized v)) => Arbitrary (Cartesian v) where
-  arbitrary = Cartesian <$> arbitrary <*> arbitrary
-
--- TODO: The above version is fine, but requires UndecidableInstances.
--- However, in this particular case, there shouldn't be any problems
--- with it.
-
-{-
-instance Arbitrary (Cartesian Vector1) where
-  arbitrary = Cartesian <$> arbitrary <*> arbitrary
-
-instance Arbitrary (Cartesian Vector2) where
-  arbitrary = Cartesian <$> arbitrary <*> arbitrary
-
-instance Arbitrary (Cartesian Vector3) where
-  arbitrary = Cartesian <$> arbitrary <*> arbitrary
 -}
-
-
+instance (Vector v, Arbitrary v, 
+          Arbitrary (Normalized v)) => Arbitrary (Cartesian v) where
+  arbitrary = Cartesian <$> arbitrary <*> arbitrary
+    
 instance Arbitrary Spherical1D where
   arbitrary = Spherical1D <$> arbitrary <*> arbitrary
 
