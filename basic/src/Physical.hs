@@ -1,49 +1,27 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
--- Physical.hs
--- T. M. Kelley
--- Jan 28, 2011
--- (c) Copyright 2011 LANSLLC, all rights reserved
+module Physical (
+    module Physical
+  , module Constants
+  , module Numerical
+  )
+  where
 
--- Physical types
+import Data.Vector.Generic.Base as GV
+import Data.Vector.Generic.Mutable as GMV
+import Data.Vector.Unboxed as V
 
-module Physical (Position(..)
-                , Direction(..)
-                , Momentum(..)
-                , Velocity(..)
-                , Energy (..)
-                , Time(..)
-                , EnergyWeight(..)
-                , Opacity(..)
-                , Temperature(..)
-                , dOnRay
-                , module Numerical
-                , module Constants)
-    where
-
-import Control.DeepSeq
-
-import Numerical
 import Constants
+import Numerical
 
-newtype Position     = Position     { pos :: VecT } deriving (Eq, Show,Num)
-newtype Direction    = Direction    { dir :: VecT } deriving (Eq, Show,Num)
-newtype Momentum     = Momentum     { mom :: VecT } deriving (Eq, Show,Num,NFData)
-newtype Velocity     = Velocity     { vel :: VecT } deriving (Eq, Show,Num)
-newtype Energy       = Energy       { e :: FP }     deriving (Eq,Show,Num)
-newtype Time         = Time         { t :: FP }     deriving (Eq, Show,Num)
-newtype EnergyWeight = EnergyWeight {ew :: FP }     deriving (Eq, Show,Num,NFData)
+newtype Position     = Position     { pos   :: Vec } deriving (Eq, Show)
+newtype Direction    = Direction    { dir   :: Vec } deriving (Eq, Show, Num)
+newtype Momentum     = Momentum     { mom   :: Vec }
+  deriving (Eq, Show, Num, GV.Vector V.Vector, GMV.MVector V.MVector, Unbox)
+newtype Velocity     = Velocity     { vel   :: Vec } deriving (Eq, Show)
+newtype Energy       = Energy       { e     :: FP  } deriving (Eq, Show, Num)
+newtype EnergyWeight = EnergyWeight { ew    :: FP  }
+  deriving (Eq, Show, Num, GV.Vector V.Vector, GMV.MVector V.MVector, Unbox)
+newtype Time         = Time         { t     :: FP  } deriving (Eq, Show, Num)
 
--- | opacity, derived (perhaps) from density * cross-section [cm^-1]
-newtype Opacity = Opacity { sigma :: FP }           deriving (Eq,Show,Num)
-newtype Temperature = Temperature { temp :: FP }    deriving (Eq,Show,Num)
-
--- | distance 
-dOnRay ::  (VecT -> FP) -> Position -> Direction -> FP
-dOnRay comp p o | ocomp /= 0.0 = pcomp/ocomp
-                | otherwise = huge
-                where ocomp = comp.dir $ o; pcomp = comp.pos $ p
-
--- version
--- $Id$
-
--- End of file
+newtype Opacity      = Opacity      { sigma :: FP  } deriving (Eq, Show)
+newtype Temperature  = Temperature  { temp  :: FP  } deriving (Eq, Show)
