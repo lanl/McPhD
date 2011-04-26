@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances, UndecidableInstances, OverlappingInstances #-}
+{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving #-}
 module NormalizedValues (Mag
            , Normalized ()  -- Exporting type but not constructor.
            , unsafe_makeNormal
@@ -139,9 +139,12 @@ instance Mag Vector3 where
 -- will never work. GHC will not look which of A or B hold in order to choose
 -- the instance.
 
-{- Functions for making normalized vectors. There are here because I
+{- Functions for making normalized vectors. They are here because I
 don't want to expose the Normalized constructor. This really hampers
 the extensibility of the Normalized type and Mag class-}
+
+-- TODO: What would you prefer here? I see you export unsafe_makeNormal,
+-- which is the same as the Normalized constructor.
 
 normalVector1 :: Double -> Normalized Vector1
 normalVector1 x = let Normalized n = normalize x in Normalized $ Vector1 n
@@ -166,11 +169,9 @@ generateNormalVector3 x y = Normalized $
 
 
 -- A data type with hidden constructor to enforce normalization
-newtype Normalized a = Normalized { normalized_value :: a } deriving (Eq, Show)
+newtype Normalized a = Normalized { normalized_value :: a }
+  deriving (Eq, Show, Approx)
 
 unsafe_makeNormal :: (Mag a) => a -> Normalized a
 unsafe_makeNormal = Normalized
 
-instance (Mag a, Approx a) => Approx (Normalized a) where
-  within_eps epsilon (Normalized a) (Normalized b) =
-    within_eps epsilon a b
