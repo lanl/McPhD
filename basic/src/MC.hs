@@ -1,96 +1,119 @@
--- MC.hs
--- T. M. Kelley
--- Dec 06, 2010
--- Copyright (c) 2010 LANSLLC all rights reserved.
+module MC where
 
-module MC (runParticle, pickEvent)  -- Added pickEvent here for testing only. Is there a better way?
-    where
-
-import Physical
-import Particle
-import PRNG
+import Cell
+import Event
 import Material
 import Mesh
+import Particle as P
+import Physical
+import PRNG
 import Tally
-import Event
--- import Data.Function
-import Data.List (minimumBy)
-import Data.Ord (comparing)
 
-runParticle :: Mesh -> Material -> Particle -> Tally
-runParticle mesh matl p = tally_ $ push p mesh matl
+-- | Run an individual particle in a mesh. Returns the tally containing
+-- information about all the generated events.
+runParticle :: Mesh m => m -> Particle -> Tally
+runParticle msh p = tally msh (steps msh p)
 
-{- Use a particle (and its RNG), a mesh, and a material to
- - generate a list of (Event, Particle) pairs. -}
-push :: Particle -> Mesh -> Material -> [(Event,Particle)]
-push p msh matl =  
-  let (sel_s,sel_a,ds1,ds2,ds3,rng') = getFiveRNs $ pRNG p
-      omega' = sampleDirection msh ds1 ds2 ds3
-      evt    = pickEvent p sel_s sel_a omega' matl msh
-      p'     = stream p evt msh omega' rng' in
-  if isContinuing evt
-    then (evt,p'): push p' msh matl
-    else [(evt,p')]
+-- | Compute the trace of a particle as long as events that allow continuing
+-- are produced. Returns the entire list.
+steps :: Mesh m => m -> Particle -> [(Event, Particle)]
+steps msh = go
+  where
+    go p = case step msh p of
+             (e, p') -> (e, p') : if isContinuing e then go p' else []
 
--- Pick event for a particle. Provide particle, two uniform random deviates
--- (to select distances), a new direction (however sampled), a material, and a 
--- mesh; get an Event in return. Distance to event and momentum transfer are 
--- encoded in the event. For boundary events, the face is also encoded.
-pickEvent :: Particle -> 
-             FP   ->    -- distance to scatter selector (RN)
-             FP   ->    -- distance to absorption selector (RN)
-             Direction ->  -- omega': sampled new direction from scatter (lab frame) 
-             Material -> 
-             Mesh -> 
-             Event
-pickEvent p sel_s sel_a omega' matl msh = 
-    let (d_bdy,face)  = distToBdy msh cell x omega
-        d_scat = min (-log( sel_s)/sig_s) huge -- knows div-by-0 > than huge...
-        d_abs  = min (-log( sel_a)/sig_a) huge -- ...but what about sigfpe?
-        d_cen  = c * tcen where tcen = t $ pTime p
-        cellt  = bdyEvent msh cell face
-    in closestEvent [Scatter d_scat (dp omega') (pWeight p), 
-                     Absorb  d_abs (dp 0) (pWeight p), -- omega' is 0 
-                     cellt   d_bdy face,
-                     Census  d_cen 0]
-        where sig_s = sigma $ sig_scat ( mat matl ! cell)
-              sig_a = sigma $ sig_abs  ( mat matl ! cell)
-              x     = pPos p
-              cell  = pCell p
-              -- TO DO: boost to co-moving frame, compute the scatter,
-              -- boost back to lab frame.
-              omega = pDir p
-              dp    = elasticScatterMomDep (pEnergy p) omega 
+-- QUESTION: So currently, we do not include the original state of the
+-- particle in the tally, but we include the final state (i.e., the one
+-- *after* we've already decided not to continue. Is this the correct
+-- choice?
 
--- |Generate a particle at the event with the RNG, and one or more of 
--- new direction, cell, etc 
-stream :: Particle -> Event -> Mesh -> Direction -> RNG -> Particle
-stream p event msh omega' rng' = 
-    case event of
-      Scatter {}   -> p' {pDir= omega',    pRNG=rng'}
-      Absorb {}    -> p' {pDir= omega,     pRNG=rng'}
-      Reflect {}   -> p' {pDir= -omega,  pRNG=rng'}
-      Transmit _ f -> p' {pCell=newcell f,pRNG=rng'}
-      Escape {}    -> p' {pCell=0,        pRNG=rng'}
-      Census {}    -> p' {pTime=0,        pRNG=rng'}
-    where p'      = p{pPos = x', pTime = t'}
-          d       = dist event
-          x'      = pPos p + Position (d *| dir omega)
-          t'      = pTime p - Time (d/c)
-          omega   = pDir p
-          newcell = cellAcross msh (pCell p)
+-- | Compute the next event for a given particle in a given mesh. Also
+-- returns the new state of the particle.
+step :: Mesh m => m -> Particle -> (Event, Particle)
+step msh p =
+  withRandomParticle p $ do
+    omega' <- sampleDirection msh
+    evt    <- pickEvent msh p omega'
+    let p' =  stream msh p omega' evt
+    return (evt, p')
 
--- must have at least one event!
-closestEvent :: [Event] -> Event
-closestEvent = minimumBy (comparing dist)
+-- | Computes a new particle from a particle, a direction and
+-- an event.
+stream :: Mesh m => m -> Particle -> Direction -> Event -> Particle
+stream msh
+       p@(Particle { P.dir = omega
+                   , P.pos = x
+                   , time  = t
+                   , cell  = cidx
+                   })
+       omega' event =
+  case event of
+    Scatter  {}           -> p' { P.dir =  omega'   }
+    Absorb   {}           -> p' { P.dir =  omega    }
+    Reflect  {}           -> p' { P.dir = -omega    }
+    Transmit { face = f } -> p' { cell  = newCell f }
+    Escape   {}           -> p' { cell  = 0         } -- QUESTION: 0?
+    Census   {}           -> p' { time  = 0         }
+  where
+    p' :: Particle
+    p' = p { P.pos = x', time = t' }
+    d  :: FP
+    d  = dist event
+    x' :: Position
+    x' = x
+    t' = t - Time (d / c)
 
--- | compute the elastic scattering momentum deposition: E/c (k_i^ - k_f)
+    newCell :: Face -> CellIdx
+    newCell = cellAcross msh cidx
+
+-- | Wrap a random computation based on a particle. Extracts the
+-- random number generator from the particle in the beginning, and
+-- put it back in at the end of the computation.
+withRandomParticle :: Particle -> Rnd (a, Particle) -> (a, Particle)
+withRandomParticle (Particle { rng = rng }) m =
+  case runRnd rng m of
+    ((x, p), rng') -> (x, p { rng = rng' })
+
+-- | Determine the next event that occurs for a particle, and
+-- a new state for the particle.
+pickEvent :: Mesh m => m -> Particle -> Direction -> Rnd Event
+pickEvent msh
+          p@(Particle { P.dir  = omega
+                      , P.pos  = x
+                      , cell   = cidx
+                      , weight = w
+                      , time   = Time tcen
+                      , energy = e
+                      })
+          omega' = do
+  sel_s <- random
+  sel_a <- random
+  let (d_bdy, face) = distanceToBoundary msh cidx x omega
+      matl          = material msh cidx
+      sig_s         = sigma $ sig_scat matl
+      sig_a         = sigma $ sig_abs  matl
+      -- TODO: boost to co-moving frame, compute the scatter, boost
+      -- back to lab frame
+      d_scat        = min (- log sel_s / sig_s) huge
+      d_abs         = min (- log sel_a / sig_a) huge
+      d_cen         = c * tcen
+
+      dp :: Direction -> Momentum
+      dp = elasticScatterMomDep e omega
+
+      -- Events to consider:
+      events        = [
+          Scatter       d_scat (dp omega') w
+        , Absorb        d_abs  (dp 0)      w
+        , boundaryEvent msh cidx d_bdy face
+        , Census        d_cen  0
+        ]
+
+  return (closestEvent events)
+
+-- | Compute the elastic scattering momentum deposition:
+-- E/c (k_i^ - k_f)
 elasticScatterMomDep :: Energy -> Direction -> Direction -> Momentum
-elasticScatterMomDep energy omega_i omega_f = Momentum ((nrg/c) *| dir (omega_i - omega_f))
-    where nrg = e energy
+elasticScatterMomDep (Energy e) (Direction omega_i) (Direction omega_f) =
+  Momentum ((e / c) * (omega_i - omega_f))
 
-
--- version
--- $Id$
-
--- End of file
