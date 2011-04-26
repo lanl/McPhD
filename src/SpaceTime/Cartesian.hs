@@ -19,7 +19,8 @@ addition operatons of this vector.
 {-- TODO: Direction should be a unit vector --}
 
 -- A data type for Cartesian spaces over a vector type
-data Cartesian v = Cartesian { cart_position :: v, cart_direction :: Normalized v }
+data Cartesian v = Cartesian { cart_position  :: v,
+                               cart_direction :: Normalized v }
                  deriving (Eq, Show)
 
 -- When the vector type is Vector, we can define a common streaming operator
@@ -32,15 +33,19 @@ instance (Vector v) => Space (Cartesian v) where
     position = cart_position
     direction = cart_direction
 
-
-instance Approx (Cartesian Vector1) where
+instance Approx v => Approx (Cartesian v) where
   within_eps epsilon (Cartesian x1 d1) (Cartesian x2 d2) =
     (within_eps epsilon x1 x2) && (within_eps epsilon d1 d2)
 
-instance Approx (Cartesian Vector2) where
-  within_eps epsilon (Cartesian x1 d1) (Cartesian x2 d2) =
-    (within_eps epsilon x1 x2) && (within_eps epsilon d1 d2)
-
-instance Approx (Cartesian Vector3) where
-  within_eps epsilon (Cartesian x1 d1) (Cartesian x2 d2) =
-    (within_eps epsilon x1 x2) && (within_eps epsilon d1 d2)
+-- TODO: There were separate instances for Vector1, Vector2, Vector3 before,
+-- but this is a good case where you can give a general instance, because this
+-- is not
+--
+-- instance A a => B a
+--
+-- but rather
+--
+-- instance A a => B (SomeType a)
+--
+-- It would only be problematic if you had other types of Cartesians for
+-- which you'd want to define a different Approx instance.

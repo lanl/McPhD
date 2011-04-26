@@ -1,4 +1,4 @@
-{-# LANGUAGE TypeFamilies, NoMonomorphismRestriction #-}
+{-# LANGUAGE TypeFamilies #-}
 
 module SpaceTime.Classes where
 
@@ -12,7 +12,8 @@ class Space s where
   stream    :: s -> Distance s -> s
   position  :: s -> Position s
   direction :: s -> Direction s
-  
 
 (+->) :: (Space s) => s -> Distance s -> s
 (+->) = stream
+
+-- TODO: Do you want to add an infix declaration for (+->) ?

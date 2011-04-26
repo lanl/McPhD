@@ -17,6 +17,12 @@ data SphericalDirection = Inward | Outward
 
 data SphericalMesh = SphericalMesh { radii :: [Radius] }
 
+-- TODO: Do we need to work with indices here? And if we do, we should
+-- probably avoid using a list here (except if the lists are very small),
+-- as list lookup is linear. A finite map (Data.Map) or a sequence
+-- (Data.Sequence) are good general-purpose functional data structures
+-- with logarithmic lookup.
+
 inward_cell :: SphericalMesh -> SphericalMeshCell -> SphericalMeshCell
 inward_cell mesh Void = SphericalMeshCell { index = size mesh }
 inward_cell _ cell

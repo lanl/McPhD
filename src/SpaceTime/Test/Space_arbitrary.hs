@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FlexibleInstances, FlexibleContexts, UndecidableInstances #-}
 module SpaceTime.Test.Space_arbitrary where
 
 import Test.QuickCheck
@@ -8,8 +8,10 @@ import Control.Applicative
 import Data.Vector.V1
 import Data.Vector.V2
 import Data.Vector.V3
+import Data.Vector.Class
 import SpaceTime.Cartesian
 import SpaceTime.Spherical1D
+import NormalizedValues
 
 import Test.Numeric_arbitrary ()
 
@@ -32,18 +34,25 @@ import Test.Numeric_arbitrary ()
 {-- ???: Generating overlapping instances for the three kinds of
  Vectors. Compiler suggests incoherent instances, which I suspect
 is not correct. -}
--- instance (Vector v, Arbitrary v) => Arbitrary (Cartesian v) where
---     arbitrary = Cartesian <$> arbitrary <*> arbitrary
-    
+
+instance (Arbitrary v, Arbitrary (Normalized v)) => Arbitrary (Cartesian v) where
+  arbitrary = Cartesian <$> arbitrary <*> arbitrary
+
+-- TODO: The above version is fine, but requires UndecidableInstances.
+-- However, in this particular case, there shouldn't be any problems
+-- with it.
+
+{-
 instance Arbitrary (Cartesian Vector1) where
   arbitrary = Cartesian <$> arbitrary <*> arbitrary
-  
+
 instance Arbitrary (Cartesian Vector2) where
   arbitrary = Cartesian <$> arbitrary <*> arbitrary
-  
+
 instance Arbitrary (Cartesian Vector3) where
   arbitrary = Cartesian <$> arbitrary <*> arbitrary
-  
+-}
+
 
 instance Arbitrary Spherical1D where
   arbitrary = Spherical1D <$> arbitrary <*> arbitrary

@@ -33,16 +33,16 @@ prop_ZeroDistance location = (location ~== stream location 0)
 
 -- Property: Any side of the triangle is less than the sum of the
 -- other sides.
-prop_TriangleInequality :: (Num (Distance s), Mag (Distance s), 
-                            Mag (Position s), 
+prop_TriangleInequality :: (Num (Distance s), Mag (Distance s),
+                            Mag (Position s),
                             Space s, Approx s) => s -> Distance s -> Bool
 prop_TriangleInequality location distance = let
     location' = location +-> distance
     mag_location  = magnitude $ position location
     mag_location' = magnitude $ position location'
     mag_distance  = magnitude distance
-    in ((mag_location + mag_location') ~~>= mag_distance) 
-       && ((mag_location' + mag_distance) ~~>= mag_location ) 
+    in ((mag_location + mag_location') ~~>= mag_distance)
+       && ((mag_location' + mag_distance) ~~>= mag_location )
        && ((mag_location  + mag_distance) ~~>= mag_location')
   where (~~>=) a b = (a>b) || (a~~==b)
 

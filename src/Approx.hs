@@ -16,20 +16,20 @@ class Approx a where
   (~~==) :: a -> a -> Bool
   (~~==) = within_eps 1.0e-8 -- | Operator for a common looser tolerance
 
+-- TODO: Perhaps define global constants in some file, and use the constants
+-- here rather than the hardcoded values?
 
 instance Approx Double where
   within_eps epsilon a b = abs (a-b) < epsilon
 
 -- These instances cry out for unification.
 
-instance Approx Vector1 where
-  within_eps epsilon a b = let d = a-b in
-    vdot d d < epsilon^(2::Int)
+-- TODO: Well, we can do quite a bit better already.
 
-instance Approx Vector2 where
-  within_eps epsilon a b  = let d = a-b in
-    vdot d d < epsilon^(2::Int)
+within_eps_Vector :: Vector v => Double -> v -> v -> Bool
+within_eps_Vector epsilon a b =
+  let d = a - b in vdot d d < epsilon ^ (2 :: Int)
 
-instance Approx Vector3 where
-  within_eps epsilon a b = let d = a-b in
-    vdot d d < epsilon^(2::Int)
+instance Approx Vector1 where within_eps = within_eps_Vector
+instance Approx Vector2 where within_eps = within_eps_Vector
+instance Approx Vector3 where within_eps = within_eps_Vector

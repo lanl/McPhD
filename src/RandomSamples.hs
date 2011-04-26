@@ -4,7 +4,7 @@ works with a PureMT source of random numbers and returns a value and a
 new PureMT.
 
 These functions often use generators, which are functions that convert
-variants (uniformaly distributed values in [0,1] into values.
+variants (uniformly distributed values in [0,1] into values.
 --}
 module RandomSamples where
 
@@ -49,7 +49,7 @@ sample_ball1D (Radius radius) rand =
     let (Radius r_unit, rand') = sample_unit_ball1D rand
     in (Radius $ r_unit*radius, rand')
 
--- | Sample a unformly distributed point (with 1D symmetry) inside of
+-- | Sample a uniformly distributed point (with 1D symmetry) inside of
 -- a ball of given radius and outside the ball of another smaller
 -- radius.
 sample_annulus1D :: Radius -> Radius -> PureMT -> (Radius, PureMT)

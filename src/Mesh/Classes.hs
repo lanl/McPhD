@@ -1,8 +1,8 @@
-{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeFamilies, FlexibleContexts #-}
 
-{-| An typeclass for Meshes.
+{-| A typeclass for Meshes.
 
-Each mesh is designed for use on a specific space. It defines it's own
+Each mesh is designed for use on a specific space. It defines its own
 cell and face indexing schemes. -}
 
 module Mesh.Classes (SpaceMesh (..)) where
@@ -13,7 +13,7 @@ import Numerics ()
 import SpaceTime.Classes
 
 -- | A class for describing operations on meshes.
-class SpaceMesh m where
+class (Space (MeshSpace m)) => SpaceMesh m where
   type MeshCell  m :: *
   type MeshFace  m :: *
   type MeshSpace m :: *
@@ -49,3 +49,10 @@ class SpaceMesh m where
 
   -- | Sample a location unformly in the given cell.
   uniform_sample_cell :: m -> MeshCell m -> PureMT -> (MeshSpace m, PureMT)
+
+-- TODO: Are all these functions independent of each other, or would you
+-- want to give default definitions for a few?
+--
+-- The use of Distance in cell_boundary also suggests that you want to
+-- require that the MeshSpace of a SpaceMesh (hah!) is actually a Space,
+-- so I've added a superclass constraint.

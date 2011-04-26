@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances, UndecidableInstances, OverlappingInstances #-}
+{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving #-}
 module NormalizedValues (Mag
            , Normalized ()  -- Exporting type but not constructor.
            , unsafe_makeNormal
@@ -39,9 +39,8 @@ instance Mag Double where
 
 instance Mag Radius where
   normalize (Radius r) = Normalized $ Radius $ (normalized_value $ normalize r)
-  magnitude (Radius r) = r  
+  magnitude (Radius r) = r
   magnitude2 (Radius r) = r*r
-  
 
 {- ???: Can't do this because of duplicate instances. Any way around this? -}
 -- instance (RealFloat a) => Mag a where
@@ -112,17 +111,17 @@ instance Mag Vector3 where
   normalize    = Normalized . vnormalise
   magnitude    = vmag
   magnitude2 d = vdot d d
-  
--- instance Mag (Normalized Vector1) where    
+
+-- instance Mag (Normalized Vector1) where
 --   normalize = Normalize . normalized_value
 --   magnitude = const (1.0::Double)
 --   magnitude2 = const (1.0::Double)
-  
+
 -- instance Mag (Normalized Vector2) where
 --   normalize = id
 --   magnitude = const (1.0::Double)
 --   magnitude2 = const (1.0::Double)
-               
+
 -- instance Mag (Normalized Vector3) where
 --   normalize = id
 --   magnitude = const (1.0::Double)
@@ -140,9 +139,12 @@ instance Mag Vector3 where
 -- will never work. GHC will not look which of A or B hold in order to choose
 -- the instance.
 
-{- Functions for making normalized vectors. There are here because I
+{- Functions for making normalized vectors. They are here because I
 don't want to expose the Normalized constructor. This really hampers
 the extensibility of the Normalized type and Mag class-}
+
+-- TODO: What would you prefer here? I see you export unsafe_makeNormal,
+-- which is the same as the Normalized constructor.
 
 normalVector1 :: Double -> Normalized Vector1
 normalVector1 x = let Normalized n = normalize x in Normalized $ Vector1 n
@@ -167,13 +169,9 @@ generateNormalVector3 x y = Normalized $
 
 
 -- A data type with hidden constructor to enforce normalization
-newtype Normalized a = Normalized { normalized_value :: a } deriving (Eq, Show)
+newtype Normalized a = Normalized { normalized_value :: a }
+  deriving (Eq, Show, Approx)
 
 unsafe_makeNormal :: (Mag a) => a -> Normalized a
 unsafe_makeNormal = Normalized
 
-instance (Mag a, Approx a) => Approx (Normalized a) where
-  within_eps epsilon (Normalized a) (Normalized b) =
-    within_eps epsilon a b
-    
-  
