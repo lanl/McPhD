@@ -22,10 +22,6 @@ class Approx a where
 instance Approx Double where
   within_eps epsilon a b = abs (a-b) < epsilon
 
--- These instances cry out for unification.
-
--- TODO: Well, we can do quite a bit better already.
-
 within_eps_Vector :: Vector v => Double -> v -> v -> Bool
 within_eps_Vector epsilon a b =
   let d = a - b in vdot d d < epsilon ^ (2 :: Int)

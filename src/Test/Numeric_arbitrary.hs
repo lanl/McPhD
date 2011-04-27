@@ -22,9 +22,6 @@ instance (Arbitrary n, Random n, RealFloat n) =>
       arbitrary = UnitInterval <$> choose (0.0, 1.0)
 
 
--- TODO: Do you need the default for more than one type? It looks like the
--- vector instances are all special. Do they have to be?
-
 instance Arbitrary Vector1 where
   arbitrary = Vector1 <$> arbitrary
 
@@ -44,12 +41,26 @@ instance Arbitrary Radius where
   arbitrary = sampleRadius <$> arbitrary
 
 
+-- TODO: Do you need the default for more than one type? It looks like the
+-- vector instances are all special. Do they have to be?
+
+-- ANS: The 2 & 3 vector functions are tailored to their dimension, so
+-- they should be unique for efficiency's sake. The default may not be
+-- all that useful after all, since I don't have that many Normalized
+-- quantities to deal with.
+
+{-- ??? Having trouble with this default instance again after adding
+the NormalizedType associated type to class Mag --}
 
 -- Default for Normalized Arbitrary instances uses normalize function
 -- from class Mag and requires a NonZero argument
-instance (Arbitrary n, Ord n, Num n, Mag n) =>
-     Arbitrary (Normalized n) where
-         arbitrary = (\ (NonZero a) -> normalize a) <$> arbitrary
+-- instance (Arbitrary n, Ord n, Num n, Mag n) =>
+--      Arbitrary (Normalized n) where
+--          arbitrary = (\ (NonZero a) -> normalize a) <$> arbitrary
+
+
+instance Arbitrary (Normalized Vector1) where
+  arbitrary = normalize <$> Vector1 <$> arbitrary
 
 -- For 2 and 3 vectors, we have specialized functions which can
 -- compute unit vectors directly

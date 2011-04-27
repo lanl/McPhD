@@ -23,6 +23,9 @@ data SphericalMesh = SphericalMesh { radii :: [Radius] }
 -- (Data.Sequence) are good general-purpose functional data structures
 -- with logarithmic lookup.
 
+-- ANS: Definitely. These lists are the size of the mesh, so they'll
+-- need to go.
+
 inward_cell :: SphericalMesh -> SphericalMeshCell -> SphericalMeshCell
 inward_cell mesh Void = SphericalMeshCell { index = size mesh }
 inward_cell _ cell

@@ -29,4 +29,3 @@ samples generator rand = unfoldr (Just . generator) rand
 -- to prevent them being evaluated on another CPU, and to prevent space
 -- leaks. But I might be wrong, which is why I'm not yet making the
 -- change.
-

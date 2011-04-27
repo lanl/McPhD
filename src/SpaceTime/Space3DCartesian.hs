@@ -44,6 +44,11 @@ class ScalarType s where
 -- TODO: I have a somewhat bad feeling about these. Is it a good idea to have
 -- 3D-specific classes like this?
 
+-- ANS: This was my prototype space definition. Once I get the
+-- typeclass spaces and meshes up to speed I should have
+-- instance-specific versions for all of these and this one will get
+-- retired.
+
 instance VectorType Vector3 where
   vector = id
 
@@ -64,7 +69,7 @@ newtype Distance = Distance { dis :: Double  } deriving (Eq, Show, Num, Ord, App
 
 -- | Direction, a 3D vector of magnitude 1.
 -- TODO: Replace this with a Normalized Vector3
-newtype Direction = Direction { dir :: Vector3 } deriving (Eq, Show, Num, Approx, Mag, VectorType)
+newtype Direction = Direction { dir :: Vector3 } deriving (Eq, Show, Num, Approx, VectorType)
 
 -- | A scalar representing the magnitude of velocity.
 newtype Speed = Speed { speed :: Double } deriving (Eq, Show, Num, Ord, Approx, ScalarType)

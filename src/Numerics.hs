@@ -1,5 +1,5 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-- A module for various numeric definitions useful in building
+{-| A module for various numeric definitions useful in building
 domain-specific numeric types
 
 For each new type, there are various functions defined:
@@ -30,6 +30,14 @@ unsafe_makeUnitary x = UnitInterval x
 -- you do, or you can crash the program on failure (using error). Is
 -- omitting the check really what you want?
 
+-- ANS: The goal was to hide these constructors and replace them with
+-- constructor functions which transformed to input to be valid. Like
+-- Normalized quantities, some functions we know will produce valid
+-- values, and I wanted to be able to allow them to create the data
+-- types directly withoug going through the conversion.
+
+-- These aren't actually being used yet. They may prove unnecessary.
+
 -- | The type for uniform variants.
 type Var = UnitInterval Double
 
@@ -43,8 +51,8 @@ makeAzimuthAngle x
     | abs x <= pi = Just (AzimuthAngle x)
     | otherwise   = Nothing
 
-unsafe_makeAzimuthAngle :: Double -> AzimuthAngle
-unsafe_makeAzimuthAngle = AzimuthAngle
+-- unsafe_makeAzimuthAngle :: Double -> AzimuthAngle
+-- unsafe_makeAzimuthAngle = AzimuthAngle
 
 sampleAzimuthAngle :: Var -> AzimuthAngle
 sampleAzimuthAngle (UnitInterval a) = AzimuthAngle (pi*(2*a - 1))
@@ -59,8 +67,8 @@ makeZenithAngle z
     | (0 < z) && (z < pi) = Just (ZenithAngle z)
     | otherwise           = Nothing
 
-unsafe_makeZenithAngle :: Double -> ZenithAngle
-unsafe_makeZenithAngle = ZenithAngle
+-- unsafe_makeZenithAngle :: Double -> ZenithAngle
+-- unsafe_makeZenithAngle = ZenithAngle
 
 sampleZenithAngle :: Var -> ZenithAngle
 sampleZenithAngle (UnitInterval a) = ZenithAngle (pi*a)
@@ -74,8 +82,8 @@ makeRadius x
     | (x > 0)   = Just (Radius x)
     | otherwise = Nothing
 
-unsafe_makeRadius :: Double -> Radius
-unsafe_makeRadius = Radius
+-- unsafe_makeRadius :: Double -> Radius
+-- unsafe_makeRadius = Radius
 
 sampleRadius :: Var -> Radius
 sampleRadius (UnitInterval x) = (Radius . negate . log) x

@@ -56,3 +56,7 @@ class (Space (MeshSpace m)) => SpaceMesh m where
 -- The use of Distance in cell_boundary also suggests that you want to
 -- require that the MeshSpace of a SpaceMesh (hah!) is actually a Space,
 -- so I've added a superclass constraint.
+
+-- ANS: I may need to reconsider some of my names :) There are a few
+-- dependencies between methods to write defaults with. Have to think
+-- a bit on implementing them.
