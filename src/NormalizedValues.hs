@@ -26,6 +26,10 @@ import Data.Vector.V1
 -- | A Num-like class for quantities that need to remain
 -- normalized. E.g. certain vectors.  Provides normalize and magnitude
 -- functions
+
+-- A default associated type would be a big help here. This is a todo
+-- item at
+-- http://hackage.haskell.org/trac/ghc/wiki/TypeFunctionsStatus
 class Mag a where
   type NormalizedType a
   normalize  :: a -> NormalizedType a
@@ -40,8 +44,8 @@ instance Mag Double where
 
 instance Mag Radius where
   type NormalizedType Radius = Normalized Radius
-  normalize (Radius r) = Normalized $ Radius $ (normalized_value $ normalize r)
-  magnitude (Radius r) = r
+  normalize  (Radius r) = Normalized $ Radius $ (normalized_value $ normalize r)
+  magnitude  (Radius r) = r
   magnitude2 (Radius r) = r*r
 
 -- See notes.org:Problematic instance declarations for thoughts on
@@ -65,7 +69,7 @@ instance Mag Vector3 where
   magnitude    = vmag
   magnitude2 d = vdot d d
 
-{-- This cleanly takes care of the problem of defining Mag instances
+{-- This takes care of the problem of defining Mag instances
 for Normalized quantities.
 --}
 
@@ -74,8 +78,6 @@ instance Mag (Normalized a) where
   normalize  = id
   magnitude  = const (1.0::Double)
   magnitude2 = const (1.0::Double)
-
-
 
 {- Functions for making normalized vectors. They are here because I
 don't want to expose the Normalized constructor. This really hampers
@@ -89,8 +91,8 @@ the extensibility of the Normalized type and Mag class-}
 -- modules create Normalized instances. Something like a friend
 -- decleration in C++.
 
--- Since the number of normalized quantities is turning out to be just
--- vectors, this isn't a big a deal as I thought.
+-- Since the normalized quantities are turning out to be just vectors,
+-- this isn't as big a deal as I thought.
 
 normalVector1 :: Double -> Normalized Vector1
 normalVector1 x = let Normalized n = normalize x in Normalized $ Vector1 n

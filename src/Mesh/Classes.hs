@@ -57,6 +57,6 @@ class (Space (MeshSpace m)) => SpaceMesh m where
 -- require that the MeshSpace of a SpaceMesh (hah!) is actually a Space,
 -- so I've added a superclass constraint.
 
--- ANS: I may need to reconsider some of my names :) There are a few
--- dependencies between methods to write defaults with. Have to think
--- a bit on implementing them.
+-- ANS: I may need to reconsider some of my names :) But yes, that
+-- constraint is correct. There are a few dependencies between methods
+-- to write defaults with. Have to think a bit on implementing them.
