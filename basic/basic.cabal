@@ -1,7 +1,7 @@
 name:                basic
-version:             0.0.1
+version:             0.1
 cabal-version:       >= 1.6
-synopsis:            Toy, 1D, plane parallel, MC transport code
+synopsis:            Toy, 1D, spherical, MC transport code
 description:         Tool for sketching out MC functionality
 license:             BSD3
 license-file:        COPYRIGHT
@@ -28,3 +28,20 @@ executable  basic
                  mtl >= 1,
                  deepseq >= 1,
                  parallel >= 3.1
+
+executable  basic-test
+  hs-source-dirs:  src src/Test
+  ghc-options: -Wall -fno-warn-name-shadowing -fno-warn-orphans -fwarn-tabs
+  ghc-options: -rtsopts -threaded -eventlog
+  main-is:       TestSuite.hs
+  build-depends: base >=4 && <=5,
+                 vector >= 0.7,
+                 random >= 1,
+                 mtl >= 1,
+                 deepseq >= 1,
+                 parallel >= 3.1,
+                 QuickCheck,
+                 HUnit,
+                 test-framework-quickcheck2,
+                 test-framework-hunit,
+                 test-framework
