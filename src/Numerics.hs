@@ -37,6 +37,11 @@ unsafe_makeUnitary x = UnitInterval x
 -- types directly withoug going through the conversion.
 
 -- These aren't actually being used yet. They may prove unnecessary.
+--
+-- !!!: It's fine then. You might want to include some form of configurable
+-- assertion checking that can be switched off if you're worried about the
+-- correctness of the functions making use of "unsafe_*". But we can think
+-- about that as soon as you're actually using them.
 
 -- | The type for uniform variants.
 type Var = UnitInterval Double
