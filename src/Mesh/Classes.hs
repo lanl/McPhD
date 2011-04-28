@@ -50,13 +50,3 @@ class (Space (MeshSpace m)) => SpaceMesh m where
   -- | Sample a location unformly in the given cell.
   uniform_sample_cell :: m -> MeshCell m -> PureMT -> (MeshSpace m, PureMT)
 
--- TODO: Are all these functions independent of each other, or would you
--- want to give default definitions for a few?
---
--- The use of Distance in cell_boundary also suggests that you want to
--- require that the MeshSpace of a SpaceMesh (hah!) is actually a Space,
--- so I've added a superclass constraint.
-
--- ANS: I may need to reconsider some of my names :) But yes, that
--- constraint is correct. There are a few dependencies between methods
--- to write defaults with. Have to think a bit on implementing them.
