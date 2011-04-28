@@ -52,6 +52,12 @@ instance Arbitrary Radius where
 {-- ??? Having trouble with this default instance again after adding
 the NormalizedType associated type to class Mag --}
 
+-- !!!: Indeed, I don't see how this can work now, because the "normalize"
+-- function now returns a NormalizedType, not a Normalized. Changing
+-- Normalized to NormalizedType in the instance declaration below isn't
+-- a solution either, because being a type function, NormalizedType n can
+-- in theory be anything.
+
 -- Default for Normalized Arbitrary instances uses normalize function
 -- from class Mag and requires a NonZero argument
 -- instance (Arbitrary n, Ord n, Num n, Mag n) =>

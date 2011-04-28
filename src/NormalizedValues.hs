@@ -100,7 +100,7 @@ the extensibility of the Normalized type and Mag class-}
 -- Since the normalized quantities are turning out to be just vectors,
 -- this isn't as big a deal as I thought.
 --
--- TODO: You could simulate this via the module system, but I don't think
+-- !!!: You could simulate this via the module system, but I don't think
 -- it's worth it. Module M could export T with its constructor C. Then
 -- "friends" can just import M, whereas non-friends would import a module P
 -- that imports M and re-exports T, but not C.
