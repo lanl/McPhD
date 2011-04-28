@@ -43,7 +43,8 @@ prop_AllSurfaceCrossings = propFunction testMesh noScatteringMaterial
 -- by closing over the mesh and material variables.
 propFunction :: Mesh -> Material -> RNG -> Tag -> Unit FP -> Unit FP -> Bool
 propFunction mesh matl rng tag u1 u2 = 
-  let particle = sampleParticle mesh rng tag
+--   let particle = sampleParticle mesh rng tag
+  let particle = sampleParticle mesh rng
       event    = getEvent mesh matl particle u1 u2 (pDir particle) 
   in case event of
        Escape   _ _ -> True

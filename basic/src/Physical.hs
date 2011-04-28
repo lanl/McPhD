@@ -25,3 +25,5 @@ newtype Time         = Time         { t     :: FP  } deriving (Eq, Show, Num)
 
 newtype Opacity      = Opacity      { sigma :: FP  } deriving (Eq, Show)
 newtype Temperature  = Temperature  { temp  :: FP  } deriving (Eq, Show)
+
+-- Note: in moving to 3D, we'll have to be careful about speed vs velocity

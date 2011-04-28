@@ -12,10 +12,10 @@ import Test.TestingTools
 -- The library under test
 import Sphere1D
 
--- It's dependencies
+-- Its dependencies
 import Numerical
 import Physical
-import Data.Vector.V1
+-- import Data.Vector.V1
 import Cell
 
 
