@@ -79,6 +79,12 @@ instance Mag (Normalized a) where
   magnitude  = const (1.0::Double)
   magnitude2 = const (1.0::Double)
 
+-- TODO: I'm unconvinced. Adding NormalizedType seems to be a bit
+-- over the top. All type info is static, so there's no real advantage
+-- in trying to normalize already normalized values. If you really
+-- need to (I can't see why you would), you can always un-normalize
+-- in such a situation.
+
 {- Functions for making normalized vectors. They are here because I
 don't want to expose the Normalized constructor. This really hampers
 the extensibility of the Normalized type and Mag class-}
@@ -93,6 +99,11 @@ the extensibility of the Normalized type and Mag class-}
 
 -- Since the normalized quantities are turning out to be just vectors,
 -- this isn't as big a deal as I thought.
+--
+-- TODO: You could simulate this via the module system, but I don't think
+-- it's worth it. Module M could export T with its constructor C. Then
+-- "friends" can just import M, whereas non-friends would import a module P
+-- that imports M and re-exports T, but not C.
 
 normalVector1 :: Double -> Normalized Vector1
 normalVector1 x = let Normalized n = normalize x in Normalized $ Vector1 n
