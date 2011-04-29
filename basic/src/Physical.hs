@@ -18,12 +18,16 @@ newtype Direction    = Direction    { dir   :: Vec } deriving (Eq, Show, Num)
 newtype Momentum     = Momentum     { mom   :: Vec }
   deriving (Eq, Show, Num, GV.Vector V.Vector, GMV.MVector V.MVector, Unbox)
 newtype Velocity     = Velocity     { vel   :: Vec } deriving (Eq, Show)
+
 newtype Energy       = Energy       { e     :: FP  } deriving (Eq, Show, Num)
 newtype EnergyWeight = EnergyWeight { ew    :: FP  }
   deriving (Eq, Show, Num, GV.Vector V.Vector, GMV.MVector V.MVector, Unbox)
 newtype Time         = Time         { t     :: FP  } deriving (Eq, Show, Num)
 
-newtype Opacity      = Opacity      { sigma :: FP  } deriving (Eq, Show)
+newtype CrossSection = CrossSection { mu    :: FP  } deriving (Eq, Show, Num)
+newtype Opacity      = Opacity      { sigma :: FP  } deriving (Eq, Show, Num)
 newtype Temperature  = Temperature  { temp  :: FP  } deriving (Eq, Show)
+newtype Density      = Density      { rho   :: FP  } deriving (Eq, Show)
+newtype NucleonNumber = NucleonNumber {nnucl :: FP } deriving (Eq, Show, Num)
 
--- Note: in moving to 3D, we'll have to be careful about speed vs velocity
+-- end of file
