@@ -13,3 +13,5 @@ data Particle = Particle {
   , rng     :: !RNG
   }
 
+-- end of file
+
