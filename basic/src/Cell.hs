@@ -11,9 +11,9 @@ data Cell = Cell {
   , highB  :: Position
   , lowBC  :: BoundaryCondition
   , highBC :: BoundaryCondition
-  , mat    :: Material -- QUESTION: ok to include here?
+  , mat    :: Material 
   }
   deriving Show
 
-data Face = Lo | Hi -- QUESTION: all 1D, how to generalize
+data Face = Lo | Hi 
   deriving (Eq, Show)
