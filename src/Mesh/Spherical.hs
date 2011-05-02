@@ -31,13 +31,14 @@ outward_cell mesh cell
     | otherwise = SphericalMeshCell { getIndex = getIndex cell + 1 }
 
 cell_min :: SphericalMesh -> SphericalMeshCell -> Radius
-cell_min mesh Void = (radii mesh) `index` (size mesh)
+cell_min mesh Void = outer_radius mesh
 cell_min mesh cell
     | getIndex cell == 0 = Radius 0
     | otherwise = (radii mesh) `index` (getIndex cell - 1)
 
 cell_max :: SphericalMesh -> SphericalMeshCell -> Radius
-cell_max _ Void = undefined
+cell_max _ Void = undefined -- ??? It's a mistake to ever reach
+                            -- this. How to handle?
 cell_max mesh cell = (radii mesh) `index` ( getIndex cell )
 
 outer_cell :: SphericalMesh -> SphericalMeshCell
@@ -71,6 +72,8 @@ in_cell_test comp mesh cell location =
   in cell_bounds_test comp location (rmin, rmax)
 
 
+
+
 -- | Make SphericalMesh an instance of SpaceMesh
 instance SpaceMesh SphericalMesh where
   type MeshCell  SphericalMesh = SphericalMeshCell
@@ -87,7 +90,6 @@ instance SpaceMesh SphericalMesh where
     in SphericalMeshCell
        <$> S.findIndexL (cell_bounds_test (==) location) pairs
 
-
   cell_neighbor mesh cell Inward  = inward_cell mesh cell
   cell_neighbor mesh cell Outward = outward_cell mesh cell
 
@@ -96,9 +98,7 @@ instance SpaceMesh SphericalMesh where
 
   cell_boundary = undefined
 
-  is_in_mesh mesh location =
-    let r = position location
-    in r < outer_radius mesh
+  is_in_mesh mesh location = (position location) < (outer_radius mesh)
 
   is_in_cell = in_cell_test (==)
   is_approx_in_cell = in_cell_test (~==)
