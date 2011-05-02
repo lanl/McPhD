@@ -3,7 +3,8 @@
 module Mesh.Spherical where
 
 import Data.Functor
-import Data.List
+import Data.Function
+import Data.Sequence as S
 
 import Mesh.Classes
 import SpaceTime.Classes
@@ -12,41 +13,33 @@ import Numerics
 import Approx
 import RandomSamples
 
-data SphericalMeshCell = SphericalMeshCell { index :: Int }  | Void deriving (Eq)
+data SphericalMeshCell = SphericalMeshCell { getIndex :: Int }  | Void deriving (Eq)
 data SphericalDirection = Inward | Outward
 
-data SphericalMesh = SphericalMesh { radii :: [Radius] }
-
--- TODO: Do we need to work with indices here? And if we do, we should
--- probably avoid using a list here (except if the lists are very small),
--- as list lookup is linear. A finite map (Data.Map) or a sequence
--- (Data.Sequence) are good general-purpose functional data structures
--- with logarithmic lookup.
-
--- ANS: Definitely. These lists are the size of the mesh, so they'll
--- need to go.
+data SphericalMesh = SphericalMesh { radii :: Seq Radius }
 
 inward_cell :: SphericalMesh -> SphericalMeshCell -> SphericalMeshCell
-inward_cell mesh Void = SphericalMeshCell { index = size mesh }
+inward_cell mesh Void = SphericalMeshCell { getIndex = size mesh }
 inward_cell _ cell
-    | index cell == 0 = SphericalMeshCell { index = 0 } -- | Crossing origin.
-    | otherwise       = SphericalMeshCell { index = index cell - 1 }
+    | getIndex cell == 0 = SphericalMeshCell { getIndex = 0 } -- | Crossing origin.
+    | otherwise = SphericalMeshCell { getIndex = getIndex cell - 1 }
 
 outward_cell :: SphericalMesh -> SphericalMeshCell -> SphericalMeshCell
 outward_cell _ Void = Void
 outward_cell mesh cell
-    | index cell == size mesh = Void -- | Leaving the mesh
-    | otherwise               = SphericalMeshCell { index = index cell + 1 }
+    | getIndex cell == size mesh = Void -- | Leaving the mesh
+    | otherwise = SphericalMeshCell { getIndex = getIndex cell + 1 }
 
 cell_min :: SphericalMesh -> SphericalMeshCell -> Radius
-cell_min mesh Void = (radii mesh) !! (size mesh)
+cell_min mesh Void = outer_radius mesh
 cell_min mesh cell
-    | index cell == 0 = Radius 0
-    | otherwise       = (radii mesh) !! (index cell - 1)
+    | getIndex cell == 0 = Radius 0
+    | otherwise = (radii mesh) `index` (getIndex cell - 1)
 
 cell_max :: SphericalMesh -> SphericalMeshCell -> Radius
-cell_max _ Void = undefined
-cell_max mesh cell = (radii mesh) !! ( index cell )
+cell_max _ Void = undefined -- ??? It's a mistake to ever reach
+                            -- this. How to handle?
+cell_max mesh cell = (radii mesh) `index` ( getIndex cell )
 
 outer_cell :: SphericalMesh -> SphericalMeshCell
 outer_cell mesh = SphericalMeshCell $ size mesh -1
@@ -54,32 +47,50 @@ outer_cell mesh = SphericalMeshCell $ size mesh -1
 outer_radius :: SphericalMesh -> Radius
 outer_radius mesh = cell_max mesh (outer_cell mesh)
 
+
+-- | Use the position and direction to determine if a location is
+-- between two radii.
+cell_bounds_test :: (Radius -> Radius -> Bool)
+                    -> Spherical1D
+                    -> (Radius, Radius)
+                    -> Bool
+cell_bounds_test comp location (rmin, rmax) =
+  let r = sph1d_position location
+      cos_dis = cos_Sph1Ddirection location
+  in ( (r > rmin) || ( (r `comp` rmin) && cos_dis >= 0) )  &&
+     ( (r < rmax) || ( (r `comp` rmax) && cos_dis < 0) )
+
+
+-- | Use the position and direction to determine if a location is in a
+-- particular cell of the mesh.
 in_cell_test :: (Radius -> Radius -> Bool)
                 -> SphericalMesh -> SphericalMeshCell -> Spherical1D
                 -> Bool
 in_cell_test comp mesh cell location =
-  let r       = position location
-      rmin    = cell_min mesh cell
+  let rmin    = cell_min mesh cell
       rmax    = cell_max mesh cell
-      cos_dis = cos_Sph1Ddirection location
-    in ( (r > rmin) || ( (r `comp` rmin) && cos_dis >= 0) )  &&
-       ( (r < rmax) || ( (r `comp` rmax) && cos_dis < 0) )
+  in cell_bounds_test comp location (rmin, rmax)
 
 
+
+
+-- | Make SphericalMesh an instance of SpaceMesh
 instance SpaceMesh SphericalMesh where
   type MeshCell  SphericalMesh = SphericalMeshCell
   type MeshFace  SphericalMesh = SphericalDirection
   type MeshSpace SphericalMesh = Spherical1D
 
-  size = length . radii
+  -- | # cells = # stored radii
+  size = S.length . radii
 
-  -- This is too simple; we should use direction to break equality
-  -- Also, it looks like line noise.
-  cell_find mesh location = SphericalMeshCell <$>
-                            ( fst <$> ( find ( ( > position location) . snd)
-                                        (zip [0..] (radii mesh))))
+  -- | Search the mesh for the cell containing the given location.
+  cell_find mesh location =
+    let rads  = radii mesh
+        pairs = S.zip (Radius 0 <| rads) (rads)
+    in SphericalMeshCell
+       <$> S.findIndexL (cell_bounds_test (==) location) pairs
 
-  cell_neighbor mesh cell Inward = inward_cell mesh cell
+  cell_neighbor mesh cell Inward  = inward_cell mesh cell
   cell_neighbor mesh cell Outward = outward_cell mesh cell
 
   cell_neighbors mesh cell = [(Inward, inward_cell mesh cell),
@@ -87,12 +98,9 @@ instance SpaceMesh SphericalMesh where
 
   cell_boundary = undefined
 
-  is_in_mesh mesh location =
-    let r = position location
-    in r < outer_radius mesh
+  is_in_mesh mesh location = (position location) < (outer_radius mesh)
 
   is_in_cell = in_cell_test (==)
-
   is_approx_in_cell = in_cell_test (~==)
 
   uniform_sample mesh rand =

@@ -2,6 +2,7 @@
 module Mesh.Test.Mesh_test (tests) where
 
 import Data.Functor
+import Data.Sequence as S
 import Control.Applicative
 
 -- Testing libraries
@@ -24,14 +25,15 @@ import Mesh.Classes
 
 import Test.RandomNumbers_arbitrary
 
+
 -- * CellIndex tests
 
 cellIndex :: CellIndex
 cellIndex = CellIndex 10 10 10
 
 testRange :: Assertion
-testRange = inRange (CellIndex 0 0 0, CellIndex 20 20 20) cellIndex @?
-            "InRange operator for CellIndex"
+testRange = inRange (CellIndex 0 0 0, CellIndex 20 20 20) cellIndex
+            @? "InRange operator for CellIndex"
 
 
 -- * Simple Mesh Tests
@@ -44,7 +46,7 @@ simpleTestSize = (meshSize simpleMesh) @?= 1000
 
 -- * Spherical 1D Mesh tests
 spherical_mesh :: SphericalMesh
-spherical_mesh = SphericalMesh $ fmap Radius [1..100]
+spherical_mesh = SphericalMesh (S.fromList (fmap Radius [1..100]))
 
 sph1DTestSize :: Assertion
 sph1DTestSize = (size spherical_mesh) @?= 100;
@@ -59,7 +61,6 @@ prop_SampleInMesh seed =
     in is_in_mesh spherical_mesh location
 
 
-
 prop_FindIsInAgree :: Seed -> Bool
 prop_FindIsInAgree seed =
   let rng = makePureMT seed
@@ -68,7 +69,6 @@ prop_FindIsInAgree seed =
   in case (is_in_cell spherical_mesh) <$> found_cell <*> Just location of
        Just True -> True
        _         -> False
-
 
 
 
