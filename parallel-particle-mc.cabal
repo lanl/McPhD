@@ -48,6 +48,7 @@ executable TestSuite
                    , random
                    , hpc
                    , AC-Vector == 2.*
+                   , containers
                    , array == 0.3.*
                    , mersenne-random-pure64 == 0.2.*
                    , HUnit == 1.2.*
