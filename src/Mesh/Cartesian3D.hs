@@ -13,11 +13,20 @@ data Cartesian3DCell = Void
                      | Cartesian3DCell { cm_index :: (Int,Int,Int) }
                      deriving (Eq, Show, Ord)
 
+-- TODO: Could you document why a cell can be "Void"?
+
 -- | We make the cell type into an index by prepending void.
 instance Ix Cartesian3DCell where
-  range (Void, Cartesian3DCell b) = Void : map Cartesian3DCell (range ((0,0,0), b))
-  range (_, Void) = []
+  range (Void             , Void             ) = [Void]
+  range (Void             , Cartesian3DCell b) = Void : map Cartesian3DCell (range ((0,0,0), b))
+  range (_                , Void             ) = []
   range (Cartesian3DCell a, Cartesian3DCell b) = map Cartesian3DCell (range (a,b))
+
+  inRange (a, b) x = x `elem` range (a, b)
+
+-- TODO: I have added the first line, please verify. range is typically an "inclusive" function.
+-- I've added a very inefficient version of inRange, to make the definition complete. A more
+-- efficient version should be added. Why exactly do we need the Ix instance?
 
 data Cartesian3DDirection = Negative_X
                           | Positive_X
@@ -26,7 +35,11 @@ data Cartesian3DDirection = Negative_X
                           | Negative_Z
                           | Positive_Z deriving (Eq, Show)
 
-data C3D = Dimensions Int Int Int deriving Show
+data C3D = Dimensions !Int !Int !Int deriving Show
+
+-- TODO: I've added strictness annotations for good measure. It seems inconsistent to have
+-- (Int, Int, Int) to identify a cell above, and then three Int fields here. I'd prefer the
+-- latter everywhere.
 
 data Cartesian3DMesh = Cartesian3DMesh {
   c3Ddimensions :: C3D

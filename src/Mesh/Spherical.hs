@@ -41,6 +41,21 @@ cell_max _ Void = undefined -- ??? It's a mistake to ever reach
                             -- this. How to handle?
 cell_max mesh cell = (radii mesh) `index` ( getIndex cell )
 
+-- !!!: Depends on the answer to my other question. Why is Void even needed? My naive
+-- assumption would be that normal coordinates aren't Void, and that you just need it
+-- as a special case sometimes. Then I'd use SphericalMeshCell to be an Int-triple, and
+-- Maybe SphericalCell when you need to care about the special case.
+--
+-- If you can't statically rule this out, then the best thing to do is to throw a
+-- descriptive run-time error message using the "error" function.
+--
+-- BTW, the index handling in general is suspicious to me. If I see something like
+--
+-- > foo `index` getIndex cell
+--
+-- like you have above, then I have to wonder why you don't look up via the cell in the
+-- first place.
+
 outer_cell :: SphericalMesh -> SphericalMeshCell
 outer_cell mesh = SphericalMeshCell $ size mesh -1
 
