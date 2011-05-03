@@ -49,19 +49,20 @@ chunk n = L.unfoldr go
               r        -> Just r
 
 bigMesh :: Sphere1D
-bigMesh = 
-  Sphere1D $ V.fromList 
-    ([Cell (Position 0) (Position 1) Refl   Transp
+bigMesh =
+  Sphere1D $ V.fromList $
+     [Cell (Position 0) (Position 1)       Refl   Transp
            (Material (Opacity 0.1) (Opacity 2)
                      (Velocity 0) (Temperature 1)
                      (Density 1.0) (Density 0.5) (Density 0))]
      L.++
-     [Cell (Position i) (Position $ i+1.0) Transp Transp 
+     [Cell (Position i) (Position $ i+1.0) Transp Transp
            (Material (Opacity 1) (Opacity 0.5)
                      (Velocity 0) (Temperature 2)
-                     (Density 1.0) (Density 0.5) (Density 0)) | i<-[1.0..998.0]]
+                     (Density 1.0) (Density 0.5) (Density 0))
+     | i <- [1..998]]
      L.++
-     [Cell (Position 999.0) (Position 1000.0) Transp Refl
-                    (Material (Opacity 1)   (Opacity 0.5)
-                              (Velocity 0) (Temperature 2)                                                       (Density 1.0) (Density 0.5) (Density 0))]
-     )
+     [Cell (Position 999) (Position 1000)  Transp Refl
+           (Material (Opacity 1)   (Opacity 0.5)
+                     (Velocity 0) (Temperature 2)
+                     (Density 1.0) (Density 0.5) (Density 0))]
