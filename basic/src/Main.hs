@@ -48,8 +48,9 @@ infMesh :: Sphere1D
 infMesh = Sphere1D $ V.fromList
             [ Cell (Position 0) (Position 1) Refl   Transp
                    (Material (Opacity 0.1) (Opacity 2)
-                             (Velocity 0) (Temperature 1))
+                             (Velocity 0) (Temperature 1)
+                             (Density 1.0) (Density 0.5) (Density 0))
             , Cell (Position 1) (Position 2) Transp Refl
                    (Material (Opacity 1)   (Opacity 0.5)
-                             (Velocity 0) (Temperature 2))
+                             (Velocity 0) (Temperature 2)                                                       (Density 1.0) (Density 0.5) (Density 0))
             ]
