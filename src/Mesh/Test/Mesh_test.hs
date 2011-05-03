@@ -44,6 +44,7 @@ simpleMesh = SimpleMesh cellIndex (Vector3 0.1 0.2 0.3)
 simpleTestSize :: Assertion
 simpleTestSize = (meshSize simpleMesh) @?= 1000
 
+
 -- * Spherical 1D Mesh tests
 spherical_mesh :: SphericalMesh
 spherical_mesh = SphericalMesh (S.fromList (fmap Radius [1..100]))
