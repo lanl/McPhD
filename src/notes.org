@@ -294,3 +294,9 @@
   InstanceA_arbitrary.hs
   InstanceA_test.hs  -- Tests for each data type
   InstanceB_test.hs
+
+* Tasks:
+** TODO Make indices for Cartesian3D and Spherical meshes into Ix instances.
+** TODO Complete Cartesian3D mesh interface.
+** TODO Convert lists in mesh types to arrays.
+
