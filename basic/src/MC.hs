@@ -42,7 +42,7 @@ step msh p =
 stream :: Mesh m => m -> Particle -> Direction -> Event -> Particle
 stream msh
        p@(Particle { P.dir = omega
-                   , P.pos = x
+                   , P.pos = (Position x)
                    , time  = t
                    , cell  = cidx
                    })
@@ -60,7 +60,7 @@ stream msh
     d  :: FP
     d  = dist event
     x' :: Position
-    x' = x
+    x' = Position $ x +  (Physical.dir omega) * d
     t' = t - Time (d / c)
 
     newCell :: Face -> CellIdx
@@ -78,13 +78,13 @@ withRandomParticle (Particle { rng = rng }) m =
 -- a new state for the particle.
 pickEvent :: Mesh m => m -> Particle -> Direction -> Rnd Event
 pickEvent msh
-          p@(Particle { P.dir  = omega
+          Particle { P.dir  = omega
                       , P.pos  = x
                       , cell   = cidx
                       , weight = w
                       , time   = Time tcen
                       , energy = e
-                      })
+                      }
           omega' = do
   sel_s <- random
   sel_a <- random
