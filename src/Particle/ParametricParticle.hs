@@ -38,6 +38,11 @@ mesh would still be useful for defining a boundary on the space.
 --                            mesh     :: m }
 --
 
+-- ANS: Whoops. That was a question to myself, wondering if there's
+-- even a use-case for particles which aren't on a mesh.  There isn't,
+-- at least that I want to address right now, so ParamParticleMesh
+-- below will become the norm.
+
 data ParametricParticle space =
   ParametricParticle
   {
@@ -50,10 +55,6 @@ createParametricParticle :: (Space a) => a -> Time -> Seed -> ParametricParticle
 createParametricParticle location time seed =
   ParametricParticle location time (makePureMT seed)
 
--- ??? Cannot re-use the function weps for comparing Time values. The
--- error is a mismatch between space and Time. The first use of weps
--- appears to fix its type signature.
-
 -- !!!: That's a tricky corner of Haskell. You've been hit by the
 -- "monomorphism restriction", which is controversial at best. Bindings
 -- without a type signature and without function arguments (such as weps)
@@ -64,6 +65,9 @@ createParametricParticle location time seed =
 -- this case, too, but not for truly overloaded non-functions), or remove
 -- the monomorphism restriction for the module by using the
 -- NoMonomorphismRestriction LANGUAGE pragma.
+
+-- ANS: Ah, thank you for that explanation. I never really understood
+-- the momomprphism restriction.
 
 instance (Approx space) => Approx (ParametricParticle space) where
   within_eps epsilon a b =
@@ -82,9 +86,6 @@ data (SpaceMesh mesh) => ParamParticleMesh mesh = ParamParticleMesh
 createParamParticleMesh :: (SpaceMesh m) => (MeshSpace m) -> Time -> Seed -> ParamParticleMesh m
 createParamParticleMesh location time seed = ParamParticleMesh location time (makePureMT seed)
 
--- ??? Can't re-use weps here either, even if I specify it's parametric definition.
--- !!!: Yes, you need the type signature as a real type signature, not just
--- as an annotation.
 instance (Approx (MeshSpace mesh), SpaceMesh mesh) => Approx (ParamParticleMesh mesh) where
   within_eps epsilon a b =
     (weps (ppmLocation a) (ppmLocation b)) && (within_eps epsilon (ppmTime a) (ppmTime b))

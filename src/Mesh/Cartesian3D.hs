@@ -15,6 +15,25 @@ data Cartesian3DCell = Void
 
 -- TODO: Could you document why a cell can be "Void"?
 
+-- ANS: Void is there to capture the notion of "there is no next cell"
+-- when dealing with cells that are on the boundary, for example when
+-- querying for neighbors. In other codes, we reserved cell # 0 for
+-- this, but I wanted a more clear distinction.
+--
+-- Maybe could work for this special case, but I'll need to encode
+-- more information in the type. For example, the next cell may not be
+-- there because it's the edge of the simulation, it's on another
+-- processor, etc. I'd add constructors to Cartesian3DCell to handle
+-- these.
+
+-- I think I've got a better way to do this using Neighbor
+-- below. Should be in here soon.
+
+-- | A datatype representing the possible neighbors of a cell. 
+data Neighbor = Cell { neighbor_cell :: Cartesian3DCell } 
+              | Edge -- ^ Edge of the simulation
+              | Reflection -- ^ Reflecting boundary condition. Particle will not escape.
+
 -- | We make the cell type into an index by prepending void.
 instance Ix Cartesian3DCell where
   range (Void             , Void             ) = [Void]
@@ -27,6 +46,10 @@ instance Ix Cartesian3DCell where
 -- TODO: I have added the first line, please verify. range is typically an "inclusive" function.
 -- I've added a very inefficient version of inRange, to make the definition complete. A more
 -- efficient version should be added. Why exactly do we need the Ix instance?
+  
+-- ANS: I anticipate storing physical properties defined on the mesh
+-- as arrays. Perhaps this is premature? I could easily store these as
+-- a map keyed on Cartesian3DCell.
 
 data Cartesian3DDirection = Negative_X
                           | Positive_X

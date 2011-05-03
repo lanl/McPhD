@@ -4,7 +4,7 @@ module Mesh.Spherical where
 
 import Data.Functor
 import Data.Function
-import Data.Sequence as S
+import Data.Sequence as Seq
 
 import Mesh.Classes
 import SpaceTime.Classes
@@ -45,16 +45,24 @@ cell_max mesh cell = (radii mesh) `index` ( getIndex cell )
 -- assumption would be that normal coordinates aren't Void, and that you just need it
 -- as a special case sometimes. Then I'd use SphericalMeshCell to be an Int-triple, and
 -- Maybe SphericalCell when you need to care about the special case.
---
--- If you can't statically rule this out, then the best thing to do is to throw a
--- descriptive run-time error message using the "error" function.
---
+
+-- ANS: I answered this in Cartesian3D.hs
+
 -- BTW, the index handling in general is suspicious to me. If I see something like
 --
 -- > foo `index` getIndex cell
 --
 -- like you have above, then I have to wonder why you don't look up via the cell in the
 -- first place.
+
+-- ANS: I wanted to capture in one place the relationship between
+-- cells and the correct entries in the radius data. In this mesh, we
+-- have a collection of radii in increasing order, with each cell
+-- being bounded above and below by consecutive radii. (Except cell 0,
+-- it's lower radius is implicitly zero, so I don't store this
+-- information) Functions cell_min and cell_max are where I encode the
+-- fact that the upper radius for cell #i is in the position i of
+-- radii and the lower radius is in position i-1.
 
 outer_cell :: SphericalMesh -> SphericalMeshCell
 outer_cell mesh = SphericalMeshCell $ size mesh -1
@@ -96,14 +104,14 @@ instance SpaceMesh SphericalMesh where
   type MeshSpace SphericalMesh = Spherical1D
 
   -- | # cells = # stored radii
-  size = S.length . radii
+  size = Seq.length . radii
 
   -- | Search the mesh for the cell containing the given location.
   cell_find mesh location =
     let rads  = radii mesh
-        pairs = S.zip (Radius 0 <| rads) (rads)
+        pairs = Seq.zip (Radius 0 <| rads) (rads)
     in SphericalMeshCell
-       <$> S.findIndexL (cell_bounds_test (==) location) pairs
+       <$> Seq.findIndexL (cell_bounds_test (==) location) pairs
 
   cell_neighbor mesh cell Inward  = inward_cell mesh cell
   cell_neighbor mesh cell Outward = outward_cell mesh cell
