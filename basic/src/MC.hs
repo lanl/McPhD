@@ -79,12 +79,12 @@ withRandomParticle (Particle { rng = rng }) m =
 pickEvent :: Mesh m => m -> Particle -> Direction -> Rnd Event
 pickEvent msh
           Particle { P.dir  = omega
-                      , P.pos  = x
-                      , cell   = cidx
-                      , weight = w
-                      , time   = Time tcen
-                      , energy = e
-                      }
+                   , P.pos  = x
+                   , cell   = cidx
+                   , weight = w
+                   , time   = Time tcen
+                   , energy = e
+                   }
           omega' = do
   sel_s <- random
   sel_a <- random
