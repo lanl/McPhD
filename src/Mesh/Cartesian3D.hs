@@ -26,6 +26,12 @@ data Cartesian3DCell = Cartesian3DCell Int Int Int
 
 -- I think I've got a better way to do this. Should be in here soon.
 
+-- !!!: It's great that you want to avoid using cell 0 for encoding
+-- exceptions. Given the type system of Haskell, such approaches are
+-- discouraged. It's fine if Maybe isn't enough. You can use Either
+-- or use a special type (as you did) instead. I like the new
+-- Neighbor-approach much better. See also my comment next to the
+-- definition of Neighbor.
 
 
 -- Why exactly do we need the Ix instance?
@@ -33,6 +39,9 @@ data Cartesian3DCell = Cartesian3DCell Int Int Int
 -- ANS: I anticipate storing physical properties defined on the mesh
 -- as arrays. Perhaps this is premature? I could easily store these as
 -- a map keyed on Cartesian3DCell.
+--
+-- !!!: Are the physical properties of a mesh immutable during a
+-- simulation? If yes, an array-like type might be appropriate.
 
 data Cartesian3DDirection = Negative_X
                           | Positive_X

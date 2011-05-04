@@ -20,6 +20,18 @@ data Neighbor c = Cell { neighbor_cell :: c }
                 | Same -- ^ Cell is it's own neighbor. E.g. reflection
                 deriving Show
 
+-- TODO: Ok, this is nice (and much nicer than incorporating the
+-- "exceptional" cases in the base type). A typical pattern in Haskell
+-- is to use the Either type for situations as this:
+--
+-- > type Neighbor c = Either NeighborException c
+-- > data NeighborException = Void | Same
+--
+-- This has the advantage that you can make use of the predefined
+-- Monad and MonadError instances of the Either type. However, there's
+-- nothing wrong with using a dedicated type such as Neighbor, and
+-- if you need the instances, you can easily define them yourself.
+
 data BoundaryCondition = Vacuum | Reflection deriving Show
 
 -- | A class for describing operations on meshes.
