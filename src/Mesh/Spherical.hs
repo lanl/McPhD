@@ -4,6 +4,7 @@ module Mesh.Spherical where
 
 import Data.Functor
 import Data.Function
+import Data.Ix
 import Data.Sequence as Seq
 
 import Mesh.Classes
@@ -13,33 +14,38 @@ import Numerics
 import Approx
 import RandomSamples
 
-data SphericalMeshCell = SphericalMeshCell { getIndex :: Int }  | Void deriving (Eq)
+data SphericalMeshCell = SphericalMeshCell { getIndex :: Int }
+                       deriving (Eq, Ord, Ix, Show)
+
 data SphericalDirection = Inward | Outward
+                        deriving (Eq, Ord, Show)
 
-data SphericalMesh = SphericalMesh { radii :: Seq Radius }
+data SphericalMesh = SphericalMesh { radii :: Seq Radius
+                                   , bc :: BoundaryCondition }
+                   deriving Show
 
-inward_cell :: SphericalMesh -> SphericalMeshCell -> SphericalMeshCell
-inward_cell mesh Void = SphericalMeshCell { getIndex = size mesh }
-inward_cell _ cell
-    | getIndex cell == 0 = SphericalMeshCell { getIndex = 0 } -- | Crossing origin.
-    | otherwise = SphericalMeshCell { getIndex = getIndex cell - 1 }
+inward_neighbor :: SphericalMesh
+                   -> SphericalMeshCell
+                   -> Neighbor SphericalMeshCell
+inward_neighbor mesh cell
+  | getIndex cell == 0 = Cell cell -- ^ Crossing origin.
+  | otherwise = Cell cell{ getIndex = getIndex cell - 1 }
 
-outward_cell :: SphericalMesh -> SphericalMeshCell -> SphericalMeshCell
-outward_cell _ Void = Void
-outward_cell mesh cell
-    | getIndex cell == size mesh = Void -- | Leaving the mesh
-    | otherwise = SphericalMeshCell { getIndex = getIndex cell + 1 }
+
+outward_neighbor :: SphericalMesh
+                    -> SphericalMeshCell
+                    -> Neighbor SphericalMeshCell
+outward_neighbor mesh cell
+  | getIndex cell == size mesh = Void
+  | otherwise = Cell cell{ getIndex = getIndex cell + 1 }
 
 cell_min :: SphericalMesh -> SphericalMeshCell -> Radius
-cell_min mesh Void = outer_radius mesh
 cell_min mesh cell
     | getIndex cell == 0 = Radius 0
-    | otherwise = (radii mesh) `index` (getIndex cell - 1)
+    | otherwise = (radii mesh) `Seq.index` (getIndex cell - 1)
 
 cell_max :: SphericalMesh -> SphericalMeshCell -> Radius
-cell_max _ Void = undefined -- ??? It's a mistake to ever reach
-                            -- this. How to handle?
-cell_max mesh cell = (radii mesh) `index` ( getIndex cell )
+cell_max mesh cell = (radii mesh) `Seq.index` ( getIndex cell )
 
 -- !!!: Depends on the answer to my other question. Why is Void even needed? My naive
 -- assumption would be that normal coordinates aren't Void, and that you just need it
@@ -69,7 +75,6 @@ outer_cell mesh = SphericalMeshCell $ size mesh -1
 
 outer_radius :: SphericalMesh -> Radius
 outer_radius mesh = cell_max mesh (outer_cell mesh)
-
 
 -- | Use the position and direction to determine if a location is
 -- between two radii.
@@ -113,11 +118,11 @@ instance SpaceMesh SphericalMesh where
     in SphericalMeshCell
        <$> Seq.findIndexL (cell_bounds_test (==) location) pairs
 
-  cell_neighbor mesh cell Inward  = inward_cell mesh cell
-  cell_neighbor mesh cell Outward = outward_cell mesh cell
+  cell_neighbor mesh cell Inward  = inward_neighbor mesh cell
+  cell_neighbor mesh cell Outward = outward_neighbor mesh cell
 
-  cell_neighbors mesh cell = [(Inward, inward_cell mesh cell),
-                              (Outward, outward_cell mesh cell) ]
+  cell_neighbors mesh cell = [(Inward, inward_neighbor mesh cell),
+                              (Outward, outward_neighbor mesh cell) ]
 
   cell_boundary = undefined
 

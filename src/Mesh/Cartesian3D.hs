@@ -5,12 +5,10 @@ import Data.Vector.V3
 import Data.Ix
 import Data.Sequence
 
-
 import SpaceTime.Cartesian
 import Mesh.Classes
 
-data Cartesian3DCell = Void
-                     | Cartesian3DCell { cm_index :: (Int,Int,Int) }
+data Cartesian3DCell = Cartesian3DCell Int Int Int
                      deriving (Eq, Show, Ord)
 
 -- TODO: Could you document why a cell can be "Void"?
@@ -26,27 +24,12 @@ data Cartesian3DCell = Void
 -- processor, etc. I'd add constructors to Cartesian3DCell to handle
 -- these.
 
--- I think I've got a better way to do this using Neighbor
--- below. Should be in here soon.
+-- I think I've got a better way to do this. Should be in here soon.
 
--- | A datatype representing the possible neighbors of a cell. 
-data Neighbor = Cell { neighbor_cell :: Cartesian3DCell } 
-              | Edge -- ^ Edge of the simulation
-              | Reflection -- ^ Reflecting boundary condition. Particle will not escape.
 
--- | We make the cell type into an index by prepending void.
-instance Ix Cartesian3DCell where
-  range (Void             , Void             ) = [Void]
-  range (Void             , Cartesian3DCell b) = Void : map Cartesian3DCell (range ((0,0,0), b))
-  range (_                , Void             ) = []
-  range (Cartesian3DCell a, Cartesian3DCell b) = map Cartesian3DCell (range (a,b))
 
-  inRange (a, b) x = x `elem` range (a, b)
+-- Why exactly do we need the Ix instance?
 
--- TODO: I have added the first line, please verify. range is typically an "inclusive" function.
--- I've added a very inefficient version of inRange, to make the definition complete. A more
--- efficient version should be added. Why exactly do we need the Ix instance?
-  
 -- ANS: I anticipate storing physical properties defined on the mesh
 -- as arrays. Perhaps this is premature? I could easily store these as
 -- a map keyed on Cartesian3DCell.
@@ -60,15 +43,21 @@ data Cartesian3DDirection = Negative_X
 
 data C3D = Dimensions !Int !Int !Int deriving Show
 
--- TODO: I've added strictness annotations for good measure. It seems inconsistent to have
--- (Int, Int, Int) to identify a cell above, and then three Int fields here. I'd prefer the
--- latter everywhere.
+-- TODO: I've added strictness annotations for good measure. It seems
+-- inconsistent to have (Int, Int, Int) to identify a cell above, and
+-- then three Int fields here. I'd prefer the latter everywhere.
 
 data Cartesian3DMesh = Cartesian3DMesh {
   c3Ddimensions :: C3D
   , x_coords :: Seq Double
   , y_coords :: Seq Double
-  , z_coords :: Seq Double } deriving Show
+  , z_coords :: Seq Double
+  , x_low_bc :: BoundaryCondition
+  , x_high_bc :: BoundaryCondition
+  , y_low_bc  :: BoundaryCondition
+  , y_high_bc :: BoundaryCondition
+  , z_low_bc  :: BoundaryCondition
+  , z_high_bc :: BoundaryCondition } deriving Show
 
 instance SpaceMesh Cartesian3DMesh where
   type MeshCell Cartesian3DMesh  = Cartesian3DCell

@@ -2,7 +2,7 @@
 module Mesh.Test.Mesh_test (tests) where
 
 import Data.Functor
-import Data.Sequence as S
+import Data.Sequence as Seq
 import Control.Applicative
 
 -- Testing libraries
@@ -15,6 +15,7 @@ import Test.QuickCheck
 -- The libraries under test
 import Mesh.SimpleCartesian
 import Mesh.Spherical
+import Mesh.Classes
 
 -- Their dependencies
 import Data.Vector.V3
@@ -47,14 +48,13 @@ simpleTestSize = (meshSize simpleMesh) @?= 1000
 
 -- * Spherical 1D Mesh tests
 spherical_mesh :: SphericalMesh
-spherical_mesh = SphericalMesh (S.fromList (fmap Radius [1..100]))
+spherical_mesh = SphericalMesh (Seq.fromList (fmap Radius [1..100])) Vacuum
 
 sph1DTestSize :: Assertion
 sph1DTestSize = (size spherical_mesh) @?= 100;
 
 sph1DTestRadius :: Assertion
 sph1DTestRadius = outer_radius spherical_mesh @?= Radius 100.0
-
 
 prop_SampleInMesh :: Seed -> Bool
 prop_SampleInMesh seed =
@@ -70,7 +70,6 @@ prop_FindIsInAgree seed =
   in case (is_in_cell spherical_mesh) <$> found_cell <*> Just location of
        Just True -> True
        _         -> False
-
 
 
 tests = [ testGroup "Index Tests"
