@@ -296,7 +296,27 @@
   InstanceB_test.hs
 
 * Tasks:
-** TODO Make indices for Cartesian3D and Spherical meshes into Ix instances.
+** DONE Make indices for Cartesian3D and Spherical meshes into Ix instances.
+   CLOSED: [2011-05-05 Thu 16:53]
+   :LOGBOOK:
+   - State "DONE"       from "TODO"       [2011-05-05 Thu 16:53]
+   :END:
+** DONE Convert lists in mesh types to arrays.
+   CLOSED: [2011-05-05 Thu 16:53]
+   :LOGBOOK:
+   - State "DONE"       from "TODO"       [2011-05-05 Thu 16:53]
+   :END:
 ** TODO Complete Cartesian3D mesh interface.
-** TODO Convert lists in mesh types to arrays.
+** Begin porting Tim's streaming, events, and tallies over to the general code
+*** TODO Add a material property data type to the mesh
+*** TODO Implement basic streaming
+    - Use the general data types for particle, mesh and space.
+    - [ ] Copy Tim's event structure
+    - [ ] Copy Tim's approach to streaming via recursion and termination
+*** TODO Rest of basic branch
+    - [ ] Tally type
+    - [ ] Tally fold
+    - [ ] Multiple particles
+
+ 
 
