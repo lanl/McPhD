@@ -279,7 +279,6 @@
 
 
 
-
 * Directory and file structure
 
   A common pattern in sub-directories is appearing:
@@ -318,5 +317,4 @@
     - [ ] Tally fold
     - [ ] Multiple particles
 
- 
 
