@@ -17,7 +17,7 @@ import SpaceTime.Classes
 -- | A datatype representing the possible neighbors of a cell.
 data Neighbor c = Cell { neighbor_cell :: c }
                 | Void -- ^ Edge of the simulation
-                | Same -- ^ Cell is it's own neighbor. E.g. reflection
+                | Self -- ^ Cell is it's own neighbor. E.g. reflection
                 deriving Show
 
 -- TODO: Ok, this is nice (and much nicer than incorporating the

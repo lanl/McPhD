@@ -21,7 +21,6 @@ instance (Arbitrary n, Random n, RealFloat n) =>
     Arbitrary (UnitInterval n) where
       arbitrary = UnitInterval <$> choose (0.0, 1.0)
 
-
 instance Arbitrary Vector1 where
   arbitrary = Vector1 <$> arbitrary
 

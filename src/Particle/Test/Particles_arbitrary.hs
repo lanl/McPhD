@@ -18,8 +18,8 @@ instance Arbitrary BasicParticle where
               <*> arbitrary
               <*> arbitrary
 
-instance (Space s, Arbitrary s) => Arbitrary (ParametricParticle s) where
-  arbitrary = createParametricParticle
+instance (Space s, Arbitrary s) => Arbitrary (ParticleInSpace s) where
+  arbitrary = createParticleInSpace
               <$> arbitrary
               <*> arbitrary
               <*> arbitrary
