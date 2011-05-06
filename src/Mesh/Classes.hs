@@ -1,11 +1,11 @@
-{-# LANGUAGE TypeFamilies, FlexibleContexts #-}
+{-# LANGUAGE TypeFamilies, FlexibleContexts, MultiParamTypeClasses #-}
 
 {-| A typeclass for Meshes.
 
 Each mesh is designed for use on a specific space. It defines its own
 cell and face indexing schemes. -}
 
-module Mesh.Classes (SpaceMesh (..)
+module Mesh.Classes (Mesh (..)
                     , Neighbor (..)
                     , BoundaryCondition (..)) where
 
@@ -35,7 +35,7 @@ data Neighbor c = Cell { neighbor_cell :: c }
 data BoundaryCondition = Vacuum | Reflection deriving Show
 
 -- | A class for describing operations on meshes.
-class (Space (MeshSpace m)) => SpaceMesh m where
+class (Space (MeshSpace m)) => Mesh m where
   type MeshCell  m :: *
   type MeshFace  m :: *
   type MeshSpace m :: *

@@ -16,7 +16,7 @@ import Approx
 import SpaceTime.Test.Space_arbitrary ()
 
 -- | Data type for a particle moving through a space with a mesh.
-data (SpaceMesh mesh) => ParticleInMesh mesh = ParticleInMesh
+data (Mesh mesh) => ParticleInMesh mesh = ParticleInMesh
     {
       ppmCell     :: MeshCell mesh  -- ^ Current cell in mesh.
     , ppmLocation :: MeshSpace mesh -- ^ Location in mesh's space.
@@ -29,7 +29,7 @@ data (SpaceMesh mesh) => ParticleInMesh mesh = ParticleInMesh
 (<*^>) g a = g <*> (pure a)
 infixl 4 <*^>
 
-createParticleInMesh :: (SpaceMesh m) => m -> (MeshSpace m)
+createParticleInMesh :: (Mesh m) => m -> (MeshSpace m)
                         -> Time
                         -> Seed
                         -> Maybe (ParticleInMesh m)
@@ -37,7 +37,7 @@ createParticleInMesh mesh location time seed =
   ParticleInMesh <$> cell <*^> location <*^> time <*^> (makePureMT seed)
   where cell = cell_find mesh location
 
-instance (Approx (MeshSpace mesh), SpaceMesh mesh) =>
+instance (Approx (MeshSpace mesh), Mesh mesh) =>
          Approx (ParticleInMesh mesh) where
   within_eps epsilon a b =
     (weps (ppmLocation a) (ppmLocation b)) && (weps (ppmTime a) (ppmTime b))

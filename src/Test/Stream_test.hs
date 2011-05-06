@@ -38,7 +38,7 @@ collatzCont _   = True
 
 collatzStep :: Collatz -> (CollatzEvent, Collatz)
 collatzStep (Collatz v)
-  | v==2      = (One,  Collatz 1)
+  | v == 2    = (One,  Collatz 1)
   | odd v     = (Up,   Collatz $ 3*v + 1)
   | otherwise = (Down, Collatz $ v `div` 2)
 

@@ -1,4 +1,4 @@
-{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeFamilies, FlexibleInstances, MultiParamTypeClasses #-}
 module Mesh.Cartesian3D where
 
 import Data.Vector.V3
@@ -39,7 +39,7 @@ data Cartesian3DMesh = Cartesian3DMesh {
   , z_low_bc  :: BoundaryCondition
   , z_high_bc :: BoundaryCondition } deriving Show
 
-instance SpaceMesh Cartesian3DMesh where
+instance Mesh Cartesian3DMesh where
   type MeshCell Cartesian3DMesh  = Cartesian3DCell
   type MeshFace Cartesian3DMesh  = Cartesian3DDirection
   type MeshSpace Cartesian3DMesh = Cartesian Vector3
@@ -54,7 +54,7 @@ instance SpaceMesh Cartesian3DMesh where
   cell_neighbors = undefined
 
   cell_boundary = undefined
-
+  
   is_in_cell = undefined
 
   is_in_mesh = undefined

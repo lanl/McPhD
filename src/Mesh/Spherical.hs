@@ -102,8 +102,8 @@ in_cell_test comp mesh cell location =
 
 
 
--- | Make SphericalMesh an instance of SpaceMesh
-instance SpaceMesh SphericalMesh where
+-- | Make SphericalMesh an instance of Mesh
+instance Mesh SphericalMesh where
   type MeshCell  SphericalMesh = SphericalMeshCell
   type MeshFace  SphericalMesh = SphericalDirection
   type MeshSpace SphericalMesh = Spherical1D
