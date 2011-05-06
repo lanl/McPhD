@@ -10,24 +10,23 @@ import Test.QuickCheck
 -- The libraries under test
 import Stream
 
--- Their dependencies
 
 
 
 -- A particle that holds an integer counter.
-data Counter = Counter { counter :: Int }
+data Counter = Counter { counter :: Int } deriving Show
 data CEvent = Decrmt | Done
 
-
 -- Reduce counter to zero, then stop
-step :: Counter -> (CEvent, Counter)
-step p@(Counter c) = if (c>1) then (Decrmt, Counter $ c-1) else (Done, p)
+countStep :: Counter -> (CEvent, Counter)
+countStep p@(Counter c) = if (c>1) then (Decrmt, Counter $ c-1) else (Done, p)
 
-cont :: CEvent -> Bool
-cont Decrmt = True
-cont Done = False
+countCont :: CEvent -> Bool
+countCont Decrmt = True
+countCont Done = False
 
-countStream = stream step cont
+countStream = stream countStep countCont
+
 
 
 data Collatz = Collatz { value :: Int } deriving Show
@@ -35,7 +34,7 @@ data CollatzEvent = Up | Down | One
 
 collatzCont :: CollatzEvent -> Bool
 collatzCont One = False
-collatzCont _    = True
+collatzCont _   = True
 
 collatzStep :: Collatz -> (CollatzEvent, Collatz)
 collatzStep (Collatz v)
