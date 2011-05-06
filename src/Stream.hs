@@ -2,9 +2,7 @@
 
 module Stream where
 
-import Particle.Classes
-import Data.List
-
+import Mesh.Classes
 
 -- | Prototype events type without associated data
 data Event = Scatter | CellFace | Escape | Census
@@ -14,10 +12,9 @@ isFinal Escape {} = True
 isFinal Census {} = True
 isFinal _         = False
 
-step :: (Mesh m, Particle p) => m -> p -> (Event, p)
-step = undefined
+isContinuing = not . isFinal
 
-stream :: Mesh -> Particle -> [(Event, Particle)]
-stream mesh particle = stream' mesh particle []
-    where stream' :: Mesh -> Particle -> [(Event, Particle)] -> [(Event, Particle)]
-          stream' mesh particle events = 
+stream :: (p -> (e,p)) -> (e -> Bool) -> p -> [(e, p)]
+stream stepper continue p =
+  let (e, p') = stepper p
+  in  (e, p') : if continue e then stream stepper continue p' else []
