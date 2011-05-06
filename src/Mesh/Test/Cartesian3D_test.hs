@@ -12,7 +12,7 @@ import Mesh.Cartesian3D
 
 -- It's dependencies
 import Mesh.Classes
-import SpaceTime.Classes
-import SpaceTime.Cartesian
+import Space.Classes
+import Space.Cartesian
 
 tests = []

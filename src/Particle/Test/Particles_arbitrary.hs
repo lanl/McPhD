@@ -4,7 +4,7 @@ import Control.Applicative
 import Test.QuickCheck
 
 
-import SpaceTime.Classes
+import Space.Classes
 import Particle.Test.Space3DCartesian_arbitrary
 import Particle.ParametricParticle
 

@@ -2,14 +2,14 @@
 module Mesh.Cartesian3D where
 
 import Data.Vector.V3
-import Data.Ix
 import Data.Sequence
+import Data.Ix
 
-import SpaceTime.Cartesian
+import Space.Cartesian
 import Mesh.Classes
 
 data Cartesian3DCell = Cartesian3DCell Int Int Int
-                     deriving (Eq, Show, Ord)
+                     deriving (Eq, Show, Ord, Ix)
 
 -- !!!: Are the physical properties of a mesh immutable during a
 -- simulation? If yes, an array-like type might be appropriate.
@@ -44,8 +44,7 @@ instance Mesh Cartesian3DMesh where
   type MeshFace Cartesian3DMesh  = Cartesian3DDirection
   type MeshSpace Cartesian3DMesh = Cartesian Vector3
 
-  size m = let Dimensions x y z = c3Ddimensions m
-           in x*y*z
+  size m = let Dimensions x y z = c3Ddimensions m in x*y*z
 
   cell_find = undefined
 

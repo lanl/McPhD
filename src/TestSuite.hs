@@ -9,7 +9,7 @@ import Test.NormalizedValues_test as NormalizedValues
 import Particle.Test.ParametricParticle_test as ParametricParticle
 import Mesh.Test.Mesh_test as Mesh
 import Mesh.Test.Cartesian3D_test as CartesianMesh
-import SpaceTime.Test.Space_test as Space
+import Space.Test.Space_test as Space
 import Test.Stream_test as Stream
 
 

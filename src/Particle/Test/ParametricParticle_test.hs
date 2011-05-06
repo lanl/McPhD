@@ -14,8 +14,8 @@ import Particle.ParametricParticle
 -- It's dependencies
 import Particle.Test.Particles_arbitrary
 import Approx
-import SpaceTime.Classes
-import SpaceTime.Spherical1D
+import Space.Classes
+import Space.Spherical1D
 
 -- | Property: Every particle is approximately equal to itself.
 prop_Approx :: (Space s, Approx s) => ParticleInSpace s -> Bool

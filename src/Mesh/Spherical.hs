@@ -1,24 +1,22 @@
-{-# LANGUAGE TypeFamilies, UndecidableInstances #-}
+{-# LANGUAGE TypeFamilies, FlexibleInstances, MultiParamTypeClasses #-}
 
 module Mesh.Spherical where
 
 import Data.Functor
-import Data.Function
 import Data.Ix
 import Data.Sequence as Seq
 
 import Mesh.Classes
-import SpaceTime.Classes
-import SpaceTime.Spherical1D
+import Space.Classes
+import Space.Spherical1D
 import Numerics
 import Approx
 import RandomSamples
 
-data SphericalMeshCell = SphericalMeshCell { getIndex :: Int }
-                       deriving (Eq, Ord, Ix, Show)
+newtype SphericalMeshCell = SphericalMeshCell { getIndex :: Int }
+    deriving (Eq, Ord, Ix, Show)
 
-data SphericalDirection = Inward | Outward
-                        deriving (Eq, Ord, Show)
+data SphericalDirection = Inward | Outward deriving (Eq, Ord, Show)
 
 data SphericalMesh = SphericalMesh { radii :: Seq Radius
                                    , bc :: BoundaryCondition }
@@ -27,7 +25,7 @@ data SphericalMesh = SphericalMesh { radii :: Seq Radius
 inward_neighbor :: SphericalMesh
                    -> SphericalMeshCell
                    -> Neighbor SphericalMeshCell
-inward_neighbor mesh cell
+inward_neighbor _ cell
   | getIndex cell == 0 = Cell cell -- ^ Crossing origin.
   | otherwise = Cell cell{ getIndex = getIndex cell - 1 }
 
@@ -47,13 +45,6 @@ cell_min mesh cell
 cell_max :: SphericalMesh -> SphericalMeshCell -> Radius
 cell_max mesh cell = (radii mesh) `Seq.index` ( getIndex cell )
 
--- !!!: Depends on the answer to my other question. Why is Void even needed? My naive
--- assumption would be that normal coordinates aren't Void, and that you just need it
--- as a special case sometimes. Then I'd use SphericalMeshCell to be an Int-triple, and
--- Maybe SphericalCell when you need to care about the special case.
-
--- ANS: I answered this in Cartesian3D.hs
-
 -- BTW, the index handling in general is suspicious to me. If I see something like
 --
 -- > foo `index` getIndex cell
@@ -61,14 +52,9 @@ cell_max mesh cell = (radii mesh) `Seq.index` ( getIndex cell )
 -- like you have above, then I have to wonder why you don't look up via the cell in the
 -- first place.
 
--- ANS: I wanted to capture in one place the relationship between
--- cells and the correct entries in the radius data. In this mesh, we
--- have a collection of radii in increasing order, with each cell
--- being bounded above and below by consecutive radii. (Except cell 0,
--- it's lower radius is implicitly zero, so I don't store this
--- information) Functions cell_min and cell_max are where I encode the
--- fact that the upper radius for cell #i is in the position i of
--- radii and the lower radius is in position i-1.
+-- ???: I don't understand the question. Do you mean why dont I use a
+-- map instead, with SphericalMeshCell as the key? Or Drop
+-- SphericalMeshCell as a seperate type and just use Int?
 
 outer_cell :: SphericalMesh -> SphericalMeshCell
 outer_cell mesh = SphericalMeshCell $ size mesh -1
@@ -83,7 +69,7 @@ cell_bounds_test :: (Radius -> Radius -> Bool)
                     -> (Radius, Radius)
                     -> Bool
 cell_bounds_test comp location (rmin, rmax) =
-  let r = sph1d_position location
+  let r       = sph1d_position location
       cos_dis = cos_Sph1Ddirection location
   in ( (r > rmin) || ( (r `comp` rmin) && cos_dis >= 0) )  &&
      ( (r < rmax) || ( (r `comp` rmax) && cos_dis < 0) )
@@ -130,6 +116,9 @@ instance Mesh SphericalMesh where
 
   is_in_cell = in_cell_test (==)
   is_approx_in_cell = in_cell_test (~==)
+
+  
+
 
   uniform_sample mesh rand =
     let (radius, rand') = sample_ball1D (outer_radius mesh) rand

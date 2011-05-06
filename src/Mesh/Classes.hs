@@ -12,7 +12,8 @@ module Mesh.Classes (Mesh (..)
 import System.Random.Mersenne.Pure64
 
 import Numerics ()
-import SpaceTime.Classes
+import Data.Ix
+import Space.Classes
 
 -- | A datatype representing the possible neighbors of a cell.
 data Neighbor c = Cell { neighbor_cell :: c }
@@ -35,10 +36,10 @@ data Neighbor c = Cell { neighbor_cell :: c }
 data BoundaryCondition = Vacuum | Reflection deriving Show
 
 -- | A class for describing operations on meshes.
-class (Space (MeshSpace m)) => Mesh m where
+class (Space (MeshSpace m), Ix (MeshCell m)) => Mesh m where
   type MeshCell  m :: *
-  type MeshFace  m :: *
   type MeshSpace m :: *
+  type MeshFace  m :: *
 
   -- | Number of cells in the mesh
   size :: m -> Int
@@ -55,7 +56,7 @@ class (Space (MeshSpace m)) => Mesh m where
   -- | Get the distance to exit a cell, and the face.
   cell_boundary :: m -> MeshCell m -> MeshSpace m
                    -> (Distance (MeshSpace m), MeshFace m)
-
+                   
   -- | Is the location in the given cell of the mesh?
   is_in_cell :: m -> MeshCell m -> MeshSpace m -> Bool
 

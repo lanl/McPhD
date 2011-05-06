@@ -1,5 +1,5 @@
 {-# LANGUAGE FlexibleInstances, UndecidableInstances #-}
-module SpaceTime.Test.Space_arbitrary where
+module Space.Test.Space_arbitrary where
 
 import Test.QuickCheck
 import Control.Applicative
@@ -9,8 +9,8 @@ import Data.Vector.V1
 import Data.Vector.V2
 import Data.Vector.V3
 import Data.Vector.Class
-import SpaceTime.Cartesian
-import SpaceTime.Spherical1D
+import Space.Cartesian
+import Space.Spherical1D
 import NormalizedValues
 
 import Test.Numeric_arbitrary ()

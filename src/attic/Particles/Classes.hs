@@ -4,7 +4,7 @@
 -}
 module Particle.Classes where
 
-import qualified SpaceTime.Space3DCartesian as Space
+import qualified Space.Space3DCartesian as Space
 
 -- * Particles
 
@@ -39,7 +39,7 @@ class (Particle p) => InTime p where
   tick :: p -> Space.Time -> p
 
 
--- | InSpaceTime particles have a speed, and can be advanced by
+-- | InSpace particles have a speed, and can be advanced by
 -- specifying either the time or distance of travel. These functions
 -- have default values which use the appropiate methods from InSpace
 -- and InTime.
