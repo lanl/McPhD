@@ -33,7 +33,6 @@ toBoundaryEvent :: BoundaryCondition -> BoundaryEvent
 toBoundaryEvent Vac    = Escape
 toBoundaryEvent Refl   = Reflect
 toBoundaryEvent Transp = Transmit
-toBoundaryEvent None   = error "Mesh.toBoundaryEventType: None boundary"
 
 boundaryEvent :: Mesh m => m -> CellIdx -> BoundaryEvent
 boundaryEvent msh cidx d face =

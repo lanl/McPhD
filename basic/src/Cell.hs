@@ -3,7 +3,7 @@ module Cell where
 import Physical
 import Material
 
-data BoundaryCondition = Vac | Refl | Transp | None
+data BoundaryCondition = Vac | Refl | Transp 
   deriving Show
 
 data Cell = Cell {
