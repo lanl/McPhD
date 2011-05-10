@@ -7,9 +7,11 @@ import Test.Framework (defaultMain, testGroup)
 import Test.Mesh_test as Mesh
 -- import Test.MC_test as MC
 import Test.Geometry_Test as Geometry
+import Test.Opacity_test as Opacity
 
 all_tests = [testGroup "Mesh tests"     Mesh.tests
            , testGroup "Geometry Tests" Geometry.tests
+            , testGroup "Opacity Tests" Opacity.tests
             -- , testGroup "Sphere1D tests" Sphere1D.tests
             -- , testGroup "MC tests"       MC.tests
             ]
