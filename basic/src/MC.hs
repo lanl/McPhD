@@ -22,11 +22,6 @@ steps msh = go
     go p = case step msh p of
              (e, p') -> (e, p') : if isContinuing e then go p' else []
 
--- QUESTION: So currently, we do not include the original state of the
--- particle in the tally, but we include the final state (i.e., the one
--- *after* we've already decided not to continue. Is this the correct
--- choice?
-
 -- | Compute the next event for a given particle in a given mesh. Also
 -- returns the new state of the particle.
 step :: Mesh m => m -> Particle -> (Event, Particle)
@@ -52,16 +47,16 @@ stream msh
     Absorb   {}           -> p' { P.dir =  omega    }
     Reflect  {}           -> p' { P.dir = -omega    }
     Transmit { face = f } -> p' { cell  = newCell f }
-    Escape   {}           -> p' { cell  = 0         } -- QUESTION: 0?
+    Escape   {}           -> p' { cell  = 0         } 
     Census   {}           -> p' { time  = 0         }
   where
     p' :: Particle
     p' = p { P.pos = x', time = t' }
-    d  :: FP
+    d  :: Distance
     d  = dist event
     x' :: Position
-    x' = Position $ x +  (Physical.dir omega) * d
-    t' = t - Time (d / c)
+    x' = Position $ x +  (Physical.dir omega) * Physical.distance d
+    t' = t - Time (Physical.distance d / c)
 
     newCell :: Face -> CellIdx
     newCell = cellAcross msh cidx
@@ -90,13 +85,13 @@ pickEvent msh
   sel_a <- random
   let (d_bdy, face) = distanceToBoundary msh cidx x omega
       matl          = material msh cidx
-      sig_s         = sigma $ sig_scat matl
-      sig_a         = sigma $ sig_abs  matl
+      sig_s         = mu $ sig_scat matl
+      sig_a         = mu $ sig_abs  matl
       -- TODO: boost to co-moving frame, compute the scatter, boost
       -- back to lab frame
-      d_scat        = min (- log sel_s / sig_s) huge
-      d_abs         = min (- log sel_a / sig_a) huge
-      d_cen         = c * tcen
+      d_scat        = Distance $ min (- log sel_s / sig_s) huge
+      d_abs         = Distance $ min (- log sel_a / sig_a) huge
+      d_cen         = Distance $ c * tcen
 
       dp :: Direction -> Momentum
       dp = elasticScatterMomDep e omega
@@ -105,7 +100,7 @@ pickEvent msh
       events        = [
           Scatter       d_scat (dp omega') w
         , Absorb        d_abs  (dp 0)      w
-        , boundaryEvent msh cidx d_bdy face
+        , boundaryEvent msh cidx (Distance d_bdy) face
         , Census        d_cen  0
         ]
 
