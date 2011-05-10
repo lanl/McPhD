@@ -19,17 +19,17 @@ import Tally
 main :: IO ()
 main =
   do
-    [n] <- getArgs
-    print (runManyParticles (read n) infMesh)
+    [n,sz] <- getArgs
+    print (runManyParticles (read n) (read sz) infMesh)
 
 -- | Perform the simulation for several (at least one) particles
 -- in a given mesh.
-runManyParticles :: Mesh m => Int -> m -> Tally
-runManyParticles !n msh =
+runManyParticles :: Mesh m => Int -> Int -> m -> Tally
+runManyParticles !n !chunkSz msh =
   let
     particles = genParticles n msh testRNG
     tallies   = L.map (runParticle msh) particles
-    chunked   = chunk 500 tallies
+    chunked   = chunk chunkSz tallies
     res       = L.map (L.foldl1' merge) chunked
                 `using` parBuffer 10 rdeepseq
   in
