@@ -4,7 +4,7 @@ import Data.List
 import Data.Ord
 
 import Cell
-import Physical
+import Physical hiding (distance)
 
 -- | Events: what can happen to a particle on a Monte Carlo step.
 --
@@ -19,25 +19,72 @@ import Physical
 -- Census:   the particle's internal clock has reached the end of the
 --           time step; it is banked for the next time step.
 
+
+{-- QUESTION: In some sense, there are really three types here, along 
+with two enumerations. The types are 
+  Collision (NucleonAbsorb | ... | EPlusInelastic)
+  Boundary (Transmit | Reflect | Escape )
+  Census. 
+Would the following make more sense?
+
+-----
+data CollType  = NucleonAbsorb | NucleonElastic | EMinusInelastic | EPlusInelastic
+
+data BoundType = Transmit | Reflect | Escape
+
+data Event = 
+    Collision { dist   :: !Distance
+              , deltaP :: Momentum
+              , eDep   :: EnergyWeight
+              , CollType
+            }
+  | Boundary { dist :: !Distance
+             , face :: Face
+             , BoundType
+             }
+  | Census   { dist :: !Distance
+             , deltaP :: Momentum
+             }
+-----
+
+I'm curious, especially in the case of Opacity.sampleCollision, whether there 
+would be any benefit. 
+-}
 data Event =
-    Scatter  { dist   :: !FP            -- ^ distance travelled
+    Scatter  { dist   :: !Distance            -- ^ distance travelled
              , deltaP :: Momentum       -- ^ momentum deposited
              , eDep   :: EnergyWeight   -- ^ energy deposited
              }
-  | Absorb   { dist   :: !FP            -- ^ distance travelled
+  | Absorb   { dist   :: !Distance            -- ^ distance travelled
              , deltaP :: Momentum       -- ^ momentum deposited
              , eDep   :: EnergyWeight   -- ^ energy deposited
              }
-  | Transmit { dist   :: !FP            -- ^ distance travelled
+  | NucleonAbsorb  { dist   :: !Distance            -- ^ distance travelled
+                   , deltaP :: Momentum       -- ^ momentum deposited
+                   , eDep   :: EnergyWeight   -- ^ energy deposited
+                   }
+  | NucleonElastic { dist   :: !Distance            -- ^ distance travelled
+                   , deltaP :: Momentum       -- ^ momentum deposited
+                   , eDep   :: EnergyWeight   -- ^ energy deposited
+                   }
+  | EMinusInelastic { dist   :: !Distance            -- ^ distance travelled
+                    , deltaP :: Momentum       -- ^ momentum deposited
+                    , eDep   :: EnergyWeight   -- ^ energy deposited
+                    }
+  | EPlusInelastic  { dist   :: !Distance            -- ^ distance travelled
+                    , deltaP :: Momentum       -- ^ momentum deposited
+                    , eDep   :: EnergyWeight   -- ^ energy deposited
+                    }
+  | Transmit { dist   :: !Distance            -- ^ distance travelled
              , face   :: Face           -- ^ which boundary
              }
-  | Escape   { dist   :: !FP            -- ^ distance travelled
+  | Escape   { dist   :: !Distance            -- ^ distance travelled
              , face   :: Face           -- ^ which boundary
              }
-  | Reflect  { dist   :: !FP            -- ^ distance travelled
+  | Reflect  { dist   :: !Distance            -- ^ distance travelled
              , face   :: Face           -- ^ which boundary
              }
-  | Census   { dist   :: !FP            -- ^ distance travelled
+  | Census   { dist   :: !Distance            -- ^ distance travelled
              , deltaP :: Momentum       -- ^ momentum deposited
              }
   deriving (Show, Eq)
@@ -47,7 +94,7 @@ data Event =
 -- events that are discarded.
 
 -- | Common type for all boundary event constructors.
-type BoundaryEvent = FP -> Face -> Event
+type BoundaryEvent = Distance -> Face -> Event
 
 -- | Does an event continue a random walk?
 isContinuing :: Event -> Bool
@@ -57,7 +104,7 @@ isContinuing (Transmit {}) = True
 isContinuing _             = False
 
 -- | Distance to be travelled for the event
-distance :: Event -> FP
+distance :: Event -> Distance
 distance = dist
 
 -- | Determines the closest event; input list must contain at least
