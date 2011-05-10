@@ -5,7 +5,7 @@ module Particle.BasicParticle where
 
 import Particle.Classes
 
-import qualified SpaceTime.Space3DCartesian as Space
+import qualified Space.Space3DCartesian as Space
 import Data.Vector.V3
 import RandomNumbers
 import Approx
@@ -46,7 +46,7 @@ instance InTime BasicParticle where
   tick p t = p { bpTime = newTime }
       where newTime = bpTime p + t
 
-instance InSpaceTime BasicParticle where
+instance InSpace BasicParticle where
   speed = bpSpeed
 
 instance RandomParticle BasicParticle where

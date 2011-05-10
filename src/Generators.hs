@@ -3,6 +3,7 @@ into a range of values, including ones represented by various data
 types. These functions can also take additional values which are
 parameters of the distribution.
 --}
+
 module Generators where
 
 import Numerics

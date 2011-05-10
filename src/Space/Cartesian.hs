@@ -1,9 +1,9 @@
 {-# LANGUAGE FlexibleInstances, TypeFamilies #-}
-module SpaceTime.Cartesian where
+module Space.Cartesian where
 
 import Approx
 import NormalizedValues
-import SpaceTime.Classes
+import Space.Classes
 import Data.Vector.Class
 
 {-- The cartesian spaces for 1,2 and 3 dimensions are all very

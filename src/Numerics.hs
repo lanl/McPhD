@@ -8,7 +8,16 @@ For each new type, there are various functions defined:
   unsafe_makeFoo :: Double -> Foo        Create a Foo which may be invalid. User beware!
   sampleFoo      :: Var    -> Foo        Maps Var values uniformly onto Foos
 
-  This looks like an opportunity for a new class.
+  Would a class be useful here.
+
+TODO: Add functions which create valid Foo's even with out-of range input:
+
+  createFoo :: Double -> Foo
+
+  These will typically take the modulus of the argument over the valid
+  domain.
+
+TODO: Add configurable assertion checking to the unsafe_makeFoo functions.
 
 --}
 module Numerics where
@@ -26,22 +35,6 @@ makeUnitary x
 unsafe_makeUnitary :: (RealFloat n) => n -> UnitInterval n
 unsafe_makeUnitary x = UnitInterval x
 
--- TODO: There are two degrees of un-safety: you can omit the check as
--- you do, or you can crash the program on failure (using error). Is
--- omitting the check really what you want?
-
--- ANS: The goal was to hide these constructors and replace them with
--- constructor functions which transformed to input to be valid. Like
--- Normalized quantities, some functions we know will produce valid
--- values, and I wanted to be able to allow them to create the data
--- types directly withoug going through the conversion.
-
--- These aren't actually being used yet. They may prove unnecessary.
---
--- !!!: It's fine then. You might want to include some form of configurable
--- assertion checking that can be switched off if you're worried about the
--- correctness of the functions making use of "unsafe_*". But we can think
--- about that as soon as you're actually using them.
 
 -- | The type for uniform variants.
 type Var = UnitInterval Double
@@ -56,9 +49,6 @@ makeAzimuthAngle x
     | abs x <= pi = Just (AzimuthAngle x)
     | otherwise   = Nothing
 
--- unsafe_makeAzimuthAngle :: Double -> AzimuthAngle
--- unsafe_makeAzimuthAngle = AzimuthAngle
-
 sampleAzimuthAngle :: Var -> AzimuthAngle
 sampleAzimuthAngle (UnitInterval a) = AzimuthAngle (pi*(2*a - 1))
 
@@ -72,9 +62,6 @@ makeZenithAngle z
     | (0 < z) && (z < pi) = Just (ZenithAngle z)
     | otherwise           = Nothing
 
--- unsafe_makeZenithAngle :: Double -> ZenithAngle
--- unsafe_makeZenithAngle = ZenithAngle
-
 sampleZenithAngle :: Var -> ZenithAngle
 sampleZenithAngle (UnitInterval a) = ZenithAngle (pi*a)
 
@@ -87,14 +74,9 @@ makeRadius x
     | (x > 0)   = Just (Radius x)
     | otherwise = Nothing
 
--- unsafe_makeRadius :: Double -> Radius
--- unsafe_makeRadius = Radius
-
 sampleRadius :: Var -> Radius
 sampleRadius (UnitInterval x) = (Radius . negate . log) x
 
 
 -- | Time, elapsed time from beginning of streaming
-newtype Time = Time { getTime :: Double } deriving (Eq, Show, Num, Ord)
-instance Approx Time where
-  within_eps epsilon (Time t1) (Time t2) = within_eps epsilon t1 t2
+newtype Time = Time { getTime :: Double } deriving (Eq, Show, Num, Ord, Approx)

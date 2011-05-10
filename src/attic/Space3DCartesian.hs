@@ -1,7 +1,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 -- Data types for Three-dimensonal space in Cartesian coordinates
 
-module SpaceTime.Space3DCartesian(
+module Space.Space3DCartesian(
   Distance (..)
   , Position (..)
   , Momentum (..)

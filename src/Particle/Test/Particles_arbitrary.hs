@@ -4,22 +4,14 @@ import Control.Applicative
 import Test.QuickCheck
 
 
-import SpaceTime.Classes
-import Particle.Test.Space3DCartesian_arbitrary
-import Particle.BasicParticle
+import Space.Classes
 import Particle.ParametricParticle
 
--- | Arbitrary BasicParticles
-instance Arbitrary BasicParticle where
-  arbitrary = createParticle
-              <$> arbitrary
-              <*> arbitrary
-              <*> arbitrary
-              <*> arbitrary
-              <*> arbitrary
+import Test.RandomNumbers_arbitrary
 
-instance (Space s, Arbitrary s) => Arbitrary (ParametricParticle s) where
-  arbitrary = createParametricParticle
+
+instance (Space s, Arbitrary s) => Arbitrary (ParticleInSpace s) where
+  arbitrary = createParticleInSpace
               <$> arbitrary
               <*> arbitrary
               <*> arbitrary

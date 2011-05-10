@@ -12,7 +12,7 @@ import RandomValues
 
 
 -- Its dependencies
-import SpaceTime.Space3DCartesian
+import Space.Space3DCartesian
 import Data.Vector.Class
 import Approx
 import Numerics

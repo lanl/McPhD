@@ -1,6 +1,6 @@
--- Test module for SpaceTime.Space3DCartesian
+-- Test module for Space.Space3DCartesian
 
-module SpaceTime.Test.Space3DCartesian_test where
+module Space.Test.Space3DCartesian_test where
 
 -- Testing libraries
 import Test.Framework (testGroup)
@@ -10,7 +10,7 @@ import Test.HUnit
 import Test.QuickCheck
 
 -- The module under test
-import SpaceTime.Space3DCartesian
+import Space.Space3DCartesian
 
 -- Its dependencies
 

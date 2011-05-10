@@ -1,5 +1,6 @@
 syntax: glob
 
+*.orig
 *.hi
 *.o
 *.tix

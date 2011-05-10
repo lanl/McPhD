@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleInstances, FlexibleContexts #-}
 
-module SpaceTime.Test.Space_test where
+module Space.Test.Space_test where
 
 -- Testing libraries
 import Test.Framework (testGroup)
@@ -10,11 +10,11 @@ import Test.HUnit
 import Test.QuickCheck
 
 -- The libraries under test
-import SpaceTime.Cartesian
-import SpaceTime.Spherical1D
+import Space.Cartesian
+import Space.Spherical1D
 
 -- Its dependencies
-import SpaceTime.Classes
+import Space.Classes
 import Approx
 import Data.Functor
 import NormalizedValues
@@ -25,7 +25,7 @@ import Data.Vector.V3
 
 -- Arbitrary instances
 import Test.Numeric_arbitrary
-import SpaceTime.Test.Space_arbitrary
+import Space.Test.Space_arbitrary
 
 -- Property: Moving no distance leaves location unchanged.
 prop_ZeroDistance :: (Num (Distance s), Space s, Approx s) => s -> Bool

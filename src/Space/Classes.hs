@@ -1,6 +1,6 @@
 {-# LANGUAGE TypeFamilies #-}
 
-module SpaceTime.Classes where
+module Space.Classes where
 
 import Approx ()
 

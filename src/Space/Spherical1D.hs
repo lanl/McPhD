@@ -1,5 +1,5 @@
 {-# LANGUAGE TypeFamilies #-}
-module SpaceTime.Spherical1D where
+module Space.Spherical1D where
 {-- Spherical 1D space is for problems with the rotational symmetry of
 the sphere. The only location information we need in this space is the
 distance from the origin, and a direction of motion measured from the
@@ -19,7 +19,7 @@ normalized 2-vector, even though only one component is necessary.
 
 --}
 
-import SpaceTime.Classes
+import Space.Classes
 import Numerics
 import NormalizedValues
 import Data.Vector.V2

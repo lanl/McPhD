@@ -14,11 +14,11 @@ import Particle.ParametricParticle
 -- It's dependencies
 import Particle.Test.Particles_arbitrary
 import Approx
-import SpaceTime.Classes
-import SpaceTime.Spherical1D
+import Space.Classes
+import Space.Spherical1D
 
 -- | Property: Every particle is approximately equal to itself.
-prop_Approx :: (Space s, Approx s) => ParametricParticle s -> Bool
+prop_Approx :: (Space s, Approx s) => ParticleInSpace s -> Bool
 prop_Approx p = p ~== p
 
 tests =
@@ -27,6 +27,6 @@ tests =
     [
       testProperty
       "Approximate identity"
-      (prop_Approx :: ParametricParticle Spherical1D -> Bool)
+      (prop_Approx :: ParticleInSpace Spherical1D -> Bool)
     ]
   ]

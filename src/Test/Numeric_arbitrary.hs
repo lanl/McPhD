@@ -21,7 +21,6 @@ instance (Arbitrary n, Random n, RealFloat n) =>
     Arbitrary (UnitInterval n) where
       arbitrary = UnitInterval <$> choose (0.0, 1.0)
 
-
 instance Arbitrary Vector1 where
   arbitrary = Vector1 <$> arbitrary
 
@@ -39,6 +38,9 @@ instance Arbitrary ZenithAngle where
 
 instance Arbitrary Radius where
   arbitrary = sampleRadius <$> arbitrary
+
+instance Arbitrary Time where
+  arbitrary = Time <$> arbitrary
 
 
 -- TODO: Do you need the default for more than one type? It looks like the

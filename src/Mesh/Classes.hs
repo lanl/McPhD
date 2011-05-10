@@ -1,23 +1,25 @@
-{-# LANGUAGE TypeFamilies, FlexibleContexts #-}
+{-# LANGUAGE TypeFamilies, FlexibleContexts, MultiParamTypeClasses #-}
 
 {-| A typeclass for Meshes.
 
 Each mesh is designed for use on a specific space. It defines its own
 cell and face indexing schemes. -}
 
-module Mesh.Classes (SpaceMesh (..)
+module Mesh.Classes (Mesh (..)
                     , Neighbor (..)
-                    , BoundaryCondition (..)) where
+                    , BoundaryCondition (..)
+                    , boundary2neighbor) where
 
 import System.Random.Mersenne.Pure64
 
 import Numerics ()
-import SpaceTime.Classes
+import Data.Ix
+import Space.Classes
 
 -- | A datatype representing the possible neighbors of a cell.
 data Neighbor c = Cell { neighbor_cell :: c }
                 | Void -- ^ Edge of the simulation
-                | Same -- ^ Cell is it's own neighbor. E.g. reflection
+                | Self -- ^ Cell is it's own neighbor. E.g. reflection
                 deriving Show
 
 -- TODO: Ok, this is nice (and much nicer than incorporating the
@@ -34,11 +36,15 @@ data Neighbor c = Cell { neighbor_cell :: c }
 
 data BoundaryCondition = Vacuum | Reflection deriving Show
 
+boundary2neighbor :: BoundaryCondition -> Neighbor c
+boundary2neighbor Vacuum = Void
+boundary2neighbor Reflection = Self
+
 -- | A class for describing operations on meshes.
-class (Space (MeshSpace m)) => SpaceMesh m where
+class (Space (MeshSpace m), Ix (MeshCell m)) => Mesh m where
   type MeshCell  m :: *
-  type MeshFace  m :: *
   type MeshSpace m :: *
+  type MeshFace  m :: *
 
   -- | Number of cells in the mesh
   size :: m -> Int
