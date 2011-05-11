@@ -7,7 +7,8 @@ cell and face indexing schemes. -}
 
 module Mesh.Classes (Mesh (..)
                     , Neighbor (..)
-                    , BoundaryCondition (..)) where
+                    , BoundaryCondition (..)
+                    , boundary2neighbor) where
 
 import System.Random.Mersenne.Pure64
 
@@ -35,6 +36,10 @@ data Neighbor c = Cell { neighbor_cell :: c }
 
 data BoundaryCondition = Vacuum | Reflection deriving Show
 
+boundary2neighbor :: BoundaryCondition -> Neighbor c
+boundary2neighbor Vacuum = Void
+boundary2neighbor Reflection = Self
+
 -- | A class for describing operations on meshes.
 class (Space (MeshSpace m), Ix (MeshCell m)) => Mesh m where
   type MeshCell  m :: *
@@ -56,7 +61,7 @@ class (Space (MeshSpace m), Ix (MeshCell m)) => Mesh m where
   -- | Get the distance to exit a cell, and the face.
   cell_boundary :: m -> MeshCell m -> MeshSpace m
                    -> (Distance (MeshSpace m), MeshFace m)
-                   
+
   -- | Is the location in the given cell of the mesh?
   is_in_cell :: m -> MeshCell m -> MeshSpace m -> Bool
 

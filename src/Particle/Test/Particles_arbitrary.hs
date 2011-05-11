@@ -5,8 +5,10 @@ import Test.QuickCheck
 
 
 import Space.Classes
-import Particle.Test.Space3DCartesian_arbitrary
 import Particle.ParametricParticle
+
+import Test.RandomNumbers_arbitrary
+
 
 instance (Space s, Arbitrary s) => Arbitrary (ParticleInSpace s) where
   arbitrary = createParticleInSpace

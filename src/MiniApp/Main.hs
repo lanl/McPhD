@@ -15,6 +15,7 @@ isFinal _         = False
 
 isContinuing = not . isFinal
 
+-- Cell data fields
+data Material = Material { opacity :: Double }
 
 -- A Mesh
-

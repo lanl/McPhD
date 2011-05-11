@@ -11,6 +11,7 @@ import Test.QuickCheck
 
 -- The libraries under test
 import Space.Cartesian
+import Space.Cartesian1D
 import Space.Spherical1D
 
 -- Its dependencies
@@ -41,10 +42,10 @@ prop_TriangleInequality location distance = let
     mag_location  = magnitude $ position location
     mag_location' = magnitude $ position location'
     mag_distance  = magnitude distance
-    in ((mag_location + mag_location') ~~>= mag_distance)
-       && ((mag_location' + mag_distance) ~~>= mag_location )
-       && ((mag_location  + mag_distance) ~~>= mag_location')
-  where (~~>=) a b = (a>b) || (a~~==b)
+    in ((mag_location  + mag_location') >= mag_distance)  &&
+       ((mag_location' + mag_distance)  >= mag_location ) &&
+       ((mag_location  + mag_distance)  >= mag_location')
+  where (~~>=) a b = (a>=b) || (a~==b)
 
 
 tests =
@@ -53,7 +54,7 @@ tests =
     [
       testProperty
       "Zero distance -> Same location in 1D"
-      (prop_ZeroDistance :: Cartesian Vector1 -> Bool)
+      (prop_ZeroDistance :: Cartesian1D -> Bool)
     , testProperty
       "Zero distance -> Same location in 2D"
       (prop_ZeroDistance :: Cartesian Vector2 -> Bool)
@@ -68,7 +69,7 @@ tests =
     [
       testProperty
       "Triangle inequality Cartesian 1D"
-      (prop_TriangleInequality :: Cartesian Vector1 -> Double -> Bool)
+      (prop_TriangleInequality :: Cartesian1D -> Double -> Bool)
     , testProperty
       "Triangle inequality in Cartesian 2D"
       (prop_TriangleInequality :: Cartesian Vector2 -> Double  -> Bool)

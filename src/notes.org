@@ -306,15 +306,16 @@
    - State "DONE"       from "TODO"       [2011-05-05 Thu 16:53]
    :END:
 ** TODO Complete Cartesian3D mesh interface.
-** Begin porting Tim's streaming, events, and tallies over to the general code
-*** TODO Add a material property data type to the mesh
-*** TODO Implement basic streaming
+** TODO Complete Cartesian1D mesh interface
+** TODO Replace data type and streaming op for Spherical1D.
+** TODO Add isotropic scattering operation.
+** Begin porting Tim's streaming, events, and tallies over to the general code [0/3]
+*** TODO Add a material property data type.
+*** TODO Implement basic streaming [0/2]
     - Use the general data types for particle, mesh and space.
     - [ ] Copy Tim's event structure
     - [ ] Copy Tim's approach to streaming via recursion and termination
-*** TODO Rest of basic branch
+*** TODO Rest of basic branch [0/3]
     - [ ] Tally type
     - [ ] Tally fold
     - [ ] Multiple particles
-
-

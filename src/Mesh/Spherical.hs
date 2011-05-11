@@ -18,32 +18,18 @@ newtype SphericalMeshCell = SphericalMeshCell { getIndex :: Int }
 
 data SphericalDirection = Inward | Outward deriving (Eq, Ord, Show)
 
-data SphericalMesh = SphericalMesh { radii :: Seq Radius
-                                   , bc :: BoundaryCondition }
-                   deriving Show
+data SphericalMesh = SphericalMesh
+                     {
+                       radii :: Seq Radius
+                     , bc    :: BoundaryCondition
+                     } deriving Show
 
-inward_neighbor :: SphericalMesh
-                   -> SphericalMeshCell
-                   -> Neighbor SphericalMeshCell
-inward_neighbor _ cell
-  | getIndex cell == 0 = Cell cell -- ^ Crossing origin.
-  | otherwise = Cell cell{ getIndex = getIndex cell - 1 }
-
-
-outward_neighbor :: SphericalMesh
-                    -> SphericalMeshCell
-                    -> Neighbor SphericalMeshCell
-outward_neighbor mesh cell
-  | getIndex cell == size mesh = Void
-  | otherwise = Cell cell{ getIndex = getIndex cell + 1 }
-
-cell_min :: SphericalMesh -> SphericalMeshCell -> Radius
-cell_min mesh cell
+cellBound :: SphericalMesh -> SphericalMeshCell -> SphericalDirection -> Radius
+cellBound mesh cell Inward
     | getIndex cell == 0 = Radius 0
     | otherwise = (radii mesh) `Seq.index` (getIndex cell - 1)
+cellBound mesh cell Outward = (radii mesh) `Seq.index` ( getIndex cell )
 
-cell_max :: SphericalMesh -> SphericalMeshCell -> Radius
-cell_max mesh cell = (radii mesh) `Seq.index` ( getIndex cell )
 
 -- BTW, the index handling in general is suspicious to me. If I see something like
 --
@@ -60,7 +46,7 @@ outer_cell :: SphericalMesh -> SphericalMeshCell
 outer_cell mesh = SphericalMeshCell $ size mesh -1
 
 outer_radius :: SphericalMesh -> Radius
-outer_radius mesh = cell_max mesh (outer_cell mesh)
+outer_radius mesh = cellBound mesh (outer_cell mesh) Outward
 
 -- | Use the position and direction to determine if a location is
 -- between two radii.
@@ -81,10 +67,9 @@ in_cell_test :: (Radius -> Radius -> Bool)
                 -> SphericalMesh -> SphericalMeshCell -> Spherical1D
                 -> Bool
 in_cell_test comp mesh cell location =
-  let rmin    = cell_min mesh cell
-      rmax    = cell_max mesh cell
+  let rmin    = cellBound mesh cell Inward
+      rmax    = cellBound mesh cell Outward
   in cell_bounds_test comp location (rmin, rmax)
-
 
 
 
@@ -104,20 +89,26 @@ instance Mesh SphericalMesh where
     in SphericalMeshCell
        <$> Seq.findIndexL (cell_bounds_test (==) location) pairs
 
-  cell_neighbor mesh cell Inward  = inward_neighbor mesh cell
-  cell_neighbor mesh cell Outward = outward_neighbor mesh cell
+  cell_neighbor mesh cell Inward
+      | getIndex cell == 0 = Cell cell -- ^ Crossing origin.
+      | otherwise = Cell cell{ getIndex = getIndex cell - 1 }
 
-  cell_neighbors mesh cell = [(Inward, inward_neighbor mesh cell),
-                              (Outward, outward_neighbor mesh cell) ]
 
-  cell_boundary = undefined
+  cell_neighbor mesh cell Outward
+      | getIndex cell == size mesh = Void
+      | otherwise = Cell cell{ getIndex = getIndex cell + 1 }
+
+  cell_neighbors mesh cell = [(Inward,  cell_neighbor mesh cell Inward),
+                              (Outward, cell_neighbor mesh cell Outward) ]
 
   is_in_mesh mesh location = (position location) < (outer_radius mesh)
 
-  is_in_cell = in_cell_test (==)
+  is_in_cell        = in_cell_test (==)
   is_approx_in_cell = in_cell_test (~==)
 
-  
+
+  cell_boundary = undefined
+
 
 
   uniform_sample mesh rand =
@@ -126,8 +117,8 @@ instance Mesh SphericalMesh where
     in (Spherical1D radius direction, rand'')
 
   uniform_sample_cell mesh cell rand =
-    let rmin = cell_min mesh cell
-        rmax = cell_max mesh cell
+    let rmin = cellBound mesh cell Inward
+        rmax = cellBound mesh cell Outward
         (radius, rand') = sample_annulus1D rmin rmax rand
         (direction, rand'') = sampleNormalVector2 rand'
     in (Spherical1D radius direction, rand'')
