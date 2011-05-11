@@ -15,7 +15,7 @@ import Test.QuickCheck
 -- The libraries under test
 import Mesh.Classes
 import Mesh.Spherical
---import Mesh.Cartesian1D
+import Mesh.Cartesian1D
 
 -- Their dependencies
 import Data.Vector.V3
@@ -60,12 +60,12 @@ sph1DTestRadius = outer_radius spherical_mesh @?= Radius 100.0
 
 -- * Cartesian1D mesh tests.
 
--- cartesian1D_mesh :: Cartesian1DMesh
--- cartesian1D_mesh = Cartesian1DMesh (Seq.fromList (fmap fromIntegral [0..100]))
---                    Vacuum Reflection
+cartesian1D_mesh :: Cartesian1DMesh
+cartesian1D_mesh = Cartesian1DMesh (Seq.fromList (fmap fromIntegral [0..100]))
+                   Vacuum Reflection
 
--- cart1DTestSize :: Assertion
--- cart1DTestSize = (size cartesian1D_mesh) @?= 100;
+cart1DTestSize :: Assertion
+cart1DTestSize = (size cartesian1D_mesh) @?= 100;
 
 
 
@@ -87,14 +87,14 @@ tests = [ testGroup "Spherical Mesh Tests"
           , testProperty "cell_find and is_in agree"
             (prop_FindIsInAgree spherical_mesh)
           ]
-        -- , testGroup "Cartesian1D Mesh Tests"
-        --   [
-        --     testCase "Size Equality" cart1DTestSize
-        --   , testProperty "Sampled locations are in mesh"
-        --     (prop_SampleInMesh cartesian1D_mesh)
+        , testGroup "Cartesian1D Mesh Tests"
+          [
+            testCase "Size Equality" cart1DTestSize
+          , testProperty "Sampled locations are in mesh"
+            (prop_SampleInMesh cartesian1D_mesh)
 
-        --   , testProperty "cell_find and is_in agree"
-        --     (prop_FindIsInAgree cartesian1D_mesh)
+          , testProperty "cell_find and is_in agree"
+            (prop_FindIsInAgree cartesian1D_mesh)
 
-        --   ]
+          ]
         ]
