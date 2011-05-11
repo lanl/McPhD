@@ -1,6 +1,6 @@
 {-| Tests of opacity functions. -}
 
-module Test.Opacity_test where
+module Test.Opacity_Test where
 
 import Physical
 import Opacity

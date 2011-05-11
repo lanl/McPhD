@@ -1,7 +1,11 @@
 {-| Opacity values: merger of microscopic cross section and macroscopic 
  -  material properties. -}
 
-module Opacity where
+module Opacity (
+    module Opacity
+  , module Cell
+  , module Sigma
+  ) where
 
 import qualified Sigma_HBFC as Sigma
 import Cell
