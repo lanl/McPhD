@@ -1,7 +1,6 @@
 module Test.Arbitraries where
 
 import Test.QuickCheck 
-import Control.Monad (liftM)
 import Control.Applicative ( (<$>) )
 import Physical
 import Constants
@@ -71,7 +70,7 @@ instance Arbitrary BoundaryCondition where
   arbitrary = oneof [return Vac, return Refl, return Transp] 
 
 instance Arbitrary Lepton where
-  arbitrary = oneof [return nu_e, return nu_e_bar, return nu_x, return nu_x_bar]
+  arbitrary = oneof [return nuE, return nuEBar, return nuX, return nuXBar]
 
 instance Arbitrary URD where 
   arbitrary = URD <$> choose (0.0,1.0)
