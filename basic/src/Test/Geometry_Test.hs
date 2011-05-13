@@ -2,14 +2,13 @@
 
 module Test.Geometry_Test (tests) where
 
-import Test.QuickCheck
+import Test.QuickCheck ()
 import Test.Framework (testGroup)
 import Test.Framework.Providers.QuickCheck2 (testProperty)
 import Geometry
 import Test.Arbitraries ()
 import SoftEquiv
 import qualified Physical as P
-import Debug.Trace
 
 
 -- | LT with 0 velocity leaves inputs unchanged
