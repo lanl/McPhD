@@ -37,7 +37,7 @@ data Neighbor c = Cell { neighbor_cell :: c }
 data BoundaryCondition = Vacuum | Reflection deriving Show
 
 boundary2neighbor :: BoundaryCondition -> Neighbor c
-boundary2neighbor Vacuum = Void
+boundary2neighbor Vacuum     = Void
 boundary2neighbor Reflection = Self
 
 -- | A class for describing operations on meshes.
@@ -58,9 +58,11 @@ class (Space (MeshSpace m), Ix (MeshCell m)) => Mesh m where
   -- | All neighbors, with faces
   cell_neighbors :: m -> MeshCell m -> [(MeshFace m, Neighbor (MeshCell m))]
 
-  -- | Get the distance to exit a cell, and the face.
+  -- | Get the distance to exit a cell, and the face, if lower than
+  -- the given distance.
   cell_boundary :: m -> MeshCell m -> MeshSpace m
-                   -> (Distance (MeshSpace m), MeshFace m)
+                   -> Distance (MeshSpace m)
+                   -> Maybe (Distance (MeshSpace m), MeshFace m)
 
   -- | Is the location in the given cell of the mesh?
   is_in_cell :: m -> MeshCell m -> MeshSpace m -> Bool
