@@ -4,7 +4,6 @@
 module Opacity (
     module Opacity
   , module Cell
-  , module Sigma
   ) where
 
 import qualified Sigma_HBFC as Sigma
