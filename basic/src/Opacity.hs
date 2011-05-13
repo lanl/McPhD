@@ -11,7 +11,7 @@ import qualified Sigma_HBFC as Sigma
 import Cell
 import Material
 import Physical
-
+import Constants (pmg)
 
 -- | Compute individual opacities in one list.
 opacities :: Cell -> Energy -> Sigma.Lepton -> [Opacity]
@@ -62,13 +62,17 @@ opEPlus cell e_nu sigmas = mkOp rho_p sig
         sig = (Sigma.e_plus sigmas) e_nu (tToEnergy cell)
 
 -- economize some of the unwrapping -> wrapping
-mkOp :: Density -> CrossSection -> Opacity
-mkOp r s = Opacity $ (rho r) * (sigma s)
+mkOp :: NDensity -> CrossSection -> Opacity
+mkOp n s = Opacity $ (nrho n) * (sigma s)
 
 tToEnergy :: Cell -> Energy
 tToEnergy c = Energy . temp . tempE $ mat c
 
-rhoN :: Cell -> Density
-rhoN = rhoNucl . mat 
+rhoN :: Cell -> NDensity
+rhoN = nperCC . rhoNucl . mat 
+
+-- | Convert proton mass density to number density
+nperCC :: Density -> NDensity
+nperCC (Density r) = NDensity $ r / pmg
 
 -- end of file
