@@ -28,6 +28,7 @@ newtype CrossSection = CrossSection { sigma :: FP  } deriving (Eq, Show, Num)
 newtype Opacity      = Opacity      { mu    :: FP  } deriving (Eq, Show, Num)
 newtype Temperature  = Temperature  { temp  :: FP  } deriving (Eq, Show)
 newtype Density      = Density      { rho   :: FP  } deriving (Eq, Show)
+newtype NDensity     = NDensity     { nrho   :: FP } deriving (Eq, Show) -- number density
 newtype NucleonNumber = NucleonNumber {nnucl :: FP } deriving (Eq, Show, Num)
 newtype Distance     = Distance     { distance :: FP } deriving (Eq, Show, Num, Ord)
 
