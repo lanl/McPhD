@@ -8,6 +8,7 @@ import Constants
 import Cell
 import Material
 import Sigma_HBFC
+import Constants (pmg)
 
 -- QUESTION: how to use NonNegative here?
 
@@ -21,12 +22,21 @@ instance Arbitrary Energy where
 instance Arbitrary Temperature where
   arbitrary = Temperature <$> ge0
 
+-- | Neutrino cross sections are so small that we typically
+-- only see an interaction for very high densities. So, we 
+-- steer the densities toward larger numbers.
 instance Arbitrary Density where
-  arbitrary = Density <$> ge0
+  arbitrary = do
+    x <- choose (1.0,16.0)
+    return $ Density (10**x)
+
+instance Arbitrary NDensity where
+  arbitrary = do
+    (Density x) <- arbitrary 
+    return $ NDensity (x / pmg)
 
 instance Arbitrary Opacity where 
   arbitrary = Opacity <$> ge0
-
 
 instance Arbitrary Velocity where
   arbitrary = Velocity <$> choose (-c,c)
@@ -62,3 +72,10 @@ instance Arbitrary BoundaryCondition where
 
 instance Arbitrary Lepton where
   arbitrary = oneof [return nu_e, return nu_e_bar, return nu_x, return nu_x_bar]
+
+instance Arbitrary URD where 
+  arbitrary = URD <$> choose (0.0,1.0)
+
+
+-- end of file
+
