@@ -72,22 +72,26 @@ data Lepton = Lepton {
   , e_plus  :: Energy -> Energy -> CrossSection
 } 
 
-nu_e = Lepton {
+nuE :: Lepton
+nuE = Lepton {
     e_minus = nuEEMinus
   , e_plus  = nuEEPlus
 }
 
-nu_e_bar = Lepton {
+nuEBar :: Lepton
+nuEBar = Lepton {
     e_minus = nuEEPlus
   , e_plus  = nuEEMinus
 }
 
-nu_x = Lepton {
+nuX :: Lepton
+nuX = Lepton {
     e_minus = nuXEMinus
   , e_plus  = nuXEPlus
 }
 
-nu_x_bar = Lepton {
+nuXBar :: Lepton
+nuXBar = Lepton {
     e_minus = nuXEPlus
   , e_plus  = nuXEMinus
 }
