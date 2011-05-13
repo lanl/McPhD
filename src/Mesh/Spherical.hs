@@ -13,8 +13,8 @@ import Numerics
 import Approx
 import RandomSamples
 
-newtype SphericalMeshCell = SphericalMeshCell { getIndex :: Int }
-    deriving (Eq, Ord, Ix, Show)
+
+type SphCell = Int
 
 data SphericalDirection = Inward | Outward deriving (Eq, Ord, Show)
 
@@ -23,41 +23,31 @@ data SphericalMesh = SphericalMesh { radii :: Seq Radius
                    deriving Show
 
 inward_neighbor :: SphericalMesh
-                   -> SphericalMeshCell
-                   -> Neighbor SphericalMeshCell
+                   -> SphCell
+                   -> Neighbor SphCell
 inward_neighbor _ cell
-  | getIndex cell == 0 = Cell cell -- ^ Crossing origin.
-  | otherwise = Cell cell{ getIndex = getIndex cell - 1 }
+  | cell == 0 = Cell cell -- ^ Crossing origin.
+  | otherwise = Cell $ cell - 1 
 
 
 outward_neighbor :: SphericalMesh
-                    -> SphericalMeshCell
-                    -> Neighbor SphericalMeshCell
+                    -> SphCell
+                    -> Neighbor SphCell
 outward_neighbor mesh cell
-  | getIndex cell == size mesh = Void
-  | otherwise = Cell cell{ getIndex = getIndex cell + 1 }
+  | cell == size mesh = Void
+  | otherwise         = Cell $ cell + 1
 
-cell_min :: SphericalMesh -> SphericalMeshCell -> Radius
+cell_min :: SphericalMesh -> SphCell -> Radius
 cell_min mesh cell
-    | getIndex cell == 0 = Radius 0
-    | otherwise = (radii mesh) `Seq.index` (getIndex cell - 1)
+    | cell == 0 = Radius 0
+    | otherwise = (radii mesh) `Seq.index` (cell - 1)
 
-cell_max :: SphericalMesh -> SphericalMeshCell -> Radius
-cell_max mesh cell = (radii mesh) `Seq.index` ( getIndex cell )
+cell_max :: SphericalMesh -> SphCell -> Radius
+cell_max mesh cell = (radii mesh) `Seq.index` cell
 
--- BTW, the index handling in general is suspicious to me. If I see something like
---
--- > foo `index` getIndex cell
---
--- like you have above, then I have to wonder why you don't look up via the cell in the
--- first place.
 
--- ???: I don't understand the question. Do you mean why dont I use a
--- map instead, with SphericalMeshCell as the key? Or Drop
--- SphericalMeshCell as a seperate type and just use Int?
-
-outer_cell :: SphericalMesh -> SphericalMeshCell
-outer_cell mesh = SphericalMeshCell $ size mesh -1
+outer_cell :: SphericalMesh -> SphCell
+outer_cell mesh = size mesh -1
 
 outer_radius :: SphericalMesh -> Radius
 outer_radius mesh = cell_max mesh (outer_cell mesh)
@@ -78,7 +68,7 @@ cell_bounds_test comp location (rmin, rmax) =
 -- | Use the position and direction to determine if a location is in a
 -- particular cell of the mesh.
 in_cell_test :: (Radius -> Radius -> Bool)
-                -> SphericalMesh -> SphericalMeshCell -> Spherical1D
+                -> SphericalMesh -> SphCell -> Spherical1D
                 -> Bool
 in_cell_test comp mesh cell location =
   let rmin    = cell_min mesh cell
@@ -90,7 +80,7 @@ in_cell_test comp mesh cell location =
 
 -- | Make SphericalMesh an instance of Mesh
 instance Mesh SphericalMesh where
-  type MeshCell  SphericalMesh = SphericalMeshCell
+  type MeshCell  SphericalMesh = SphCell
   type MeshFace  SphericalMesh = SphericalDirection
   type MeshSpace SphericalMesh = Spherical1D
 
@@ -101,8 +91,7 @@ instance Mesh SphericalMesh where
   cell_find mesh location =
     let rads  = radii mesh
         pairs = Seq.zip (Radius 0 <| rads) (rads)
-    in SphericalMeshCell
-       <$> Seq.findIndexL (cell_bounds_test (==) location) pairs
+    in Seq.findIndexL (cell_bounds_test (==) location) pairs
 
   cell_neighbor mesh cell Inward  = inward_neighbor mesh cell
   cell_neighbor mesh cell Outward = outward_neighbor mesh cell
