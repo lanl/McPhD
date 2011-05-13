@@ -10,6 +10,7 @@ module RandomSamples where
 
 import System.Random.Mersenne.Pure64
 import RandomNumbers
+import Generators
 import Numerics
 import NormalizedValues
 import Data.Vector.V1
@@ -58,3 +59,10 @@ sample_annulus1D (Radius r_min) (Radius r_max) rand =
         (Radius r, rand') = sample_ball1D (Radius width) rand
         r' = r + r_min
     in (Radius r', rand')
+
+
+sampleInterval :: (Double, Double) -> PureMT -> (Double, PureMT)
+sampleInterval (min, max) rand = 
+  let (var, rand') = sampleVar rand
+  in (generateInterval (min, max) var, rand')
+     

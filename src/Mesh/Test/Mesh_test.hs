@@ -47,6 +47,7 @@ prop_FindIsInAgree mesh seed =
 
 -- * Spherical 1D Mesh tests
 
+-- | A mesh to test with.
 spherical_mesh :: SphericalMesh
 spherical_mesh = SphericalMesh (Seq.fromList (fmap Radius [1..100])) Vacuum
 
@@ -67,6 +68,19 @@ cartesian1D_mesh = Cartesian1DMesh (Seq.fromList (fmap fromIntegral [0..100]))
 cart1DTestSize :: Assertion
 cart1DTestSize = (size cartesian1D_mesh) @?= 100;
 
+
+-- | A function for making multuple distance assertions
+-- cart1Ddistance_function :: Normalized Vector2 -> Distance -> Assertion
+
+
+-- | Property: distance is always > 0
+
+-- | Property: distance is always < target.
+
+-- | Property: Positive cos <-> Positive Face.
+
+-- | Property: If target distance < boundary distance, always get
+-- nothing.
 
 
 

@@ -305,8 +305,12 @@
    :LOGBOOK:
    - State "DONE"       from "TODO"       [2011-05-05 Thu 16:53]
    :END:
+** DONE Complete Cartesian1D mesh interface
+   CLOSED: [2011-05-13 Fri 15:11]
+   :LOGBOOK:
+   - State "DONE"       from "TODO"       [2011-05-13 Fri 15:11]
+   :END:
 ** TODO Complete Cartesian3D mesh interface.
-** TODO Complete Cartesian1D mesh interface
 ** TODO Replace data type and streaming op for Spherical1D.
 ** TODO Add isotropic scattering operation.
 ** Begin porting Tim's streaming, events, and tallies over to the general code [0/3]
