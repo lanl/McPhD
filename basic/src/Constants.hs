@@ -7,6 +7,10 @@ c :: FP
 -- c = 1.0 -- nice for testing
 c = 2.9979e10 -- cm/sec
 
+-- | proton mass in g: needed to convert mass densities to number densities.
+pmg :: FP  
+pmg = 1.67262e-24
+
 -- | Lower limit for event selection.
 tiny :: FP
 tiny = 1e-300
