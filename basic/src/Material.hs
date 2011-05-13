@@ -8,6 +8,6 @@ data Material = Material {
   , vel         :: !Velocity    -- cm/sec
   , tempE       :: !Temperature -- in energy units (MeV)
   , rhoNucl     :: !Density     -- g/cc
-  , rhoEMinus   :: !Density
-  , rhoEPlus    :: !Density
+  , rhoEMinus   :: !NDensity    -- n/cc (derived from electron fraction) 
+  , rhoEPlus    :: !NDensity    -- n/cc 
   } deriving (Show, Eq)
