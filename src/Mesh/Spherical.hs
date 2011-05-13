@@ -13,8 +13,8 @@ import Numerics
 import Approx
 import RandomSamples
 
-newtype SphericalMeshCell = SphericalMeshCell { getIndex :: Int }
-    deriving (Eq, Ord, Ix, Show)
+
+type SphCell = Int
 
 data SphericalDirection = Inward | Outward deriving (Eq, Ord, Show)
 
@@ -26,9 +26,9 @@ data SphericalMesh = SphericalMesh
 
 cellBound :: SphericalMesh -> SphericalMeshCell -> SphericalDirection -> Radius
 cellBound mesh cell Inward
-    | getIndex cell == 0 = Radius 0
-    | otherwise = (radii mesh) `Seq.index` (getIndex cell - 1)
-cellBound mesh cell Outward = (radii mesh) `Seq.index` ( getIndex cell )
+    | cell == 0 = Radius 0
+    | otherwise = (radii mesh) `Seq.index` (cell - 1)
+cellBound mesh cell Outward = (radii mesh) `Seq.index` cell
 
 
 -- BTW, the index handling in general is suspicious to me. If I see something like
@@ -64,18 +64,18 @@ cell_bounds_test comp location (rmin, rmax) =
 -- | Use the position and direction to determine if a location is in a
 -- particular cell of the mesh.
 in_cell_test :: (Radius -> Radius -> Bool)
-                -> SphericalMesh -> SphericalMeshCell -> Spherical1D
+                -> SphericalMesh -> SphCell -> Spherical1D
                 -> Bool
 in_cell_test comp mesh cell location =
-  let rmin    = cellBound mesh cell Inward
-      rmax    = cellBound mesh cell Outward
+  let rmin    = cell_min mesh cell
+      rmax    = cell_max mesh cell
   in cell_bounds_test comp location (rmin, rmax)
 
 
 
 -- | Make SphericalMesh an instance of Mesh
 instance Mesh SphericalMesh where
-  type MeshCell  SphericalMesh = SphericalMeshCell
+  type MeshCell  SphericalMesh = SphCell
   type MeshFace  SphericalMesh = SphericalDirection
   type MeshSpace SphericalMesh = Spherical1D
 
