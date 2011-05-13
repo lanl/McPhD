@@ -67,14 +67,6 @@ instance Mag Vector3 where
   magnitude2 d = vdot d d
 
 
--- !!!: You could simulate this via the module system, but I don't think
--- it's worth it. Module M could export T with its constructor C. Then
--- "friends" can just import M, whereas non-friends would import a module P
--- that imports M and re-exports T, but not C.
-  
--- ANS: Agreed, that seems like a lot of trouble, and it's not the
--- issue I expected.
-
 normalVector1 :: Double -> Normalized Vector1
 normalVector1 x = let Normalized n = normalize x in Normalized $ Vector1 n
 

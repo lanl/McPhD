@@ -26,9 +26,10 @@ import Data.Vector.V2
 import Approx
 
 
-data Spherical1D = Spherical1D { sph1d_position :: Radius,
+data Spherical1D = Spherical1D { sph1d_position  :: Radius,
                                  sph1d_direction :: Normalized Vector2 }
                  deriving (Eq, Show)
+
 
 cos_Sph1Ddirection :: Spherical1D -> Double
 cos_Sph1Ddirection = v2x . normalized_value . sph1d_direction
