@@ -30,8 +30,8 @@ instance Mesh Sphere1D where
     where
       Cell { highB = rhi, lowB = rlo } = msh ! cidx
 
-      dhi = sqrt ((xhi - r)^2 + yhi^2)
-      dlo = sqrt ((xlo - r)^2 + ylo^2)
+      dhi = sqrt ((xhi - r)*(xhi - r) + yhi*yhi)
+      dlo = sqrt ((xlo - r)*(xlo - r) + ylo*ylo)
 
       -- These define the two intersections with the outer sphere
       xhip = xterm1 +     dethi
@@ -54,7 +54,7 @@ instance Mesh Sphere1D where
       ylo = yterm1 + t * detlo
 
       -- Determinant; depends on sphere radius rs is here
-      det rs = sqrt (rs^2 * onePTSq - r^2 * tsq) * oneOverOnePTSq
+      det rs = sqrt (rs*rs * onePTSq - r*r * tsq) * oneOverOnePTSq
       dethi  = det (pos rhi)
       detlo  = det (pos rlo)
 
@@ -63,7 +63,7 @@ instance Mesh Sphere1D where
 
       t | thetaLTpiOver2 = tan theta
         | otherwise      = tan (pi - theta)
-      tsq                = t^2
+      tsq                = t*t
       onePTSq            = 1 + tsq
       oneOverOnePTSq     = 1 / onePTSq
 
@@ -81,7 +81,7 @@ contactInner (Position r) (Position rlow) tanTheta thetaLTpiOver2 =
     tanTheta <= tanThetaLim     -- sufficiently low angle
   where
     b           = r / rlow
-    tanThetaLim = sqrt (1 / (b^2 - 1))
+    tanThetaLim = sqrt (1 / (b*b - 1))
 
 -- TODO: Add comment and reference
 pickPoint :: FP -> Rnd FP
