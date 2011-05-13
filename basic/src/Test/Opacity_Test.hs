@@ -6,9 +6,9 @@ import Physical
 import Opacity
 import Cell
 import Material
-import Test.Arbitraries
+import Test.Arbitraries ()
 
-import Test.QuickCheck
+import Test.QuickCheck ()
 import Test.Framework (testGroup)
 import Test.Framework.Providers.QuickCheck2 (testProperty)
 
@@ -49,8 +49,8 @@ prop_rhoL0Total e c@(Cell {mat = m}) sig = opLepton c' e sig == Opacity 0.0
                                 ,Material.vel = Material.vel m
                                 ,tempE = tempE m
                                 ,rhoNucl = rhoNucl m 
-                                ,rhoEMinus = Density 0.0
-                                ,rhoEPlus = Density 0.0}}
+                                ,rhoEMinus = NDensity 0.0
+                                ,rhoEPlus = NDensity 0.0}}
 
 prop_rhoL0EMinus e c@(Cell {mat = m}) sig = opEMinus c' e sig == Opacity 0.0
   where c' = c { mat = Material{sig_abs = sig_abs m
@@ -58,7 +58,7 @@ prop_rhoL0EMinus e c@(Cell {mat = m}) sig = opEMinus c' e sig == Opacity 0.0
                                 ,Material.vel = Material.vel m
                                 ,tempE = tempE m
                                 ,rhoNucl = rhoNucl m 
-                                ,rhoEMinus = Density 0.0
+                                ,rhoEMinus = NDensity 0.0
                                 ,rhoEPlus = rhoEPlus m}}
 
 prop_rhoL0EPlus e c@(Cell {mat = m}) sig = opEPlus c' e sig == Opacity 0.0
@@ -68,7 +68,7 @@ prop_rhoL0EPlus e c@(Cell {mat = m}) sig = opEPlus c' e sig == Opacity 0.0
                                 ,tempE = tempE m
                                 ,rhoNucl = rhoNucl m 
                                 ,rhoEMinus = rhoEMinus m
-                                ,rhoEPlus = Density 0.0}}
+                                ,rhoEPlus = NDensity 0.0}}
 
 -- opacities should always be greater than 0
 -- This relies on the energies and densities being greater than 0:
