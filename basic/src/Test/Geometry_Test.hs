@@ -41,6 +41,17 @@ prop_omegaBnd_CM2Lab ecm ocm v = ol < 1 && ol > -1.0
 prop_omegaBnd_Lab2CM el ol v = ocm < 1 && ocm > -1.0
   where (_, P.Direction ocm) = labToComoving el ol v
 
+-- | energy is always positive (comoving to lab)
+prop_ePstv_CM2Lab ecm ocm v = el > 0.0 
+  where (P.Energy el, _) = comovingToLab ecm ocm v
+
+-- |  energy is always positive (lab to comoving)
+prop_ePstv_Lab2CM el ol v = ecm > 0.0
+  where (P.Energy ecm, _) = labToComoving el ol v
+
+-- | gamma >= 1
+prop_gammaGE1 s = gamma s >= 1.0
+
 -- aggregate tests 
 tests = [testGroup "Lorentz Transforms" 
          [
@@ -50,6 +61,9 @@ tests = [testGroup "Lorentz Transforms"
          , testProperty "LT with 0 velocity is id (lab -> comoving)" prop_v0_id_Lab2CM
          , testProperty "omega in (-1,1) under LT (comoving->lab)" prop_omegaBnd_CM2Lab
          , testProperty "omega in (-1,1) under LT (lab->comoving)" prop_omegaBnd_Lab2CM
+         , testProperty "e > 0 under LT (comoving->lab)" prop_ePstv_CM2Lab
+         , testProperty "e > 0 under LT (lab->comoving)" prop_ePstv_Lab2CM
+         , testProperty "gamma(v) >= 1.0" prop_gammaGE1
          ] 
         ]
 
