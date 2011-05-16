@@ -14,10 +14,8 @@ import qualified Physical as P
 -- | LT with 0 velocity leaves inputs unchanged
 prop_v0_id_CM2Lab e o = comovingToLab e o (P.Velocity 0.0) == (e,o)
 
-
 -- | LT with 0 velocity leaves inputs unchanged
 prop_v0_id_Lab2CM e o = labToComoving e o (P.Velocity 0.0) == (e,o)
-
 
 -- | LT comoving->lab is inverse of LT lab->comoving
 prop_CM2Lab_Lab2CM_id el ol v  = (softEquiv e'' e tol)&&(softEquiv o'' o tol)
@@ -27,7 +25,6 @@ prop_CM2Lab_Lab2CM_id el ol v  = (softEquiv e'' e tol)&&(softEquiv o'' o tol)
           o   = P.dir ol
           tol = 1e-12
 
-
 -- | LT lab->comoving is (soft) inverse of LT comoving->lab 
 prop_Lab2CM_CM2Lab_id ecm ocm v  = (softEquiv e'' e tol)&&(softEquiv o'' o tol)
   where (el,ol)     = comovingToLab ecm ocm v
@@ -36,12 +33,23 @@ prop_Lab2CM_CM2Lab_id ecm ocm v  = (softEquiv e'' e tol)&&(softEquiv o'' o tol)
         o   = P.dir ocm
         tol = 1e-12
 
+-- | direction cosine is always in (-1,1)
+prop_omegaBnd_CM2Lab ecm ocm v = ol < 1 && ol > -1.0
+  where (_, P.Direction ol) = comovingToLab ecm ocm v
+
+-- | direction cosine is always in (-1,1)
+prop_omegaBnd_Lab2CM el ol v = ocm < 1 && ocm > -1.0
+  where (_, P.Direction ocm) = labToComoving el ol v
+
+-- aggregate tests 
 tests = [testGroup "Lorentz Transforms" 
          [
            testProperty "comovingToLab inverse of labToComoving" prop_CM2Lab_Lab2CM_id
          , testProperty "labToComoving inverse of comovingToLab" prop_Lab2CM_CM2Lab_id
          , testProperty "LT with 0 velocity is id (comoving -> lab)" prop_v0_id_CM2Lab
          , testProperty "LT with 0 velocity is id (lab -> comoving)" prop_v0_id_Lab2CM
+         , testProperty "omega in (-1,1) under LT (comoving->lab)" prop_omegaBnd_CM2Lab
+         , testProperty "omega in (-1,1) under LT (lab->comoving)" prop_omegaBnd_Lab2CM
          ] 
         ]
 
