@@ -52,6 +52,9 @@ prop_ePstv_Lab2CM el ol v = ecm > 0.0
 -- | gamma >= 1
 prop_gammaGE1 s = gamma s >= 1.0
 
+-- | gamma has even parity: g(-v) = g(v)
+prop_gammaEven s = gamma s == gamma (-s)
+
 -- aggregate tests 
 tests = [testGroup "Lorentz Transforms" 
          [
@@ -64,6 +67,7 @@ tests = [testGroup "Lorentz Transforms"
          , testProperty "e > 0 under LT (comoving->lab)" prop_ePstv_CM2Lab
          , testProperty "e > 0 under LT (lab->comoving)" prop_ePstv_Lab2CM
          , testProperty "gamma(v) >= 1.0" prop_gammaGE1
+         , testProperty "gamma has even parity" prop_gammaEven
          ] 
         ]
 
