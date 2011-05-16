@@ -13,6 +13,7 @@ import Test.QuickCheck
 import Space.Cartesian
 import Space.Cartesian1D
 import Space.Spherical1D
+import Space.Spherical1D2
 
 -- Its dependencies
 import Space.Classes
@@ -42,10 +43,26 @@ prop_TriangleInequality location distance = let
     mag_location  = magnitude $ position location
     mag_location' = magnitude $ position location'
     mag_distance  = magnitude distance
-    in ((mag_location  + mag_location') >= mag_distance)  &&
-       ((mag_location' + mag_distance)  >= mag_location ) &&
-       ((mag_location  + mag_distance)  >= mag_location')
-  where (~~>=) a b = (a>=b) || (a~==b)
+    in ((mag_location  + mag_location') ~>= mag_distance)  &&
+       ((mag_location' + mag_distance)  ~>= mag_location ) &&
+       ((mag_location  + mag_distance)  ~>= mag_location')
+  where (~>=) a b = (a>=b) || (a~~==b)
+
+
+-- | Spherical 1D tests
+
+-- | Streaming from zero.
+fromOrigin :: Assertion
+fromOrigin = assertEqual "Stream 1.0 from origin"
+             (Vector2 0.0 0.0 +-> 1.0) (Vector2 1.0 0.0)
+
+toOrigin :: Assertion
+toOrigin = assertEqual "Stream 1.0 to origin"
+           (Vector2 (negate 1.0) 0.0 +-> 1.0) (Vector2 0.0 0.0)
+
+throughOrigin :: Assertion
+throughOrigin = assertEqual "Stream 2.0 through origin"
+                (Vector2 (negate 1.0) 0.0 +-> 2.0) (Vector2 1.0 0.0)
 
 
 tests =
@@ -64,12 +81,15 @@ tests =
     , testProperty
       "Zero distance -> Same location in 1DSpherical"
       (prop_ZeroDistance :: Spherical1D -> Bool)
-    ],
-    testGroup "Triangle Inequality"
+        , testProperty
+      "Zero distance -> Same location in 1DSpherical, 2nd formulation"
+      (prop_ZeroDistance :: Spherical1D2 -> Bool)
+    ]
+  , testGroup "Triangle Inequality"
     [
       testProperty
       "Triangle inequality Cartesian 1D"
-      (prop_TriangleInequality :: Cartesian1D -> Double -> Bool)
+      (prop_TriangleInequality :: Cartesian Vector1 -> Double -> Bool)
     , testProperty
       "Triangle inequality in Cartesian 2D"
       (prop_TriangleInequality :: Cartesian Vector2 -> Double  -> Bool)
@@ -79,5 +99,14 @@ tests =
     , testProperty
       "Triangle inequality in Spherical 1D"
       (prop_TriangleInequality :: Spherical1D -> Double -> Bool)
+    , testProperty
+      "Triangle inequality in Spherical 1D, 2nd formulation"
+      (prop_TriangleInequality :: Spherical1D2 -> Double -> Bool)
+    ]
+  , testGroup "Spherical 1D Streaming"
+    [
+      testCase "From the origin" fromOrigin
+    , testCase "To the origin" toOrigin
+    , testCase "Through the origin" throughOrigin
     ]
   ]

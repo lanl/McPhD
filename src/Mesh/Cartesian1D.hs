@@ -4,10 +4,13 @@ module Mesh.Cartesian1D where
 
 import Data.Sequence as Seq
 import Data.Vector.V2
+import System.Random.Mersenne.Pure64
 
-import NormalizedValues
-import Space.Cartesian1D
 import Mesh.Classes
+
+import Space.Cartesian1D
+import NormalizedValues
+import RandomSamples
 import Approx
 
 type C1Cell = Int
@@ -21,30 +24,6 @@ data Cartesian1DMesh = Cartesian1DMesh
                        } deriving Show
 
 
-cellBound :: Cartesian1DMesh -> C1Cell -> C1Dir -> Double
-cellBound mesh cell Negative = coords mesh `Seq.index` cell
-cellBound mesh cell Positive = coords mesh `Seq.index` (cell+1)
-
-cellBoundsTest :: (Double -> Double -> Bool)
-                  -> Cartesian1D
-                  -> (Double, Double)
-                  -> Bool
-cellBoundsTest comp location (xMin, xMax) =
-  let x       = pos location
-      cos_dir = v2x . normalized_value $ dir location
-  in ((x > xMin) || ( (x `comp` xMin) && cos_dir >= 0)) &&
-     ((x < xMax) || ( (x `comp` xMax) && cos_dir < 0))
-
-
-inCellTest :: (Double -> Double -> Bool)
-              -> Cartesian1DMesh
-              -> C1Cell
-              -> Cartesian1D
-              -> Bool
-inCellTest comp mesh cell location =
-  let xMin = cellBound mesh cell Negative
-      xMax = cellBound mesh cell Positive
-  in cellBoundsTest comp location (xMin, xMax)
 
 instance Mesh Cartesian1DMesh where
   type MeshCell Cartesian1DMesh  = C1Cell
@@ -74,3 +53,67 @@ instance Mesh Cartesian1DMesh where
   is_in_mesh mesh location  = cellBoundsTest (==) location (left, right)
       where (left :< rest)  = viewl $ coords mesh
             (  _  :> right) = viewr rest
+
+
+  uniform_sample mesh rand =
+      let (position, rand')   = sampleInterval (bounds mesh) rand
+          (direction, rand'') = sampleNormalVector2 rand'
+      in (Cartesian1D position direction, rand')
+
+
+  uniform_sample_cell mesh cell rand =
+      let (position, rand')   = sampleInterval (cellBounds mesh cell) rand
+          (direction, rand'') = sampleNormalVector2 rand'
+      in (Cartesian1D position direction, rand'')
+
+
+  cell_boundary mesh cell location in_distance =
+      let bounds = cellBounds mesh cell
+          cos_dir = v2x $ normalized_value $ dir location
+          (x_distance, face) = if cos_dir > 0 
+                               then (snd bounds, Positive)
+                               else (fst bounds, Negative)
+      in if x_distance < in_distance * cos_dir 
+         then Just (x_distance / cos_dir, face)
+         else Nothing
+
+
+
+lowerBound :: Cartesian1DMesh -> Double
+lowerBound = fst . bounds
+                             
+upperBound :: Cartesian1DMesh -> Double
+upperBound = snd . bounds
+
+width :: Cartesian1DMesh -> Double
+width mesh = upperBound mesh - lowerBound mesh
+
+bounds :: Cartesian1DMesh -> (Double, Double)
+bounds mesh = (left, right) 
+    where (left :< _)  = viewl $ coords mesh
+          (_ :> right) = viewr $ coords mesh
+
+
+cellBounds :: Cartesian1DMesh -> C1Cell -> (Double, Double)
+cellBounds mesh cell = (coords mesh `Seq.index` cell, 
+                        coords mesh `Seq.index` (cell+1))
+
+-- | Determine if a position is between to values. Uses direction to break ties.
+cellBoundsTest :: (Double -> Double -> Bool)
+                  -> Cartesian1D
+                  -> (Double, Double)
+                  -> Bool
+cellBoundsTest comp location (xMin, xMax) =
+  let x       = pos location
+      cos_dir = v2x . normalized_value $ dir location
+  in ((x > xMin) || ( (x `comp` xMin) && cos_dir >= 0)) &&
+     ((x < xMax) || ( (x `comp` xMax) && cos_dir < 0))
+
+
+inCellTest :: (Double -> Double -> Bool)
+              -> Cartesian1DMesh
+              -> C1Cell
+              -> Cartesian1D
+              -> Bool
+inCellTest comp mesh cell location = cellBoundsTest comp location (cellBounds mesh cell) 
+
