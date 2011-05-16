@@ -20,5 +20,3 @@ instance (Vector v, Arbitrary v,
 instance Arbitrary Cartesian1D where
   arbitrary = Cartesian1D <$> arbitrary <*> arbitrary
 
-instance Arbitrary Spherical1D where
-  arbitrary = Spherical1D <$> arbitrary <*> arbitrary

@@ -3,6 +3,8 @@
 module Mesh.Spherical where
 
 import Data.Sequence as Seq
+import Data.Vector.Class
+import Data.Vector.V2
 
 import Mesh.Classes
 import Space.Classes
@@ -10,6 +12,7 @@ import Space.Spherical1D
 import Numerics
 import Approx
 import RandomSamples
+import NormalizedValues
 
 
 type SphCell = Int
@@ -56,16 +59,16 @@ instance Mesh SphericalMesh where
 
 
   uniform_sample mesh rand =
-    let (radius, rand') = sample_ball1D (outer_radius mesh) rand
+    let (Radius radius, rand') = sample_ball1D (outer_radius mesh) rand
         (direction, rand'') = sampleNormalVector2 rand'
-    in (Spherical1D radius direction, rand'')
+    in (radius *| normalized_value direction, rand'')
 
   uniform_sample_cell mesh cell rand =
     let rmin = cellBound mesh cell Inward
         rmax = cellBound mesh cell Outward
-        (radius, rand') = sample_annulus1D rmin rmax rand
+        (Radius radius, rand') = sample_annulus1D rmin rmax rand
         (direction, rand'') = sampleNormalVector2 rand'
-    in (Spherical1D radius direction, rand'')
+    in (radius *| normalized_value direction, rand'')
 
 
   cell_boundary = undefined
@@ -90,10 +93,10 @@ cellBoundsTest :: (Radius -> Radius -> Bool)
                     -> (Radius, Radius)
                     -> Bool
 cellBoundsTest comp location (rmin, rmax) =
-  let r       = sph1d_position location
-      cos_dis = cos_Sph1Ddirection location
+  let r       = position location
+      cos_dis = (v2x . normalized_value . direction) location
   in ( (r > rmin) || ( (r `comp` rmin) && cos_dis >= 0) )  &&
-     ( (r < rmax) || ( (r `comp` rmax) && cos_dis < 0) )
+     ( (r < rmax) || ( (r `comp` rmax) && cos_dis <  0) )
 
 
 -- | Use the position and direction to determine if a location is in a
