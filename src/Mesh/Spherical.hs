@@ -71,7 +71,14 @@ instance Mesh SphericalMesh where
     in (radius *| normalized_value direction, rand'')
 
 
-  cell_boundary = undefined
+  -- TODO: Move disqualifying comparison earlier to avoid sqrt when possible.
+  cell_boundary mesh cell (Vector2 r_xi r_eta) distance =
+      let Radius rmin = cellBound mesh cell Inward
+          Radius rmax = cellBound mesh cell Outward
+          (d, face) = if (r_eta < rmin) && (r_xi < 0) 
+                      then ((negate r_xi) - sqrt (rmin^2 - r_eta^2), Inward)
+                      else ((negate r_xi) - sqrt (rmax^2 - r_eta^2), Outward)
+      in if (d < distance) then Just (d, face) else Nothing
 
 
 outer_radius :: SphericalMesh -> Radius
@@ -84,7 +91,6 @@ cellBound mesh cell Inward
     | cell == 0 = Radius 0
     | otherwise = (radii mesh) `Seq.index` (cell - 1)
 cellBound mesh cell Outward = (radii mesh) `Seq.index` cell
-
 
 -- | Use the position and direction to determine if a location is
 -- between two radii.
