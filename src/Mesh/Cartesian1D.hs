@@ -46,9 +46,9 @@ instance Mesh Cartesian1DMesh where
   cell_neighbors mesh cell = [(Negative, cell_neighbor mesh cell Negative),
                               (Positive, cell_neighbor mesh cell Positive)]
 
-  is_in_cell        = inCellTest (==)
-  is_approx_in_cell = inCellTest (~==)
-  is_in_mesh mesh location  = cellBoundsTest (==) location (left, right)
+  is_in_cell               = inCellTest (==)
+  is_approx_in_cell        = inCellTest (~==)
+  is_in_mesh mesh location = cellBoundsTest (==) location (left, right)
       where (left :< rest)  = viewl $ coords mesh
             (  _  :> right) = viewr rest
 
@@ -66,9 +66,9 @@ instance Mesh Cartesian1DMesh where
       let bounds = cellBounds mesh cell
           cos_dir = v2x $ normalized_value $ dir location
           (x_distance, face) = if cos_dir > 0
-                               then (snd bounds, Positive)
-                               else (fst bounds, Negative)
-      in if x_distance < in_distance * cos_dir
+                               then (snd bounds - pos location, Positive)
+                               else (fst bounds - pos location, Negative)
+      in if abs x_distance < in_distance * abs cos_dir
          then Just (x_distance / cos_dir, face)
          else Nothing
 

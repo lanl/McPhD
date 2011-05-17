@@ -52,6 +52,7 @@ prop_FindIsInAgree mesh seed =
        _         -> False
 
 
+
 -- * Functions for setting up assertions for multiple mesh types
 
 assertDist :: (Mesh m, 
@@ -164,10 +165,10 @@ tests = [ testGroup "Spherical Mesh Tests"
             (cart1D_distances 0 (cart1D 0.5 $ Vector2 1.0 0.0) 0.1 Nothing)
 
           , testCase "Outward, straight to boundary"
-            (cart1D_distances 1 (cart1D 0.5 $ Vector2 1.0 0.0) 1.0 $ Just (0.5, Mesh.Cartesian1D.Positive))
+            (cart1D_distances 0 (cart1D 0.5 $ Vector2 1.0 0.0) 1.0 $ Just (0.5, Mesh.Cartesian1D.Positive))
 
           , testCase "Inward, straight to boundary"
-            (cart1D_distances 1 (cart1D 0.5 $ Vector2 (negate 1.0) 0.0) 1.0
+            (cart1D_distances 0 (cart1D 0.5 $ Vector2 (negate 1.0) 0.0) 1.0
             $ Just (0.5, Mesh.Cartesian1D.Negative))
 
           ]
