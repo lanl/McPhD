@@ -1,3 +1,6 @@
+{-# LANGUAGE FlexibleContexts #-}
+
+
 -- | Module for testing mesh types
 module Mesh.Test.Mesh_test (tests) where
 
@@ -24,9 +27,9 @@ import Data.Vector.V3
 import Data.Ix
 import Numerics
 import RandomNumbers
-import Mesh.Classes
-import Space.Cartesian1D
 import NormalizedValues
+import Space.Cartesian1D
+import Space.Classes
 
 import Test.RandomNumbers_arbitrary
 
@@ -48,6 +51,19 @@ prop_FindIsInAgree mesh seed =
        Just True -> True
        _         -> False
 
+
+-- * Functions for setting up assertions for multiple mesh types
+
+assertDist :: (Mesh m, 
+               Show (MeshFace m), Eq (MeshFace m), 
+               Show (Distance (MeshSpace m)), Eq (Distance (MeshSpace m))) => 
+              m -> MeshCell m 
+              -> MeshSpace m 
+              -> (Distance (MeshSpace m))
+              -> Maybe (Distance (MeshSpace m), MeshFace m)
+              -> Assertion
+assertDist mesh cell location max_distance result =
+  (cell_boundary mesh cell location max_distance) @?= result
 
 
 -- | Property: distance is always > 0
@@ -73,15 +89,14 @@ sph1DTestSize = (size spherical_mesh) @?= 100
 sph1DTestRadius :: Assertion
 sph1DTestRadius = outer_radius spherical_mesh @?= Radius 100.0
 
--- | Function to create multiple distance assertions.
-sph1D_distances :: SphericalMesh
-                   -> MeshCell SphericalMesh
-                   -> MeshSpace SphericalMesh
-                   -> Double
-                   -> Maybe (Double, MeshFace SphericalMesh)
-                   -> Assertion
-sph1D_distances mesh cell location max_distance result =
-  (cell_boundary mesh cell location max_distance) @?= result
+-- | Function to create multiple distance assertions on spherical_mesh
+sph1D_dist :: MeshCell SphericalMesh
+           -> MeshSpace SphericalMesh
+           -> Double
+           -> Maybe (Double, MeshFace SphericalMesh)
+           -> Assertion
+sph1D_dist = assertDist spherical_mesh
+
 
 
 
@@ -94,19 +109,16 @@ cartesian1D_mesh = Cartesian1DMesh (Seq.fromList (fmap fromIntegral [0..100]))
 cart1DTestSize :: Assertion
 cart1DTestSize = (size cartesian1D_mesh) @?= 100
 
--- | Function for multiple distance assertions.
-cart1D_distances :: Cartesian1DMesh
-                    -> MeshCell Cartesian1DMesh
+-- | Function for multiple distance assertions on cartesian1D_mesh
+cart1D_distances :: MeshCell Cartesian1DMesh
                     -> MeshSpace Cartesian1DMesh
                     -> Double
                     -> Maybe (Double, MeshFace Cartesian1DMesh)
                     -> Assertion
-cart1D_distances mesh cell location max_distance result =
-  (cell_boundary mesh cell location max_distance) @?= result
+cart1D_distances = assertDist cartesian1D_mesh
 
 cart1D :: Double -> Vector2 -> Cartesian1D
 cart1D x dir = Cartesian1D x $ unsafe_makeNormal dir
-
 
 -- * Cartesian3D mesh tests
 
@@ -124,15 +136,13 @@ tests = [ testGroup "Spherical Mesh Tests"
           , testCase "Radius Equality" sph1DTestRadius
 
           , testCase "Limit too small"
-            (sph1D_distances spherical_mesh 0 (Vector2 0.5 0) 0.1 Nothing)
+            (sph1D_dist 0 (Vector2 0.5 0) 0.1 Nothing)
 
           , testCase "Radially outward to boundary"
-            (sph1D_distances spherical_mesh 0 (Vector2 0.5 0) 1.0
-             $ Just (0.5, Outward))
+            (sph1D_dist 0 (Vector2 0.5 0) 1.0 $ Just (0.5, Outward))
 
           , testCase "Radially inward to boundary"
-            (sph1D_distances spherical_mesh 1 (Vector2 (negate 1.5) 0) 1.0
-             $ Just (0.5, Inward))
+            (sph1D_dist 1 (Vector2 (negate 1.5) 0) 1.0 $ Just (0.5, Inward))
 
           , testProperty "Locations sampled in mesh, are in mesh"
             (prop_SampleInMesh spherical_mesh)
@@ -151,17 +161,14 @@ tests = [ testGroup "Spherical Mesh Tests"
             (prop_FindIsInAgree cartesian1D_mesh)
 
           , testCase "Limit too small"
-            (cart1D_distances cartesian1D_mesh 0
-             (cart1D 0.5 $ Vector2 1.0 0.0) 0.1 Nothing)
+            (cart1D_distances 0 (cart1D 0.5 $ Vector2 1.0 0.0) 0.1 Nothing)
 
           , testCase "Outward, straight to boundary"
-            (cart1D_distances cartesian1D_mesh 1
-             (cart1D 0.5 $ Vector2 1.0 0.0) 1.0 $ Just (0.5, Mesh.Cartesian1D.Positive))
+            (cart1D_distances 1 (cart1D 0.5 $ Vector2 1.0 0.0) 1.0 $ Just (0.5, Mesh.Cartesian1D.Positive))
 
-            , testCase "Inward, straight to boundary"
-              (cart1D_distances cartesian1D_mesh 1
-               (cart1D 0.5 $ Vector2 (negate 1.0) 0.0) 1.0
-               $ Just (0.5, Mesh.Cartesian1D.Negative))
+          , testCase "Inward, straight to boundary"
+            (cart1D_distances 1 (cart1D 0.5 $ Vector2 (negate 1.0) 0.0) 1.0
+            $ Just (0.5, Mesh.Cartesian1D.Negative))
 
           ]
         ]
