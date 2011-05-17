@@ -3,32 +3,37 @@ module MC where
 import Cell
 import Event
 import Material
-import Mesh
+import Mesh as M
 import Particle as P
 import Physical
 import PRNG
 import Tally
+import Sigma_HBFC
+import Collision
+import Data.Vector
 
 -- | Run an individual particle in a mesh. Returns the tally containing
 -- information about all the generated events.
-runParticle :: Mesh m => m -> Particle -> Tally
-runParticle msh p = tally msh (steps msh p)
+runParticle :: Mesh m => Lepton -> m -> Particle -> Tally
+runParticle sig msh p = tally msh (steps sig msh p)
 
 -- | Compute the trace of a particle as long as events that allow continuing
 -- are produced. Returns the entire list.
-steps :: Mesh m => m -> Particle -> [(Event, Particle)]
-steps msh = go
+steps :: Mesh m => Lepton -> m -> Particle -> [(Event, Particle)]
+steps sig msh = go
   where
-    go p = case step msh p of
+    go p = case step sig msh p of
              (e, p') -> (e, p') : if isContinuing e then go p' else []
 
 -- | Compute the next event for a given particle in a given mesh. Also
 -- returns the new state of the particle.
-step :: Mesh m => m -> Particle -> (Event, Particle)
-step msh p =
+step :: Mesh m => Lepton-> m -> Particle -> (Event, Particle)
+step sig msh p@(Particle {P.cell = cidx
+                         ,P.dir  = o
+                         ,energy  = e}) =
   withRandomParticle p $ do
-    omega' <- sampleDirection msh
-    evt    <- pickEvent msh p omega'
+    omega' <- sampleDirectionIso msh (M.cell msh cidx) e o 
+    evt    <- pickEvent sig msh p omega'
     let p' =  stream msh p omega' evt
     return (evt, p')
 
@@ -39,16 +44,15 @@ stream msh
        p@(Particle { P.dir = omega
                    , P.pos = (Position x)
                    , time  = t
-                   , cell  = cidx
+                   , P.cell  = cidx
                    })
        omega' event =
   case event of
-    Scatter  {}           -> p' { P.dir =  omega'   }
-    Absorb   {}           -> p' { P.dir =  omega    }
-    Reflect  {}           -> p' { P.dir = -omega    }
-    Transmit { face = f } -> p' { cell  = newCell f }
-    Escape   {}           -> p' { cell  = 0         } 
-    Census   {}           -> p' { time  = 0         }
+    Collision {}                 -> p' { P.dir =  omega'   }
+    Boundary  {bType = Reflect}  -> p' { P.dir = -omega    }
+    Boundary  {bType = Transmit} -> p' { P.cell  = newCell f }
+    Boundary  {bType = Escape}   -> p' { P.cell  = 0         } 
+    Timeout   {}                 -> p' { time  = 0         }
   where
     p' :: Particle
     p' = p { P.pos = x', time = t' }
@@ -57,7 +61,7 @@ stream msh
     x' :: Position
     x' = Position $ x +  (Physical.dir omega) * Physical.distance d
     t' = t - Time (Physical.distance d / c)
-
+    f = face event
     newCell :: Face -> CellIdx
     newCell = cellAcross msh cidx
 
@@ -71,37 +75,35 @@ withRandomParticle (Particle { rng = rng }) m =
 
 -- | Determine the next event that occurs for a particle, and
 -- a new state for the particle.
-pickEvent :: Mesh m => m -> Particle -> Direction -> Rnd Event
-pickEvent msh
+pickEvent :: Mesh m => Lepton -> m -> Particle -> Direction -> Rnd Event
+pickEvent sig msh
           Particle { P.dir  = omega
                    , P.pos  = x
-                   , cell   = cidx
-                   , weight = w
+                   , P.cell   = cidx
+                   , weight = EnergyWeight w
                    , time   = Time tcen
-                   , energy = e
+                   , energy = e@(Energy nrg)
                    }
           omega' = do
-  sel_s <- random
-  sel_a <- random
-  let (d_bdy, face) = distanceToBoundary msh cidx x omega
+  sel_dc <- random
+  sel_sc <- random
+  let (dBdy, face) = distanceToBoundary msh cidx x omega
       matl          = material msh cidx
-      sig_s         = mu $ sig_scat matl
-      sig_a         = mu $ sig_abs  matl
+      mcell           = M.cell msh cidx
+      dCol         = dCollide mcell e omega sig (URD sel_dc)
       -- TODO: boost to co-moving frame, compute the scatter, boost
       -- back to lab frame
-      d_scat        = Distance $ min (- log sel_s / sig_s) huge
-      d_abs         = Distance $ min (- log sel_a / sig_a) huge
-      d_cen         = Distance $ c * tcen
-
+      dCen         = Distance $ c * tcen
+ 
       dp :: Direction -> Momentum
       dp = elasticScatterMomDep e omega
 
       -- Events to consider:
+      collEvent = sampleCollision mcell e omega sig (URD sel_sc)
       events        = [
-          Scatter       d_scat (dp omega') w
-        , Absorb        d_abs  (dp 0)      w
-        , boundaryEvent msh cidx (Distance d_bdy) face
-        , Census        d_cen  0
+          collEvent dCol (dp omega') (Energy $ nrg * w)
+        , boundaryEvent msh cidx dBdy face
+        , Timeout dCen
         ]
 
   return (closestEvent events)
