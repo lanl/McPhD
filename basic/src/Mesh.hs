@@ -11,9 +11,9 @@ import Physical
 class Mesh m where
   samplePosition     :: m -> Rnd (Position, CellIdx)
   sampleDirection    :: m -> Rnd Direction
-  distanceToBoundary :: m -> CellIdx -> Position -> Direction -> (FP, Face)
-    -- TODO: should "distance" get its own type?
+  distanceToBoundary :: m -> CellIdx -> Position -> Direction -> (Distance, Face)
   cells              :: m -> Vector Cell
+  cell               :: m -> CellIdx -> Cell
   cellAcross         :: m -> CellIdx -> Face -> CellIdx
 
 -- | Returns the maximum index of the vector of cells.
@@ -30,9 +30,9 @@ boundaryType msh (CellIdx cidx) Lo = lowBC  (cells msh ! cidx)
 boundaryType msh (CellIdx cidx) Hi = highBC (cells msh ! cidx)
 
 toBoundaryEvent :: BoundaryCondition -> BoundaryEvent
-toBoundaryEvent Vac    = Escape
-toBoundaryEvent Refl   = Reflect
-toBoundaryEvent Transp = Transmit
+toBoundaryEvent Vac    = Boundary Escape
+toBoundaryEvent Refl   = Boundary Reflect
+toBoundaryEvent Transp = Boundary Transmit
 
 boundaryEvent :: Mesh m => m -> CellIdx -> BoundaryEvent
 boundaryEvent msh cidx d face =

@@ -14,7 +14,8 @@ import SoftEquiv
 data Sphere1D = Sphere1D (Vector Cell)
 
 instance Mesh Sphere1D where
-  sampleDirection _  = liftM (\ x -> Direction (2 * x - 1)) random
+
+  sampleDirection _ = liftM (\ x -> Direction (2 * x - 1)) random
 
   samplePosition msh = do
     r <- pickPoint (rmax msh)
@@ -22,11 +23,11 @@ instance Mesh Sphere1D where
         cell = findCell msh r
     return (pos, cell)
 
-  -- distanceToBoundary :: m -> CellIdx -> Position -> Direction -> (FP, Face)
+  -- distanceToBoundary :: m -> CellIdx -> Position -> Direction -> (Distance, Face)
   distanceToBoundary (Sphere1D msh) (CellIdx cidx)
                      p@(Position r) (Direction omega)
-    | contactInner p rlo t thetaLTpiOver2 = (dlo, Lo)
-    | otherwise                           = (dhi, Hi)
+    | contactInner p rlo t thetaLTpiOver2 = (Distance dlo, Lo)
+    | otherwise                           = (Distance dhi, Hi)
     where
       Cell { highB = rhi, lowB = rlo } = msh ! cidx
 
@@ -68,6 +69,8 @@ instance Mesh Sphere1D where
       oneOverOnePTSq     = 1 / onePTSq
 
   cells (Sphere1D msh) = msh
+
+  cell cidx = msh ! (idx cidx)
 
   cellAcross _ c Lo = c - 1
   cellAcross _ c Hi = c + 1
