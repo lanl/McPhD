@@ -43,7 +43,7 @@ instance Mesh SphericalMesh where
 
   cell_neighbor _ cell Inward
       | cell == 0 = Cell cell -- ^ Crossing origin.
-      | otherwise = Cell $ cell - 1 
+      | otherwise = Cell $ cell - 1
   cell_neighbor mesh cell Outward
       | cell == size mesh = Void
       | otherwise         = Cell $ cell+1
@@ -55,8 +55,6 @@ instance Mesh SphericalMesh where
 
   is_in_cell        = inCellTest (==)
   is_approx_in_cell = inCellTest (~==)
-
-
 
   uniform_sample mesh rand =
     let (Radius radius, rand') = sample_ball1D (outer_radius mesh) rand
@@ -70,14 +68,13 @@ instance Mesh SphericalMesh where
         (direction, rand'') = sampleNormalVector2 rand'
     in (radius *| normalized_value direction, rand'')
 
-
   -- TODO: Move disqualifying comparison earlier to avoid sqrt when possible.
   cell_boundary mesh cell (Vector2 r_xi r_eta) distance =
       let Radius rmin = cellBound mesh cell Inward
           Radius rmax = cellBound mesh cell Outward
-          (d, face) = if (r_eta < rmin) && (r_xi < 0) 
+          (d, face) = if (r_eta < rmin) && (r_xi < 0)
                       then ((negate r_xi) - sqrt (rmin^2 - r_eta^2), Inward)
-                      else ((negate r_xi) - sqrt (rmax^2 - r_eta^2), Outward)
+                      else ((negate r_xi) + sqrt (rmax^2 - r_eta^2), Outward)
       in if (d < distance) then Just (d, face) else Nothing
 
 
@@ -114,5 +111,3 @@ inCellTest comp mesh cell location =
   let rmin    = cellBound mesh cell Inward
       rmax    = cellBound mesh cell Outward
   in cellBoundsTest comp location (rmin, rmax)
-
-
