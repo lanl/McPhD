@@ -11,7 +11,7 @@ import Data.Vector.Unboxed as V
 
 import Event
 import Mesh
-import Particle
+import qualified Particle as P
 import Physical
 
 -- | Should and will be in Data.Monoid soon.
@@ -26,11 +26,11 @@ data Tally = Tally {
 
 instance NFData Tally
 
-data CellTally = CellTally !Momentum !EnergyWeight
+data CellTally = CellTally !Momentum !Energy
   deriving (Show)
 
-newtype instance MVector s CellTally = MV_CellTally (MVector s (Momentum, EnergyWeight))
-newtype instance Vector    CellTally = V_CellTally  (Vector    (Momentum, EnergyWeight))
+newtype instance MVector s CellTally = MV_CellTally (MVector s (Momentum, Energy))
+newtype instance Vector    CellTally = V_CellTally  (Vector    (Momentum, Energy))
 
 instance GMV.MVector MVector CellTally where
   basicLength (MV_CellTally v) = GMV.basicLength v
@@ -60,18 +60,20 @@ type PhysicsTally = Vector CellTally
 -- | Data structure for counting the number of occurrences of each of the
 -- different event types.
 data EventCount = EventCount {
-    nScatter  :: !Int
-  , nAbsorb   :: !Int
-  , nTransmit :: !Int
-  , nReflect  :: !Int
-  , nEscape   :: !Int
-  , nCensus   :: !Int
+    nNuclAbs    :: !Int
+  , nNuclEl     :: !Int
+  , nEMinusInel :: !Int
+  , nEPlusInel  :: !Int
+  , nTransmit   :: !Int
+  , nReflect    :: !Int
+  , nEscape     :: !Int
+  , nTimeout    :: !Int
   } deriving (Show, Eq)
 
 instance Monoid EventCount where
-  mempty = EventCount 0 0 0 0 0 0
-  mappend (EventCount s1 a1 t1 r1 e1 c1) (EventCount s2 a2 t2 r2 e2 c2) =
-    EventCount (s1 + s2) (a1 + a2) (t1 + t2) (r1 + r2) (e1 + e2) (c1 + c2)
+  mempty = EventCount 0 0 0 0 0 0 0 0
+  mappend (EventCount na1 ne1 emi1 epi1 t1 r1 e1 c1) (EventCount na2 ne2 emi2 epi2 t2 r2 e2 c2) =
+    EventCount (na1 + na2) (ne1 + ne2) (emi1 + emi2) (epi1 + epi2) (t1 + t2) (r1 + r2) (e1 + e2) (c1 + c2)
 
 -- | Empty (initial) tally.
 emptyTally :: Mesh m => m -> Tally
@@ -88,18 +90,17 @@ merge (Tally ec1 d1) (Tally ec2 d2) = Tally (ec1 <> ec2) (V.zipWith (<>) d1 d2)
 -- probably not worth it.
 
 -- | Tally all the particle states.
-tally :: Mesh m => m -> [(Event, Particle)] -> Tally
+tally :: Mesh m => m -> [(Event, P.Particle)] -> Tally
 tally msh = L.foldl' tallyImpl (emptyTally msh)
 
 -- | Add the data of one event and particle to the current tally.
-tallyImpl :: Tally -> (Event, Particle) -> Tally
-tallyImpl (Tally ec d) (e, p) = Tally (countEvent e ec) (tDep e (cell p) d)
+tallyImpl :: Tally -> (Event, P.Particle) -> Tally
+tallyImpl (Tally ec d) (e, p) = Tally (countEvent e ec) (tDep e (P.cell p) d)
 
 -- | Compute the deposition of a single event.
 tDep :: Event -> CellIdx -> PhysicsTally -> PhysicsTally
-tDep (Scatter _ dp e) (CellIdx cidx) t = accum (<>) t [(cidx, CellTally dp e)]
-tDep (Absorb  _ dp e) (CellIdx cidx) t = accum (<>) t [(cidx, CellTally dp e)]
-tDep _                _              t = t
+tDep (Collision _ _ dp e) (CellIdx cidx) t = accum (<>) t [(cidx, CellTally dp e)]
+tDep _                    _              t = t
 
 -- TODO: It would be slightly cleaner, but potentially a bit less efficient,
 -- to have a function computing a CellTally from an event, and always add that
@@ -107,10 +108,13 @@ tDep _                _              t = t
 
 -- | Count a single event.
 countEvent :: Event -> EventCount -> EventCount
-countEvent (Scatter  {}) ctr = ctr { nScatter  = 1 + nScatter  ctr}
-countEvent (Absorb   {}) ctr = ctr { nAbsorb   = 1 + nAbsorb   ctr}
-countEvent (Transmit {}) ctr = ctr { nTransmit = 1 + nTransmit ctr}
-countEvent (Escape   {}) ctr = ctr { nEscape   = 1 + nEscape   ctr}
-countEvent (Reflect  {}) ctr = ctr { nReflect  = 1 + nReflect  ctr}
-countEvent (Census   {}) ctr = ctr { nCensus   = 1 + nCensus   ctr}
+
+countEvent (Collision {cType = NuclEl})     ctr = ctr { nNuclEl = 1 + nNuclEl ctr}
+countEvent (Collision {cType = NuclAbs})    ctr = ctr { nNuclAbs = 1 + nNuclAbs ctr}
+countEvent (Collision {cType = EMinusInel}) ctr = ctr { nEMinusInel = 1 + nEMinusInel ctr}
+countEvent (Collision {cType = EPlusInel})  ctr = ctr { nEPlusInel = 1 + nEPlusInel ctr}
+countEvent (Boundary  {bType = Escape})   ctr = ctr { nEscape   = 1 + nEscape   ctr}
+countEvent (Boundary  {bType = Reflect})  ctr = ctr { nReflect  = 1 + nReflect  ctr}
+countEvent (Boundary  {bType = Transmit}) ctr = ctr { nTransmit  = 1 + nTransmit  ctr}
+countEvent (Timeout   {}) ctr = ctr { nTimeout   = 1 + nTimeout   ctr}
 
