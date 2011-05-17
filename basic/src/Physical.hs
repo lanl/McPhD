@@ -19,9 +19,9 @@ newtype Momentum     = Momentum     { mom   :: Vec }
   deriving (Eq, Show, Num, GV.Vector V.Vector, GMV.MVector V.MVector, Unbox)
 newtype Velocity     = Velocity     { vel   :: Vec } deriving (Eq, Show)
 
-newtype Energy       = Energy       { e     :: FP  } deriving (Eq, Show, Num)
-newtype EnergyWeight = EnergyWeight { ew    :: FP  }
+newtype Energy       = Energy       { e     :: FP  } 
   deriving (Eq, Show, Num, GV.Vector V.Vector, GMV.MVector V.MVector, Unbox)
+newtype EnergyWeight = EnergyWeight { ew    :: FP  } deriving (Eq, Show, Num)
 newtype Time         = Time         { t     :: FP  } deriving (Eq, Show, Num)
 
 newtype CrossSection = CrossSection { sigma :: FP  } deriving (Eq, Show, Num)
