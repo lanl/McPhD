@@ -11,25 +11,25 @@ import Physical
 import Search
 import SoftEquiv
 
-data Sphere1D = Sphere1D (Vector Cell)
+data Sphere1D = Sphere1D (Vector Cell) deriving Show
 
 instance Mesh Sphere1D where
 
   sampleDirection _ = liftM (\ x -> Direction (2 * x - 1)) random
+
+  samplePositionInCell _ c = do 
+    xi <- random
+    let ri3 = ri * ri * ri
+        ro3 = ro * ro * ro
+        (ri,ro) = (pos . lowB $ c, pos . highB $ c)
+        psn = Position ( (ri3 + (ro3 - ri3) * xi) ** (1.0/3.0) )
+    return psn
 
   samplePosition msh = do
     r <- pickPoint (rmax msh)
     let pos  = Position r
         cell = findCell msh r
     return (pos, cell)
-
-  samplePositionInCell m cidx = do 
-    xi <- random
-    let ri3 = ri * ri * ri
-        ro3 = ro * ro * ro
-        (ri,ro) = (pos . lowB $ c, pos . highB $ c)
-        c = cell m cidx
-    return $ Position ( (ri3 + (ro3 - ri3) * xi) ** (1.0/3.0) )
 
   -- distanceToBoundary :: m -> CellIdx -> Position -> Direction -> (Distance, Face)
   distanceToBoundary (Sphere1D msh) (CellIdx cidx)
