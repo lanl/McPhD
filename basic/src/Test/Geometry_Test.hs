@@ -2,12 +2,13 @@
 
 module Test.Geometry_Test (tests) where
 
-import Test.QuickCheck ()
+import Test.QuickCheck 
 import Test.Framework (testGroup)
 import Test.Framework.Providers.QuickCheck2 (testProperty)
 import Geometry
 import Test.Arbitraries ()
 import SoftEquiv
+import Constants (c)
 import qualified Physical as P
 
 
@@ -49,11 +50,27 @@ prop_ePstv_CM2Lab ecm ocm v = el > 0.0
 prop_ePstv_Lab2CM el ol v = ecm > 0.0
   where (P.Energy ecm, _) = labToComoving el ol v
 
+
+{-
+
+This one needs a little more work: there are several more cases than what's here 
+right now (which is why this test keeps failing!).
+
+-- | transformed energy > original energy if transformed direction cosine o' > 0
+prop_eGT1vGT0 el@(P.Energy e) ol@(P.Direction o) vl@(P.Velocity v) = 
+  if b > 2*o / (o*o+1)
+  then ecm > e
+  else ecm <= e
+  where (P.Energy ecm, P.Direction ocm) = labToComoving el ol vl
+        b = v / c
+-}
+
 -- | gamma >= 1
 prop_gammaGE1 s = gamma s >= 1.0
 
 -- | gamma has even parity: g(-v) = g(v)
 prop_gammaEven s = gamma s == gamma (-s)
+
 
 -- aggregate tests 
 tests = [testGroup "Lorentz Transforms" 
