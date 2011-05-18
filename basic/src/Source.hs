@@ -44,8 +44,9 @@ genParticlesInCell msh rng (cidx,n) =
 genCellParticle :: Mesh m => m -> CellIdx -> RNG -> Particle
 genCellParticle msh cidx rng =
   fst $ runRnd rng $ do
+    let cll = cell msh cidx
     d <- sampleDirection msh
-    x <- samplePositionInCell msh cidx
+    x <- samplePositionInCell msh cll
     let 
         t  :: Time
         t  = 1
