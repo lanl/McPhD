@@ -85,7 +85,7 @@ pickEvent sig msh
           omega' = do
   sel_dc <- random
   sel_sc <- random
-  let (dBdy, face) = distanceToBoundary msh cidx x omega
+  let (dBdy, face) = distanceToBoundary msh mcell x omega
       dCol         = dCollide mcell e omega sig (URD sel_dc)
       dCen         = Distance $ c * tcen
       mcell        = M.cell msh cidx

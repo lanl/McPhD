@@ -31,13 +31,14 @@ instance Mesh Sphere1D where
         cell = findCell msh r
     return (pos, cell)
 
-  -- distanceToBoundary :: m -> CellIdx -> Position -> Direction -> (Distance, Face)
-  distanceToBoundary (Sphere1D msh) (CellIdx cidx)
+  -- distanceToBoundary :: m -> Cell -> Position -> Direction -> (Distance, Face)
+  distanceToBoundary _ (Cell {highB = rhi, lowB = rlo})
                      p@(Position r) (Direction omega)
     | contactInner p rlo t thetaLTpiOver2 = (Distance dlo, Lo)
     | otherwise                           = (Distance dhi, Hi)
     where
-      Cell { highB = rhi, lowB = rlo } = msh ! cidx
+      -- (rhi,rlo) = (highB cll, lowB cll)
+      -- Cell { highB = rhi, lowB = rlo } = msh ! cidx
 
       dhi = sqrt ((xhi - r)*(xhi - r) + yhi*yhi)
       dlo = sqrt ((xlo - r)*(xlo - r) + ylo*ylo)
