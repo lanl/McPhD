@@ -19,7 +19,7 @@ import Test.Framework.Providers.QuickCheck2 (testProperty)
 prop_rhoN0Total e c@(Cell {mat = m}) = opN c' e == Opacity 0.0
   where c' = c { mat = Material{sig_abs = sig_abs m
                                 ,sig_scat = sig_scat m
-                                ,Material.vel = Material.vel m
+                                ,mvel = mvel m
                                 ,tempE = tempE m
                                 ,rhoNucl = Density 0.0 
                                 ,rhoEMinus = rhoEMinus m
@@ -28,7 +28,7 @@ prop_rhoN0Total e c@(Cell {mat = m}) = opN c' e == Opacity 0.0
 prop_rhoN0Abs e c@(Cell {mat = m}) = opNAbs c' e == Opacity 0.0
   where c' = c { mat = Material{sig_abs = sig_abs m
                                 ,sig_scat = sig_scat m
-                                ,Material.vel = Material.vel m
+                                ,mvel = mvel m
                                 ,tempE = tempE m
                                 ,rhoNucl = Density 0.0 
                                 ,rhoEMinus = rhoEMinus m
@@ -37,7 +37,7 @@ prop_rhoN0Abs e c@(Cell {mat = m}) = opNAbs c' e == Opacity 0.0
 prop_rhoN0Elastic e c@(Cell {mat = m}) = opNElastic c' e == Opacity 0.0
   where c' = c { mat = Material{sig_abs = sig_abs m
                                 ,sig_scat = sig_scat m
-                                ,Material.vel = Material.vel m
+                                ,mvel = mvel m
                                 ,tempE = tempE m
                                 ,rhoNucl = Density 0.0 
                                 ,rhoEMinus = rhoEMinus m
@@ -46,7 +46,7 @@ prop_rhoN0Elastic e c@(Cell {mat = m}) = opNElastic c' e == Opacity 0.0
 prop_rhoL0Total e c@(Cell {mat = m}) sig = opLepton c' e sig == Opacity 0.0
   where c' = c { mat = Material{sig_abs = sig_abs m
                                 ,sig_scat = sig_scat m
-                                ,Material.vel = Material.vel m
+                                ,mvel = mvel m
                                 ,tempE = tempE m
                                 ,rhoNucl = rhoNucl m 
                                 ,rhoEMinus = NDensity 0.0
@@ -55,7 +55,7 @@ prop_rhoL0Total e c@(Cell {mat = m}) sig = opLepton c' e sig == Opacity 0.0
 prop_rhoL0EMinus e c@(Cell {mat = m}) sig = opEMinus c' e sig == Opacity 0.0
   where c' = c { mat = Material{sig_abs = sig_abs m
                                 ,sig_scat = sig_scat m
-                                ,Material.vel = Material.vel m
+                                ,mvel = mvel m
                                 ,tempE = tempE m
                                 ,rhoNucl = rhoNucl m 
                                 ,rhoEMinus = NDensity 0.0
@@ -64,7 +64,7 @@ prop_rhoL0EMinus e c@(Cell {mat = m}) sig = opEMinus c' e sig == Opacity 0.0
 prop_rhoL0EPlus e c@(Cell {mat = m}) sig = opEPlus c' e sig == Opacity 0.0
   where c' = c { mat = Material{sig_abs = sig_abs m
                                 ,sig_scat = sig_scat m
-                                ,Material.vel = Material.vel m
+                                ,mvel = mvel m
                                 ,tempE = tempE m
                                 ,rhoNucl = rhoNucl m 
                                 ,rhoEMinus = rhoEMinus m
