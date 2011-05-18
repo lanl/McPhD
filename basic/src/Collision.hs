@@ -22,7 +22,7 @@ import PRNG
 dCollide :: Cell -> Energy -> Direction ->
             Sigma.Lepton -> URD -> Distance
 dCollide c e o sig xi = dCollideComoving c ecom sig xi
-  where (ecom,_) = labToComoving e o (Material.vel $ mat c)
+  where (ecom,_) = labToComoving e o (mvel $ mat c)
 
 
 -- | Distance to generic collision: the lesser of -log(\xi/\simga_t) and huge
@@ -40,7 +40,7 @@ dCollideComoving c e sig (URD xi) = Distance $ min (- (log xi) / sig_c) huge
 sampleCollision :: Cell -> Energy -> Direction -> Sigma.Lepton ->
                    URD -> Distance -> Momentum -> Energy -> E.Event
 sampleCollision c e o sig xi  = sampleCollisionComoving c ecom sig xi
-  where (ecom,_) = labToComoving e o (Material.vel $ mat c)
+  where (ecom,_) = labToComoving e o (mvel $ mat c)
 
 
 -- | sample a collision event in the comoving frame: Given the cell, 
@@ -68,7 +68,7 @@ sampleDirectionIso :: Mesh m => m -> Cell ->
                       Rnd Direction  -- ^ new direction, lab frame
 sampleDirectionIso m c e o = do
   let  (ecom,_)  = labToComoving e o v
-       v         = (Material.vel $ mat c)
+       v         = (mvel $ mat c)
   ocom' <- sampleDirection m
   return (snd $ comovingToLab ecom ocom' v)
 
