@@ -23,6 +23,14 @@ instance Mesh Sphere1D where
         cell = findCell msh r
     return (pos, cell)
 
+  samplePositionInCell m cidx = do 
+    xi <- random
+    let ri3 = ri * ri * ri
+        ro3 = ro * ro * ro
+        (ri,ro) = (pos . lowB $ c, pos . highB $ c)
+        c = cell m cidx
+    return $ Position ( (ri3 + (ro3 - ri3) * xi) ** (1.0/3.0) )
+
   -- distanceToBoundary :: m -> CellIdx -> Position -> Direction -> (Distance, Face)
   distanceToBoundary (Sphere1D msh) (CellIdx cidx)
                      p@(Position r) (Direction omega)
@@ -70,7 +78,7 @@ instance Mesh Sphere1D where
 
   cells (Sphere1D msh) = msh
 
-  cell cidx = msh ! (idx cidx)
+  cell (Sphere1D msh) cidx = msh ! (idx cidx)
 
   cellAcross _ c Lo = c - 1
   cellAcross _ c Hi = c + 1
