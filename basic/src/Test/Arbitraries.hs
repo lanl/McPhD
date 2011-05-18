@@ -8,6 +8,8 @@ import Cell
 import Material
 import Sigma_HBFC
 import Constants (pmg)
+import Sphere1D
+import Data.Vector as V
 
 -- QUESTION: how to use NonNegative here?
 
@@ -43,8 +45,9 @@ instance Arbitrary Velocity where
 instance Arbitrary Direction where
   arbitrary = Direction <$> choose (-1.0,1.0)
 
+-- this is specific to 1D spherical:
 instance Arbitrary Position where
-  arbitrary = Position <$> arbitrary
+  arbitrary = Position <$> ge0
 
 instance Arbitrary Material where
   arbitrary = do
@@ -60,11 +63,20 @@ instance Arbitrary Material where
 instance Arbitrary Cell where
   arbitrary = do
     lb <- arbitrary
-    ub <- arbitrary
+    deltaUB <- arbitrary
     lbc <- arbitrary
     ubc <- arbitrary
     mat <- arbitrary
+    let ub = Position $ pos lb + (abs . pos $ deltaUB)
     return $ Cell lb ub lbc ubc mat 
+
+instance Arbitrary Sphere1D where
+  arbitrary = Sphere1D <$> arbitrary 
+
+instance Arbitrary a => Arbitrary (Vector a) where
+  arbitrary = do 
+    cells <- arbitrary
+    return $ V.fromList cells
 
 instance Arbitrary BoundaryCondition where
   arbitrary = oneof [return Vac, return Refl, return Transp] 
