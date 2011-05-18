@@ -2,7 +2,6 @@ module MC where
 
 import Cell
 import Event
-import Material
 import Mesh as M
 import Particle as P
 import Physical
@@ -10,7 +9,6 @@ import PRNG
 import Tally
 import Sigma_HBFC
 import Collision
-import Data.Vector
 
 -- | Run an individual particle in a mesh. Returns the tally containing
 -- information about all the generated events.
@@ -28,7 +26,7 @@ steps sig msh = go
 -- | Compute the next event for a given particle in a given mesh. Also
 -- returns the new state of the particle.
 step :: Mesh m => Lepton-> m -> Particle -> (Event, Particle)
-step sig msh p@(Particle {P.cell = cidx
+step sig msh p@(Particle {cellIdx = cidx
                          ,P.dir  = o
                          ,energy  = e}) =
   withRandomParticle p $ do
@@ -44,14 +42,14 @@ stream msh
        p@(Particle { P.dir = omega
                    , P.pos = (Position x)
                    , time  = t
-                   , P.cell  = cidx
+                   , cellIdx  = cidx
                    })
        omega' event =
   case event of
     Collision {}                 -> p' { P.dir =  omega'   }
     Boundary  {bType = Reflect}  -> p' { P.dir = -omega    }
-    Boundary  {bType = Transmit} -> p' { P.cell  = newCell f }
-    Boundary  {bType = Escape}   -> p' { P.cell  = 0         } 
+    Boundary  {bType = Transmit} -> p' { cellIdx  = newCell f }
+    Boundary  {bType = Escape}   -> p' { cellIdx  = 0         } 
     Timeout   {}                 -> p' { time  = 0         }
   where
     p' :: Particle
@@ -79,7 +77,7 @@ pickEvent :: Mesh m => Lepton -> m -> Particle -> Direction -> Rnd Event
 pickEvent sig msh
           Particle { P.dir  = omega
                    , P.pos  = x
-                   , P.cell   = cidx
+                   , cellIdx   = cidx
                    , weight = EnergyWeight w
                    , time   = Time tcen
                    , energy = e@(Energy nrg)
@@ -88,12 +86,9 @@ pickEvent sig msh
   sel_dc <- random
   sel_sc <- random
   let (dBdy, face) = distanceToBoundary msh cidx x omega
-      matl          = material msh cidx
-      mcell           = M.cell msh cidx
       dCol         = dCollide mcell e omega sig (URD sel_dc)
-      -- TODO: boost to co-moving frame, compute the scatter, boost
-      -- back to lab frame
       dCen         = Distance $ c * tcen
+      mcell        = M.cell msh cidx
  
       dp :: Direction -> Momentum
       dp = elasticScatterMomDep e omega
