@@ -70,6 +70,15 @@ instance Arbitrary Cell where
     let ub = Position $ pos lb + (abs . pos $ deltaUB)
     return $ Cell lb ub lbc ubc mat 
 
+-- Gives us an arbitrary Cell with an arbitrary Position in that cell
+data PositionInCell = PiC Cell Position deriving Show
+
+instance Arbitrary PositionInCell where 
+  arbitrary = do
+    c <- arbitrary 
+    x <- choose (pos . lowB $ c, pos . highB $ c)
+    return $ PiC c (Position x)
+
 instance Arbitrary Sphere1D where
   arbitrary = Sphere1D <$> arbitrary 
 

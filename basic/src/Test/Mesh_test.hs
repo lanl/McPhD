@@ -43,25 +43,15 @@ dirBnded s = do
   (Direction o) <- sampleDirection s
   return $ -1.0 <= o && o <= 1.0
 
-
--- QUESTION: is there a cleaner way to couple types?
-
--- | distance to boundary >= 0. Implementation is circuitous to ensure that the 
--- sampled position is within the Cell boundaries. 
-dToBoundGE0 :: Sphere1D -> Cell -> Direction -> Rnd Bool
-dToBoundGE0 s c o = do
-  xi <- random
-  let (l,h) = (pos . lowB $ c, pos . highB $ c) 
-      x     = l + (h - l) * xi
-      p     = Position x
-      (Distance d, _) = distanceToBoundary s c p o
-  return $ d >= 0
+-- | distance to boundary >= 0. 
+dToBoundGE0 :: Sphere1D -> PositionInCell -> Direction -> Bool
+dToBoundGE0 s (PiC c p) o = d >= 0.0
+  where (Distance d, _) = distanceToBoundary s c p o
 
 tests = [testGroup "Sphere1D" 
          [ testProperty "samplePosInCell: x >= cell lower bound" psnGELowBnd
          , testProperty "samplePosInCell: x <= cell upper bound" psnLEHighBnd
          , testProperty "sampleDirection: -1 < omega < 1" dirBnded
          , testProperty "distanceToBoundary: d >= 0" dToBoundGE0
-
          ]
         ]
