@@ -15,6 +15,7 @@ import PRNG
 import Source
 import Sphere1D
 import Tally
+import Sigma_HBFC (nuE)
 
 main :: IO ()
 main =
@@ -28,7 +29,7 @@ runManyParticles :: Mesh m => Int -> Int -> m -> Tally
 runManyParticles !n !chunkSz msh =
   let
     particles = genParticles n msh testRNG
-    tallies   = L.map (runParticle msh) particles
+    tallies   = L.map (runParticle nuE msh) particles
     chunked   = chunk chunkSz tallies
     res       = L.map (L.foldl1' merge) chunked
                 `using` parBuffer 10 rdeepseq
