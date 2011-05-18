@@ -9,12 +9,13 @@ import PRNG
 import Physical
 
 class Mesh m where
-  samplePosition     :: m -> Rnd (Position, CellIdx)
-  sampleDirection    :: m -> Rnd Direction
-  distanceToBoundary :: m -> CellIdx -> Position -> Direction -> (Distance, Face)
-  cells              :: m -> Vector Cell
-  cell               :: m -> CellIdx -> Cell
-  cellAcross         :: m -> CellIdx -> Face -> CellIdx
+  samplePosition       :: m -> Rnd (Position, CellIdx)
+  samplePositionInCell :: m -> CellIdx -> Rnd Position
+  sampleDirection      :: m -> Rnd Direction
+  distanceToBoundary   :: m -> CellIdx -> Position -> Direction -> (Distance, Face)
+  cells                :: m -> Vector Cell
+  cell                 :: m -> CellIdx -> Cell
+  cellAcross           :: m -> CellIdx -> Face -> CellIdx
 
 -- | Returns the maximum index of the vector of cells.
 nrCells :: Mesh m => m -> Int
