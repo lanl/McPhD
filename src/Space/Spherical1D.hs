@@ -1,4 +1,5 @@
-{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeSynonymInstances, TypeFamilies #-}
+
 module Space.Spherical1D where
 {-- Spherical 1D space is for problems with the rotational symmetry of
 the sphere. The only location information we need in this space is the
@@ -14,41 +15,35 @@ radial outward vector.
       O------------------------P-----------> r_vec
    Origin                   Particle
 
-Because it is convienent, we store the direction of motion as a
-normalized 2-vector, even though only one component is necessary.
+The equations of motion in this coordinate system are most naturally
+expressed in terms of r^2, r\xi and r\eta, where <\xi,
+\eta>=dir_vec: 
+
+  r\xi  <- r\xi + d
+  r\eta <- r\eta
+  r^2   <- r^2 + 2dr\xi + d^2
+
+Because r^2 = (r\xi)^2 + (r\eta)^2, we drop it as seperate quantity,
+and just store <r\xi, r\eta> as a regular Vector2.
 
 --}
+
+import Data.Vector.Class
+import Data.Vector.V2
 
 import Space.Classes
 import Numerics
 import NormalizedValues
-import Data.Vector.V2
 import Approx
 
 
-data Spherical1D = Spherical1D { sph1d_position  :: Radius,
-                                 sph1d_direction :: Normalized Vector2 }
-                 deriving (Eq, Show)
-
-
-cos_Sph1Ddirection :: Spherical1D -> Double
-cos_Sph1Ddirection = v2x . normalized_value . sph1d_direction
+type Spherical1D = Vector2
 
 instance Space Spherical1D where
-  type Distance Spherical1D = Double
-  type Position Spherical1D = Radius
-  type Direction Spherical1D = Normalized Vector2
-  stream (Spherical1D (Radius r) direction) dist =
-    Spherical1D  (Radius r') direction'
-      where cos_phi    = (v2x . normalized_value) direction
-            sin_phi    = (v2y . normalized_value) direction
-            r'         = sqrt (r*r + dist*dist + 2*r*dist*cos_phi)
-            cos_phi'   = (cos_phi*r + dist) / r'
-            sin_phi'   = sin_phi*r/r'
-            direction' = unsafe_makeNormal $ Vector2 cos_phi' sin_phi'
-  position  = sph1d_position
-  direction = sph1d_direction
-
-instance Approx Spherical1D where
-  within_eps epsilon (Spherical1D r1 d1) (Spherical1D r2 d2) =
-    (within_eps epsilon r1 r2) && (within_eps epsilon d1 d2)
+    type Distance  Spherical1D = Double
+    type Position  Spherical1D = Radius
+    type Direction Spherical1D = Normalized Vector2
+    stream (Vector2 x y) dist = Vector2 (x+dist) y
+    position s  = Radius $ vmag s
+    direction s = normalize s
+    

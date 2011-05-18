@@ -13,8 +13,8 @@ data Cartesian1D = Cartesian1D { pos :: Double
                    deriving (Eq, Show)
 
 instance Space Cartesian1D where
-  type Distance Cartesian1D = Double
-  type Position Cartesian1D = Double
+  type Distance  Cartesian1D = Double
+  type Position  Cartesian1D = Double
   type Direction Cartesian1D = Normalized Vector2
 
   position  = pos

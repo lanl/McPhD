@@ -3,6 +3,8 @@
 module Mesh.Spherical where
 
 import Data.Sequence as Seq
+import Data.Vector.Class
+import Data.Vector.V2
 
 import Mesh.Classes
 import Space.Classes
@@ -10,6 +12,7 @@ import Space.Spherical1D
 import Numerics
 import Approx
 import RandomSamples
+import NormalizedValues
 
 
 type SphCell = Int
@@ -40,7 +43,7 @@ instance Mesh SphericalMesh where
 
   cell_neighbor _ cell Inward
       | cell == 0 = Cell cell -- ^ Crossing origin.
-      | otherwise = Cell $ cell - 1 
+      | otherwise = Cell $ cell - 1
   cell_neighbor mesh cell Outward
       | cell == size mesh = Void
       | otherwise         = Cell $ cell+1
@@ -53,22 +56,26 @@ instance Mesh SphericalMesh where
   is_in_cell        = inCellTest (==)
   is_approx_in_cell = inCellTest (~==)
 
-
-
   uniform_sample mesh rand =
-    let (radius, rand') = sample_ball1D (outer_radius mesh) rand
+    let (Radius radius, rand') = sample_ball1D (outer_radius mesh) rand
         (direction, rand'') = sampleNormalVector2 rand'
-    in (Spherical1D radius direction, rand'')
+    in (radius *| normalized_value direction, rand'')
 
   uniform_sample_cell mesh cell rand =
     let rmin = cellBound mesh cell Inward
         rmax = cellBound mesh cell Outward
-        (radius, rand') = sample_annulus1D rmin rmax rand
+        (Radius radius, rand') = sample_annulus1D rmin rmax rand
         (direction, rand'') = sampleNormalVector2 rand'
-    in (Spherical1D radius direction, rand'')
+    in (radius *| normalized_value direction, rand'')
 
-
-  cell_boundary = undefined
+  -- TODO: Move disqualifying comparison earlier to avoid sqrt when possible.
+  cell_boundary mesh cell (Vector2 r_xi r_eta) distance =
+      let Radius rmin = cellBound mesh cell Inward
+          Radius rmax = cellBound mesh cell Outward
+          (d, face) = if (r_eta < rmin) && (r_xi < 0)
+                      then ((negate r_xi) - sqrt (rmin^2 - r_eta^2), Inward)
+                      else ((negate r_xi) + sqrt (rmax^2 - r_eta^2), Outward)
+      in if (d < distance) then Just (d, face) else Nothing
 
 
 outer_radius :: SphericalMesh -> Radius
@@ -82,7 +89,6 @@ cellBound mesh cell Inward
     | otherwise = (radii mesh) `Seq.index` (cell - 1)
 cellBound mesh cell Outward = (radii mesh) `Seq.index` cell
 
-
 -- | Use the position and direction to determine if a location is
 -- between two radii.
 cellBoundsTest :: (Radius -> Radius -> Bool)
@@ -90,10 +96,10 @@ cellBoundsTest :: (Radius -> Radius -> Bool)
                     -> (Radius, Radius)
                     -> Bool
 cellBoundsTest comp location (rmin, rmax) =
-  let r       = sph1d_position location
-      cos_dis = cos_Sph1Ddirection location
+  let r       = position location
+      cos_dis = (v2x . normalized_value . direction) location
   in ( (r > rmin) || ( (r `comp` rmin) && cos_dis >= 0) )  &&
-     ( (r < rmax) || ( (r `comp` rmax) && cos_dis < 0) )
+     ( (r < rmax) || ( (r `comp` rmax) && cos_dis <  0) )
 
 
 -- | Use the position and direction to determine if a location is in a
@@ -105,5 +111,3 @@ inCellTest comp mesh cell location =
   let rmin    = cellBound mesh cell Inward
       rmax    = cellBound mesh cell Outward
   in cellBoundsTest comp location (rmin, rmax)
-
-

@@ -136,7 +136,6 @@
    computeTally initTally contribs = foldl addTally initTally contribs
 
 * Unfolding versus iterating
-
 ** Unfolding
 
    When all steps can succeed:
@@ -165,7 +164,6 @@
    stepM Nothing = Nothing
 
    stepM = liftM step  ??
-
 
 ** Iterating
 
@@ -277,8 +275,6 @@
     will never work. GHC will not look which of A or B hold in order
     to choose the instance.
 
-
-
 * Directory and file structure
 
   A common pattern in sub-directories is appearing:
@@ -310,15 +306,22 @@
    :LOGBOOK:
    - State "DONE"       from "TODO"       [2011-05-13 Fri 15:11]
    :END:
-** TODO Complete Cartesian3D mesh interface.
-** TODO Replace data type and streaming op for Spherical1D.
+** DONE Replace data type and streaming op for Spherical1D.
+   CLOSED: [2011-05-16 Mon 09:51]
+   :LOGBOOK:
+   - State "DONE"       from "TODO"       [2011-05-16 Mon 09:51]
+   :END:
+** TODO Add distance-to-face to Spherical1D mesh.
+** TODO Add distance-to-face to Cartesian3D mesh.
+** TODO Property and unit tests for distance-to-face calculations
+** TODO Derive inequalities for distance-to-face in Spherical1D.
 ** TODO Add isotropic scattering operation.
-** Begin porting Tim's streaming, events, and tallies over to the general code [0/3]
+** Port Tim's streaming, events, and tallies over to the general code [0/3]
 *** TODO Add a material property data type.
-*** TODO Implement basic streaming [0/2]
+*** TODO Implement basic streaming [1/2]
     - Use the general data types for particle, mesh and space.
     - [ ] Copy Tim's event structure
-    - [ ] Copy Tim's approach to streaming via recursion and termination
+    - [X] Copy Tim's approach to streaming via recursion and termination
 *** TODO Rest of basic branch [0/3]
     - [ ] Tally type
     - [ ] Tally fold

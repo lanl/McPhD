@@ -13,7 +13,6 @@ import Test.QuickCheck
 import Space.Cartesian
 import Space.Cartesian1D
 import Space.Spherical1D
-import Space.Spherical1D2
 
 -- Its dependencies
 import Space.Classes
@@ -81,9 +80,6 @@ tests =
     , testProperty
       "Zero distance -> Same location in 1DSpherical"
       (prop_ZeroDistance :: Spherical1D -> Bool)
-        , testProperty
-      "Zero distance -> Same location in 1DSpherical, 2nd formulation"
-      (prop_ZeroDistance :: Spherical1D2 -> Bool)
     ]
   , testGroup "Triangle Inequality"
     [
@@ -99,9 +95,6 @@ tests =
     , testProperty
       "Triangle inequality in Spherical 1D"
       (prop_TriangleInequality :: Spherical1D -> Double -> Bool)
-    , testProperty
-      "Triangle inequality in Spherical 1D, 2nd formulation"
-      (prop_TriangleInequality :: Spherical1D2 -> Double -> Bool)
     ]
   , testGroup "Spherical 1D Streaming"
     [
