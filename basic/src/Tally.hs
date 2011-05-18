@@ -11,7 +11,7 @@ import Data.Vector.Unboxed as V
 
 import Event
 import Mesh
-import qualified Particle as P
+import Particle 
 import Physical
 
 -- | Should and will be in Data.Monoid soon.
@@ -90,12 +90,12 @@ merge (Tally ec1 d1) (Tally ec2 d2) = Tally (ec1 <> ec2) (V.zipWith (<>) d1 d2)
 -- probably not worth it.
 
 -- | Tally all the particle states.
-tally :: Mesh m => m -> [(Event, P.Particle)] -> Tally
+tally :: Mesh m => m -> [(Event, Particle)] -> Tally
 tally msh = L.foldl' tallyImpl (emptyTally msh)
 
 -- | Add the data of one event and particle to the current tally.
-tallyImpl :: Tally -> (Event, P.Particle) -> Tally
-tallyImpl (Tally ec d) (e, p) = Tally (countEvent e ec) (tDep e (P.cell p) d)
+tallyImpl :: Tally -> (Event, Particle) -> Tally
+tallyImpl (Tally ec d) (e, p) = Tally (countEvent e ec) (tDep e (cellIdx p) d)
 
 -- | Compute the deposition of a single event.
 tDep :: Event -> CellIdx -> PhysicsTally -> PhysicsTally
