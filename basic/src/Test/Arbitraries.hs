@@ -96,6 +96,10 @@ instance Arbitrary Lepton where
 instance Arbitrary URD where 
   arbitrary = URD <$> choose (0.0,1.0)
 
+-- type used for limiting values passed to the Source.rejector tests  
+newtype Alpha = Alpha {a :: FP} deriving Show
+instance Arbitrary Alpha where
+  arbitrary = Alpha <$> choose (0.0,10.0)
 
 -- end of file
 
