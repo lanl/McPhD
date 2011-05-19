@@ -4,7 +4,6 @@ import Numerical
 
 -- | Speed of light in vacuum.
 c :: FP
--- c = 1.0 -- nice for testing
 c = 2.9979e10 -- cm/sec
 
 -- | proton mass in g: needed to convert mass densities to number densities.
