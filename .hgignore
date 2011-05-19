@@ -6,3 +6,7 @@ syntax: glob
 *.tix
 *.hpc/
 dist/
+basic/src/tmp*
+basic/src/commit*
+basic/src/data*
+basic/src/foob
