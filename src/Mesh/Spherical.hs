@@ -42,7 +42,7 @@ instance Mesh SphericalMesh where
     in Seq.findIndexL (cellBoundsTest (==) location) pairs
 
   cell_neighbor _ cell Inward
-      | cell == 0 = Cell cell -- ^ Crossing origin.
+      | cell == 0 = Cell cell -- Crossing origin.
       | otherwise = Cell $ cell - 1
   cell_neighbor mesh cell Outward
       | cell == size mesh = Void

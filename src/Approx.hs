@@ -10,11 +10,11 @@ infix 4 ~==
 infix 4 ~~==
 class Approx a where
   within_eps :: Double -> a -> a -> Bool
-  (~==) :: a -> a -> Bool
-  (~==) = within_eps 1.0e-14 -- | Operator for a common tight tolerance
+  (~==) :: a -> a -> Bool  -- ^ Operator for a common tight tolerance
+  (~==) = within_eps 1.0e-14
 
-  (~~==) :: a -> a -> Bool
-  (~~==) = within_eps 1.0e-8 -- | Operator for a common looser tolerance
+  (~~==) :: a -> a -> Bool  -- ^ Operator for a common looser tolerance
+  (~~==) = within_eps 1.0e-8
 
 -- TODO: Perhaps define global constants in some file, and use the constants
 -- here rather than the hardcoded values?
