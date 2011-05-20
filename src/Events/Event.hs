@@ -21,13 +21,13 @@ import Space.Classes
 import Mesh.Classes
 
 -- | Type of Scattering Limiters
-data ScatterType = Elastic deriving (Eq, Show, Ord)  -- More kinds to come.
+data CollideType = Scatter | Absorb  deriving (Eq, Show, Ord)  -- More kinds to come.
 
 -- | Type of Boundary Limiters
 data BoundaryType = Cell | Escape | Reflect deriving (Eq, Show, Ord)
 
 -- | Combining the limiters into a single data type with tally information.
-data (Space s, Mesh m) => Limiter s m = Scatter  { scatterType   :: ScatterType
+data (Space s, Mesh m) => Limiter s m = Collide  { collideType   :: CollideType
                                                  , deltaMomentum :: Momentum s
                                                  , energyDep     :: Double -- For now
                                                  }
@@ -49,7 +49,8 @@ isFinalEvent = isFinalLimiter . eventLimiter
 
 -- | Returns True if a step limiter stops the particle streaming.
 isFinalLimiter :: (Mesh m, Space s) => Limiter s m -> Bool
-isFinalLimiter (Boundary Escape _) = True
-isFinalLimiter (Census _)          = True
-isFinalLimiter _                   = False
+isFinalLimiter (Collide Absorb _ _) = True
+isFinalLimiter (Boundary Escape _)  = True
+isFinalLimiter (Census _)           = True
+isFinalLimiter _                    = False
 
