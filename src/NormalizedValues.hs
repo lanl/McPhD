@@ -39,7 +39,7 @@ class Mag a where
   magnitude2 :: a -> Double  -- ^ Square of the magnitude.
 
 instance Mag Double where
-  normalize  d = Normalized $ if d < 0 then -1 else 1 -- ^ Right biased.
+  normalize  d = Normalized $ if d < 0 then -1 else 1  -- Right biased.
   magnitude  d = abs d
   magnitude2 d = d*d
 
