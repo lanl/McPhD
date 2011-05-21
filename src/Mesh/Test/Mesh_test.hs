@@ -34,6 +34,7 @@ import Space.Classes
 import Test.RandomNumbers_arbitrary
 
 
+
 -- * Property functions which work on multiple mesh types
 
 prop_SampleInMesh :: Mesh m => m -> Seed -> Bool
@@ -55,11 +56,11 @@ prop_FindIsInAgree mesh seed =
 
 -- * Functions for setting up assertions for multiple mesh types
 
-assertDist :: (Mesh m, 
-               Show (MeshFace m), Eq (MeshFace m), 
-               Show (Distance (MeshSpace m)), Eq (Distance (MeshSpace m))) => 
-              m -> MeshCell m 
-              -> MeshSpace m 
+assertDist :: (Mesh m,
+               Show (MeshFace m), Eq (MeshFace m),
+               Show (Distance (MeshSpace m)), Eq (Distance (MeshSpace m))) =>
+              m -> MeshCell m
+              -> MeshSpace m
               -> (Distance (MeshSpace m))
               -> Maybe (Distance (MeshSpace m), MeshFace m)
               -> Assertion
