@@ -311,16 +311,31 @@
    :LOGBOOK:
    - State "DONE"       from "TODO"       [2011-05-16 Mon 09:51]
    :END:
-** TODO Add distance-to-face to Spherical1D mesh.
+** DONE Add distance-to-face to Spherical1D mesh.
+   CLOSED: [2011-05-27 Fri 17:29]
+   :LOGBOOK:
+   - State "DONE"       from "TODO"       [2011-05-27 Fri 17:29]
+   :END:
 ** TODO Add distance-to-face to Cartesian3D mesh.
 ** TODO Property and unit tests for distance-to-face calculations
 ** TODO Derive inequalities for distance-to-face in Spherical1D.
 ** TODO Add isotropic scattering operation.
-** Port Tim's streaming, events, and tallies over to the general code [0/3]
-*** TODO Add a material property data type.
-*** TODO Implement basic streaming [1/2]
+** TODO Convert Properties to use Positive or Non-negative values where possible.
+** TODO Move Mag class out of NormalizedValues to where both N.V. and Properties can use it. 
+** TODO Create a 'Model' containing data and implement step :: Model -> Particle -> (Event, Particle)
+** Port Tim's streaming, events, and tallies over to the general code [2/3]
+*** DONE Add a material property data type.
+    CLOSED: [2011-05-27 Fri 17:29]
+    :LOGBOOK:
+    - State "DONE"       from "TODO"       [2011-05-27 Fri 17:29]
+    :END:
+*** DONE Implement basic streaming [2/2]
+    CLOSED: [2011-05-27 Fri 17:29]
+    :LOGBOOK:
+    - State "DONE"       from "TODO"       [2011-05-27 Fri 17:29]
+    :END:
     - Use the general data types for particle, mesh and space.
-    - [ ] Copy Tim's event structure
+    - [X] Copy Tim's event structure
     - [X] Copy Tim's approach to streaming via recursion and termination
 *** TODO Rest of basic branch [0/3]
     - [ ] Tally type
