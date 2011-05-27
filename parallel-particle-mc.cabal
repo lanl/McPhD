@@ -1,9 +1,9 @@
 name:                parallel-particle-mc
 version:             0.0.1
 cabal-version:       >= 1.6
-synopsis:            FIXME: Parallel partcile-based Monte-Carlo simulations
+synopsis:            Parallel partcile-based Monte-Carlo simulations
 description:
- FIXME: Parallel particle simulation (Monte-Carlo)
+ Parallel particle simulation (Monte-Carlo)
  parallel-particle-mc is a framework for executing a particle-based Monte Carlo simulations.
 category:            Distributed Computing
 license:             BSD3
@@ -28,22 +28,28 @@ flag test
   description: Build testsuite, code coverage tests etc
   default: True
 
--- Library
---    ghc-options: -Wall -fno-warn-name-shadowing -fno-warn-orphans
---    hs-source-dirs:
---       src
---    build-depends:
---       base > 3 && <= 5,
---       AC-Vector == 2.3.1
---    exposed-modules:
---    other-modules:
+
+Library
+   ghc-options: -Wall -fwarn-tabs -fno-warn-name-shadowing -fno-warn-orphans 
+   hs-source-dirs:
+      src
+   build-depends:
+      base > 3 && <= 6,
+      AC-Vector == 2.3.1
+   exposed-modules: Approx, Generators, NormalizedValues, Numerics, RandomNumbers, RandomSamples, Vectors
+   exposed-modules: Space.Classes, Space.Cartesian1D, Space.Cartesian, Space.Spherical1D
+   exposed-modules: Mesh.Classes, Mesh.Cartesian1D, Mesh.Cartesian3D, Mesh.Spherical
+   exposed-modules: Particle.ParametricParticle, Stream
+   other-modules:
+
 
 executable TestSuite
   hs-source-dirs: ./src/ ./src/Test
   ghc-options: -Wall -fwarn-tabs -fno-warn-name-shadowing -fno-warn-orphans
+  ghc-options:  -rtsopts -threaded
   main-is: TestSuite.hs
   if flag(test)
-    ghc-options: -fhpc
+    ghc-options: -fhpc 
     build-depends: base >=3 && <=6
                    , random
                    , hpc
