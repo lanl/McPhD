@@ -16,6 +16,7 @@ import NormalizedValues
 import Data.Vector.V1
 import Data.Vector.V2
 import Data.Vector.V3
+import Test.QuickCheck.Modifiers
 
 -- The Var type is a uniform value in [0,1].
 sampleVar :: PureMT -> (Var, PureMT)
@@ -65,4 +66,9 @@ sampleInterval :: (Double, Double) -> PureMT -> (Double, PureMT)
 sampleInterval (min, max) rand = 
   let (var, rand') = sampleVar rand
   in (generateInterval (min, max) var, rand')
-     
+
+
+sampleExponential :: Double -> PureMT -> (Double, PureMT)
+sampleExponential lambda rand = 
+  let (var, rand') = sampleVar rand
+  in (generateExponential (Positive lambda) var, rand')

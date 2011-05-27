@@ -5,11 +5,11 @@
 
 Limiters of particle motion fall into categories:
 
-Collisions: Consist of various kinds of physical scattering and absoroption
+ - Collisions: Consist of various kinds of physical scattering and absoroption
 
-Boundaries: Geometric interfaces, e.g. cells, mesh boundaries and end of timestep.
+ - Boundaries: Geometric interfaces, e.g. cells, mesh boundaries.
 
-Census: A category of one. Represents reaching the end of the timestep.
+ - Census: A category of one. Represents reaching the end of the timestep.
 
 -}
 module MiniApp.Events where

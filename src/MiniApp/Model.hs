@@ -20,8 +20,12 @@ import Numerics (huge)
 
 import MiniApp.Events
 
--- | Aliases
+-- * Aliases
 type P = ParticleInMesh
+
+-- | Outcomes are Event, Particle pairs that might happen (candidates)
+-- or finally do happen.
+type Outcome m = (Event m, P m) 
 
 -- | Properties of the space.
 data (Space s) => Physics s = Physics {
@@ -45,16 +49,32 @@ data (Mesh m) => Model m = Model {
     , t_final :: Time 
     }
 
-timeStepEnd_dist :: (Mesh m) => Model m -> P m -> (Event m, P m)
-timeStepEnd_dist = undefined
+-- | Extract the physics data for the Particle's cell.
+localPhysics :: (Mesh m) => Model m -> P m -> Physics (MeshSpace m)
+localPhysics model particle = (physics model) !! (pimCell particle)
 
 
-scatter_dist :: (Mesh m) => Model m -> P m -> (Event m, P m)
+-- | Compute an Outcome for reaching the timestep end.
+timeStepEnd_dist :: (Mesh m) => Model m -> P m -> Outcome m
+timeStepEnd_dist model particle =  
+    let time_left = t_final model - pimTime particle
+        location  = pimLocation particle
+        distance  = gettingTo time_left (pimSpeed particle)
+        motion    = Motion location distance
+        particle' = move particle distance
+        -- TODO: Replace 1.0 with suitable momentum weight.
+        limiter   = Census (Momentum 1.0 $ direction location) 
+    in (Event motion limiter, particle')
+
+-- | Compute an Outcome for scattering
+scatter_dist :: (Mesh m) => Model m -> P m -> Outcome m
 scatter_dist = undefined
+             
 
-boundary_dist :: (Mesh m) => Model m -> P m -> (Event m, P m)
+-- | Compute and Outcome for mesh crossing events.
+boundary_dist :: (Mesh m) => Model m -> P m -> Outcome m
 boundary_dist = undefined
 
-step :: (Mesh m) => m -> Model m -> ParticleInMesh m -> (Event m, ParticleInMesh m)
+step :: (Mesh m) => Model m -> ParticleInMesh m -> Outcome m
 step = undefined
 

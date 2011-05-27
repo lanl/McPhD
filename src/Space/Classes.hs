@@ -18,7 +18,7 @@ data (Space s) => Motion s = Motion s Distance
 deriving instance (Space s, Show s) => Show (Motion s)
 
 -- | Momentum is a weight (energy, mass) and direction.
-data (Space s) => Momentum s = Momentum Distance (Direction s)
+data (Space s) => Momentum s = Momentum Double (Direction s)
 
 -- | Velocity is a direction and speed. 
 data (Space s) => Velocity s = Velocity Speed (Direction s)

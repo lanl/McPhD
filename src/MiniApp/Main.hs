@@ -4,7 +4,6 @@ module Main where
 import Space.Spherical1D
 import Mesh.Spherical
 import MiniApp.Events
-import MiniApp.Physics
 import MiniApp.Model
 
 main :: IO ()
