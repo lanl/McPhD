@@ -2,10 +2,12 @@
 
 module Space.Cartesian1D where
 
-import Approx
-import NormalizedValues
-import Space.Classes
 import Data.Vector.V2
+
+import Space.Classes
+import Approx
+import Properties
+import NormalizedValues
 
 
 data Cartesian1D = Cartesian1D { pos :: Double
@@ -13,14 +15,13 @@ data Cartesian1D = Cartesian1D { pos :: Double
                    deriving (Eq, Show)
 
 instance Space Cartesian1D where
-  type Distance  Cartesian1D = Double
   type Position  Cartesian1D = Double
   type Direction Cartesian1D = Normalized Vector2
 
   position  = pos
   direction = dir
-  stream loc@(Cartesian1D pos dir) distance
-      = loc { pos = pos + distance*dx }
+  stream loc@(Cartesian1D pos dir) (Distance d)
+      = loc { pos = pos + d*dx }
         where dx = v2x $ normalized_value dir
 
 instance Approx Cartesian1D where

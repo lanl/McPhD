@@ -39,10 +39,6 @@ instance Arbitrary ZenithAngle where
 instance Arbitrary Radius where
   arbitrary = sampleRadius <$> arbitrary
 
-instance Arbitrary Time where
-  arbitrary = Time <$> arbitrary
-
-
 -- TODO: Do you need the default for more than one type? It looks like the
 -- vector instances are all special. Do they have to be?
 

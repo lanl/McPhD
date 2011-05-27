@@ -3,19 +3,11 @@ module Main where
 
 import Space.Spherical1D
 import Mesh.Spherical
+import MiniApp.Events
+import MiniApp.Physics
+import MiniApp.Model
 
+main :: IO ()
+main = do
+  print "Hello World!"
 
--- | Events
-data Event = Scatter | CellFace | Esacpe | Census
-
-isFinal :: Event -> Bool
-isFinal Escape {} = True
-isFinal Census {} = True
-isFinal _         = False
-
-isContinuing = not . isFinal
-
--- Cell data fields
-data Material = Material { opacity :: Double }
-
--- A Mesh

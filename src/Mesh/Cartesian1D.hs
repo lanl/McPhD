@@ -4,7 +4,6 @@ module Mesh.Cartesian1D where
 
 import Data.Sequence as Seq
 import Data.Vector.V2
-import System.Random.Mersenne.Pure64
 
 import Mesh.Classes
 
@@ -12,6 +11,7 @@ import Space.Cartesian1D
 import NormalizedValues
 import RandomSamples
 import Approx
+import Properties
 
 type C1Cell = Int
 data C1Dir  = Negative | Positive deriving (Show, Eq)
@@ -55,21 +55,21 @@ instance Mesh Cartesian1DMesh where
   uniform_sample mesh rand =
       let (position, rand')   = sampleInterval (bounds mesh) rand
           (direction, rand'') = sampleNormalVector2 rand'
-      in (Cartesian1D position direction, rand')
+      in (Cartesian1D position direction, rand'')
 
   uniform_sample_cell mesh cell rand =
       let (position, rand')   = sampleInterval (cellBounds mesh cell) rand
           (direction, rand'') = sampleNormalVector2 rand'
       in (Cartesian1D position direction, rand'')
 
-  cell_boundary mesh cell location in_distance =
-      let bounds = cellBounds mesh cell
+  cell_boundary mesh cell location (Distance distance) =
+      let bounds  = cellBounds mesh cell
           cos_dir = v2x $ normalized_value $ dir location
           (x_distance, face) = if cos_dir > 0
                                then (snd bounds - pos location, Positive)
                                else (fst bounds - pos location, Negative)
-      in if abs x_distance < in_distance * abs cos_dir
-         then Just (x_distance / cos_dir, face)
+      in if abs x_distance < distance * abs cos_dir
+         then Just ( Distance (x_distance / cos_dir), face)
          else Nothing
 
 

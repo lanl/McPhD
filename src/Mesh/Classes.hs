@@ -1,4 +1,4 @@
-{-# LANGUAGE TypeFamilies, FlexibleContexts, MultiParamTypeClasses #-}
+{-# LANGUAGE TypeFamilies, FlexibleContexts, MultiParamTypeClasses, StandaloneDeriving #-}
 
 {-| A typeclass for Meshes.
 
@@ -11,9 +11,10 @@ module Mesh.Classes (Mesh (..)
                     , boundary2neighbor) where
 
 import System.Random.Mersenne.Pure64
+import Data.Ix
 
 import Numerics ()
-import Data.Ix
+import Properties
 import Space.Classes
 
 -- | A datatype representing the possible neighbors of a cell.
@@ -24,14 +25,15 @@ data Neighbor c = Cell { neighbor_cell :: c }
 
 data BoundaryCondition = Vacuum | Reflection deriving Show
 
+-- | Map boundary conditions on to the correct Neighbor value
 boundary2neighbor :: BoundaryCondition -> Neighbor c
 boundary2neighbor Vacuum     = Void
 boundary2neighbor Reflection = Self
 
 -- | A class for describing operations on meshes.
 class (Space (MeshSpace m), Ix (MeshCell m)) => Mesh m where
-  type MeshCell  m :: *
   type MeshSpace m :: *
+  type MeshCell  m :: *
   type MeshFace  m :: *
 
   -- | Number of cells in the mesh
@@ -49,8 +51,8 @@ class (Space (MeshSpace m), Ix (MeshCell m)) => Mesh m where
   -- | Get the distance to exit a cell, and the face, if lower than
   -- the given distance.
   cell_boundary :: m -> MeshCell m -> MeshSpace m
-                   -> Distance (MeshSpace m)
-                   -> Maybe (Distance (MeshSpace m), MeshFace m)
+                   -> Distance
+                   -> Maybe (Distance, MeshFace m)
 
   -- | Is the location in the given cell of the mesh?
   is_in_cell :: m -> MeshCell m -> MeshSpace m -> Bool
@@ -67,3 +69,4 @@ class (Space (MeshSpace m), Ix (MeshCell m)) => Mesh m where
 
   -- | Sample a location unformly in the given cell.
   uniform_sample_cell :: m -> MeshCell m -> PureMT -> (MeshSpace m, PureMT)
+
