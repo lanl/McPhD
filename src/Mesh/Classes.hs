@@ -25,14 +25,15 @@ data Neighbor c = Cell { neighbor_cell :: c }
 
 data BoundaryCondition = Vacuum | Reflection deriving Show
 
+-- | Map boundary conditions on to the correct Neighbor value
 boundary2neighbor :: BoundaryCondition -> Neighbor c
 boundary2neighbor Vacuum     = Void
 boundary2neighbor Reflection = Self
 
 -- | A class for describing operations on meshes.
 class (Space (MeshSpace m), Ix (MeshCell m)) => Mesh m where
-  type MeshCell  m :: *
   type MeshSpace m :: *
+  type MeshCell  m :: *
   type MeshFace  m :: *
 
   -- | Number of cells in the mesh
