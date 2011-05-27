@@ -22,6 +22,7 @@ import Physical
 data Tally = Tally {
     globalEvts :: !EventCount
   , deposition :: !PhysicsTally
+  , escape     :: ![(Energy,EnergyWeight)]
   } deriving (Show)
 
 instance NFData Tally
@@ -75,14 +76,18 @@ instance Monoid EventCount where
   mappend (EventCount na1 ne1 emi1 epi1 t1 r1 e1 c1) (EventCount na2 ne2 emi2 epi2 t2 r2 e2 c2) =
     EventCount (na1 + na2) (ne1 + ne2) (emi1 + emi2) (epi1 + epi2) (t1 + t2) (r1 + r2) (e1 + e2) (c1 + c2)
 
+type EscapeCount = [(Energy,EnergyWeight)]
+
 -- | Empty (initial) tally.
 emptyTally :: Mesh m => m -> Tally
 emptyTally msh = Tally mempty
-                       (V.replicate (nrCells msh) (CellTally 0 0))
+                       (V.replicate (nrCells msh) (CellTally 0 0)) 
+                       mempty
 
 -- | Merge two tallies.
 merge :: Tally -> Tally -> Tally
-merge (Tally ec1 d1) (Tally ec2 d2) = Tally (ec1 <> ec2) (V.zipWith (<>) d1 d2)
+merge (Tally ec1 d1 esc1) (Tally ec2 d2 esc2) = 
+  Tally (ec1 <> ec2) (V.zipWith (<>) d1 d2) (esc1 L.++ esc2)
 
 -- TODO: It's a bit annoying that due to the use of vectors, we cannot
 -- make Tally an instance of the Monoid class. Well, we could if we'd
@@ -95,12 +100,18 @@ tally msh = L.foldl' tallyImpl (emptyTally msh)
 
 -- | Add the data of one event and particle to the current tally.
 tallyImpl :: Tally -> (Event, Particle) -> Tally
-tallyImpl (Tally ec d) (e, p) = Tally (countEvent e ec) (tDep e (cellIdx p) d)
+tallyImpl (Tally ec dep esc) (e, p) = 
+  Tally (countEvent e ec) (tDep e (cellIdx p) dep) (tEsc e esc)
 
 -- | Compute the deposition of a single event.
 tDep :: Event -> CellIdx -> PhysicsTally -> PhysicsTally
 tDep (Collision _ _ dp e) (CellIdx cidx) t = accum (<>) t [(cidx, CellTally dp e)]
 tDep _                    _              t = t
+
+-- tally an Escape event
+tEsc :: Event -> EscapeCount -> EscapeCount
+tEsc (Boundary {bType = Escape, bEnergy = e, bWeight = wt}) ec = 
+  (e,wt):ec
 
 -- TODO: It would be slightly cleaner, but potentially a bit less efficient,
 -- to have a function computing a CellTally from an event, and always add that

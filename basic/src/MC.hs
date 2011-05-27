@@ -75,12 +75,12 @@ withRandomParticle (Particle { rng = rng }) m =
 -- a new state for the particle.
 pickEvent :: Mesh m => Lepton -> m -> Particle -> Direction -> Rnd Event
 pickEvent sig msh
-          Particle { P.dir  = omega
-                   , P.pos  = x
+          Particle { P.dir     = omega
+                   , P.pos     = x
                    , cellIdx   = cidx
-                   , weight = EnergyWeight w
-                   , time   = Time tcen
-                   , energy = e@(Energy nrg)
+                   , weight    = wt@(EnergyWeight w)
+                   , time      = Time tcen
+                   , energy    = e@(Energy nrg)
                    }
           omega' = do
   sel_dc <- random
@@ -97,7 +97,7 @@ pickEvent sig msh
       collEvent = sampleCollision mcell e omega sig (URD sel_sc)
       events        = [
           collEvent dCol (dp omega') (Energy $ nrg * w)
-        , boundaryEvent msh cidx dBdy face
+        , boundaryEvent msh cidx dBdy face e wt
         , Timeout dCen
         ]
 

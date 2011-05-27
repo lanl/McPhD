@@ -16,14 +16,16 @@ data CollType  = NuclAbs | NuclEl | EMinusInel | EPlusInel deriving (Show,Eq)
 data BoundType = Transmit | Reflect | Escape deriving (Show,Eq)
 
 data Event = 
-    Collision { cType :: CollType
+    Collision { cType    :: CollType
               , dist     :: !Distance   -- ^ distance travelled to collision
               , pDep     :: Momentum    -- ^ momentum transferred (k_i - k_f)
               , eDep     :: Energy      -- ^ energy transferred (E_i - E_f)
             }
-  | Boundary { bType :: BoundType
+  | Boundary { bType     :: BoundType
              , dist      :: !Distance   -- ^ distance to boundary
              , face      :: Face        -- ^ which face intersected
+             , bEnergy   :: Energy
+             , bWeight   :: EnergyWeight
              }
   | Timeout  { dist :: !Distance } -- ^ distance to timeout
   deriving (Show, Eq)
@@ -35,7 +37,7 @@ data Event =
 
 
 -- | Common type for all boundary event constructors.
-type BoundaryEvent = Distance -> Face -> Event
+type BoundaryEvent = Distance -> Face -> Energy -> EnergyWeight -> Event
 
 -- | Does an event continue a random walk?
 isContinuing :: Event -> Bool
