@@ -24,6 +24,10 @@ module Numerics where
 
 import Approx
 
+-- | Upper limit for event selection.
+huge :: Double
+huge = 1e+300
+
 -- | A newtype for aribtrary values in (0,1)
 newtype UnitInterval n = UnitInterval n deriving (Show, Eq, Ord)
 
@@ -78,5 +82,3 @@ sampleRadius :: Var -> Radius
 sampleRadius (UnitInterval x) = (Radius . negate . log) x
 
 
--- | Time, elapsed time from beginning of streaming
-newtype Time = Time { getTime :: Double } deriving (Eq, Show, Num, Ord, Approx)

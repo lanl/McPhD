@@ -9,6 +9,7 @@ import Data.Vector.V2
 import Mesh.Classes
 import Space.Classes
 import Space.Spherical1D
+import Properties
 import Numerics
 import Approx
 import RandomSamples
@@ -69,13 +70,13 @@ instance Mesh SphericalMesh where
     in (radius *| normalized_value direction, rand'')
 
   -- TODO: Move disqualifying comparison earlier to avoid sqrt when possible.
-  cell_boundary mesh cell (Vector2 r_xi r_eta) distance =
+  cell_boundary mesh cell (Vector2 r_xi r_eta) (Distance distance) =
       let Radius rmin = cellBound mesh cell Inward
           Radius rmax = cellBound mesh cell Outward
           (d, face) = if (r_eta < rmin) && (r_xi < 0)
                       then ((negate r_xi) - sqrt (rmin^2 - r_eta^2), Inward)
                       else ((negate r_xi) + sqrt (rmax^2 - r_eta^2), Outward)
-      in if (d < distance) then Just (d, face) else Nothing
+      in if (d < distance) then Just ((Distance d), face) else Nothing
 
 
 outer_radius :: SphericalMesh -> Radius

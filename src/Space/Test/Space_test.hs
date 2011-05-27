@@ -19,6 +19,7 @@ import Space.Classes
 import Approx
 import Data.Functor
 import NormalizedValues
+import Properties
 
 import Data.Vector.V1
 import Data.Vector.V2
@@ -29,14 +30,12 @@ import Test.Numeric_arbitrary
 import Space.Test.Space_arbitrary
 
 -- Property: Moving no distance leaves location unchanged.
-prop_ZeroDistance :: (Num (Distance s), Space s, Approx s) => s -> Bool
-prop_ZeroDistance location = (location ~== stream location 0)
+prop_ZeroDistance :: (Space s, Approx s) => s -> Bool
+prop_ZeroDistance location = (location ~== stream location (Distance 0))
 
 -- Property: Any side of the triangle is less than the sum of the
 -- other sides.
-prop_TriangleInequality :: (Num (Distance s), Mag (Distance s),
-                            Mag (Position s),
-                            Space s, Approx s) => s -> Distance s -> Bool
+prop_TriangleInequality :: (Mag (Position s), Space s, Approx s) => s -> Distance -> Bool
 prop_TriangleInequality location distance = let
     location' = location +-> distance
     mag_location  = magnitude $ position location
@@ -53,15 +52,15 @@ prop_TriangleInequality location distance = let
 -- | Streaming from zero.
 fromOrigin :: Assertion
 fromOrigin = assertEqual "Stream 1.0 from origin"
-             (Vector2 0.0 0.0 +-> 1.0) (Vector2 1.0 0.0)
+             (Vector2 0.0 0.0 +-> (Distance 1.0)) (Vector2 1.0 0.0)
 
 toOrigin :: Assertion
 toOrigin = assertEqual "Stream 1.0 to origin"
-           (Vector2 (negate 1.0) 0.0 +-> 1.0) (Vector2 0.0 0.0)
+           (Vector2 (negate 1.0) 0.0 +-> (Distance 1.0)) (Vector2 0.0 0.0)
 
 throughOrigin :: Assertion
 throughOrigin = assertEqual "Stream 2.0 through origin"
-                (Vector2 (negate 1.0) 0.0 +-> 2.0) (Vector2 1.0 0.0)
+                (Vector2 (negate 1.0) 0.0 +-> (Distance 2.0)) (Vector2 1.0 0.0)
 
 
 tests =
@@ -85,16 +84,16 @@ tests =
     [
       testProperty
       "Triangle inequality Cartesian 1D"
-      (prop_TriangleInequality :: Cartesian Vector1 -> Double -> Bool)
+      (prop_TriangleInequality :: Cartesian Vector1 -> Distance -> Bool)
     , testProperty
       "Triangle inequality in Cartesian 2D"
-      (prop_TriangleInequality :: Cartesian Vector2 -> Double  -> Bool)
+      (prop_TriangleInequality :: Cartesian Vector2 -> Distance  -> Bool)
     , testProperty
       "Triangle inequality in Cartesian 3D"
-      (prop_TriangleInequality :: Cartesian Vector3 -> Double -> Bool)
+      (prop_TriangleInequality :: Cartesian Vector3 -> Distance -> Bool)
     , testProperty
       "Triangle inequality in Spherical 1D"
-      (prop_TriangleInequality :: Spherical1D -> Double -> Bool)
+      (prop_TriangleInequality :: Spherical1D -> Distance -> Bool)
     ]
   , testGroup "Spherical 1D Streaming"
     [

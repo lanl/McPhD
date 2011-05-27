@@ -1,4 +1,4 @@
-{-# LANGUAGE TypeFamilies, FlexibleContexts, MultiParamTypeClasses #-}
+{-# LANGUAGE TypeFamilies, FlexibleContexts, MultiParamTypeClasses, StandaloneDeriving #-}
 
 {-| A typeclass for Meshes.
 
@@ -11,9 +11,10 @@ module Mesh.Classes (Mesh (..)
                     , boundary2neighbor) where
 
 import System.Random.Mersenne.Pure64
+import Data.Ix
 
 import Numerics ()
-import Data.Ix
+import Properties
 import Space.Classes
 
 -- | A datatype representing the possible neighbors of a cell.
@@ -49,8 +50,8 @@ class (Space (MeshSpace m), Ix (MeshCell m)) => Mesh m where
   -- | Get the distance to exit a cell, and the face, if lower than
   -- the given distance.
   cell_boundary :: m -> MeshCell m -> MeshSpace m
-                   -> Distance (MeshSpace m)
-                   -> Maybe (Distance (MeshSpace m), MeshFace m)
+                   -> Distance
+                   -> Maybe (Distance, MeshFace m)
 
   -- | Is the location in the given cell of the mesh?
   is_in_cell :: m -> MeshCell m -> MeshSpace m -> Bool
@@ -67,3 +68,4 @@ class (Space (MeshSpace m), Ix (MeshCell m)) => Mesh m where
 
   -- | Sample a location unformly in the given cell.
   uniform_sample_cell :: m -> MeshCell m -> PureMT -> (MeshSpace m, PureMT)
+

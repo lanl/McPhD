@@ -1,10 +1,12 @@
 {-# LANGUAGE FlexibleInstances, TypeFamilies #-}
 module Space.Cartesian where
 
+import Data.Vector.Class
+
 import Approx
+import Properties
 import NormalizedValues
 import Space.Classes
-import Data.Vector.Class
 
 {-- The cartesian spaces for 2 and 3 dimensions are all very similar,
 differning only in the dimensionality of the vector used to store the
@@ -20,11 +22,10 @@ data Cartesian v = Cartesian { cart_position  :: v,
 
 -- When the vector type is Vector, we can define a common streaming operator
 instance (Vector v) => Space (Cartesian v) where
-    type Distance  (Cartesian v) = Double
     type Position  (Cartesian v) = v
     type Direction (Cartesian v) = Normalized v
-    stream (Cartesian pos dir) dist =
-      Cartesian (pos + (normalized_value  dir) |* dist) dir
+    stream (Cartesian pos dir) (Distance d) =
+      Cartesian (pos + (normalized_value  dir) |* d) dir
     position  = cart_position
     direction = cart_direction
 

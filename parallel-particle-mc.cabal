@@ -64,3 +64,30 @@ executable TestSuite
                    , QuickCheck
   else
     buildable: False
+
+executable MiniApp
+  hs-source-dirs: ./src ./src/MiniApp
+  ghc-options: -Wall -fwarn-tabs -fno-warn-name-shadowing -fno-warn-orphans
+  ghc-options: -rtsopts -threaded
+  main-is: MiniApp/Main.hs
+  build-depends: base >=3 && <=6
+                   , random  
+                   , hpc
+                   , AC-Vector == 2.*
+                   , containers
+                   , array == 0.3.*
+                   , mersenne-random-pure64 == 0.2.*
+
+
+
+
+
+
+
+
+
+
+
+
+
+                 

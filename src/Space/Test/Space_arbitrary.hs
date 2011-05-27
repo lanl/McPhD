@@ -8,7 +8,6 @@ import Control.Applicative
 import Data.Vector.Class
 import Space.Cartesian
 import Space.Cartesian1D
-import Space.Spherical1D
 import NormalizedValues
 
 import Test.Numeric_arbitrary ()
@@ -20,3 +19,5 @@ instance (Vector v, Arbitrary v,
 instance Arbitrary Cartesian1D where
   arbitrary = Cartesian1D <$> arbitrary <*> arbitrary
 
+
+-- TODO: Need instance for Spherical1D
