@@ -54,11 +54,13 @@ prop_FindIsInAgree mesh seed =
 
 -- * Functions for setting up assertions for multiple mesh types
 
-assertDist :: (Mesh m, Show (MeshFace m), Eq (MeshFace m)) => 
-              m -> MeshCell m 
-              -> MeshSpace m 
-              -> Distance
-              -> Maybe  (Distance, MeshFace m)
+assertDist :: (Mesh m,
+               Show (MeshFace m), Eq (MeshFace m),
+               Show (Distance (MeshSpace m)), Eq (Distance (MeshSpace m))) =>
+              m -> MeshCell m
+              -> MeshSpace m
+              -> (Distance (MeshSpace m))
+              -> Maybe (Distance (MeshSpace m), MeshFace m)
               -> Assertion
 assertDist mesh cell location max_distance result =
   (cell_boundary mesh cell location max_distance) @?= result
