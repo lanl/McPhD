@@ -74,9 +74,13 @@ instance Mesh SphericalMesh where
       let Radius rmin = cellBound mesh cell Inward
           Radius rmax = cellBound mesh cell Outward
           (d, face) = if (r_eta < rmin) && (r_xi < 0)
-                      then ((negate r_xi) - sqrt (rmin^2 - r_eta^2), Inward)
-                      else ((negate r_xi) + sqrt (rmax^2 - r_eta^2), Outward)
+                      then
+                          (distComp rmin, Inward)
+                      else
+                          (distComp rmax, Outward)
       in if (d < distance) then Just ((Distance d), face) else Nothing
+      where distComp rad =
+                (negate r_xi) + sqrt (rad^(2::Integer) - r_eta^(2::Integer))
 
 
 outer_radius :: SphericalMesh -> Radius

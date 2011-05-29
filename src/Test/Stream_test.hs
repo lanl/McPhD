@@ -8,9 +8,7 @@ import Test.HUnit
 import Test.QuickCheck
 
 -- The libraries under test
-import Stream
-
-
+import MonteCarlo
 
 
 -- A particle that holds an integer counter.

@@ -37,7 +37,7 @@ class Mag a where
   normalize  :: a -> Normalized a
   magnitude  :: a -> Double
   magnitude2 :: a -> Double  -- ^ Square of the magnitude.
-  magnitude2 x = (magnitude x) ^ 2
+  magnitude2 x = (magnitude x) ^ (2::Integer)
 
 instance Mag Double where
   normalize  d = Normalized $ if d < 0 then -1 else 1  -- Right biased.

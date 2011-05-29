@@ -1,4 +1,4 @@
-module Particle.Test.ParametricParticle_test where
+module Particle.Test.Particle_test where
 
 
 -- Testing Libraries
@@ -9,7 +9,9 @@ import Test.HUnit
 import Test.QuickCheck
 
 -- The library under test
-import Particle.ParametricParticle
+import Particle.SpaceParticle
+import Particle.IndexedParticle
+import Particle.MeshedParticle
 
 -- It's dependencies
 import Particle.Test.Particles_arbitrary
@@ -18,7 +20,7 @@ import Space.Classes
 import Space.Spherical1D
 
 -- | Property: Every particle is approximately equal to itself.
-prop_Approx :: (Space s, Approx s) => ParticleInSpace s -> Bool
+prop_Approx :: (Space s, Approx s) => SpaceParticle s -> Bool
 prop_Approx p = p ~== p
 
 tests =
@@ -27,6 +29,6 @@ tests =
     [
       testProperty
       "Approximate identity"
-      (prop_Approx :: ParticleInSpace Spherical1D -> Bool)
+      (prop_Approx :: SpaceParticle Spherical1D -> Bool)
     ]
   ]

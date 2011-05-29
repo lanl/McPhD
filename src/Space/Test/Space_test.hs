@@ -7,7 +7,7 @@ import Test.Framework (testGroup)
 import Test.Framework.Providers.HUnit
 import Test.Framework.Providers.QuickCheck2 (testProperty)
 import Test.HUnit
-import Test.QuickCheck
+import Test.QuickCheck()
 
 -- The libraries under test
 import Space.Cartesian
@@ -17,7 +17,6 @@ import Space.Spherical1D
 -- Its dependencies
 import Space.Classes
 import Approx
-import Data.Functor
 import NormalizedValues
 import Properties
 
@@ -26,8 +25,7 @@ import Data.Vector.V2
 import Data.Vector.V3
 
 -- Arbitrary instances
-import Test.Numeric_arbitrary
-import Space.Test.Space_arbitrary
+import Space.Test.Space_arbitrary()
 
 -- Property: Moving no distance leaves location unchanged.
 prop_ZeroDistance :: (Space s, Approx s) => s -> Bool

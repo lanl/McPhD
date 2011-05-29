@@ -1,11 +1,32 @@
 module MonteCarlo where
 
-import Stream
-import Particle.Classes
 import Mesh.Classes
 import Space.Classes
 
--- | Step a particle on a mesh, with a physical model.
+-- * These functions seem pretty general. They would use data types
+-- defined in each application:
 
--- | Run a single particle on a mesh, with associated data.
+-- | Stream a single particle:
+stream :: (p -> (e,p))   -- ^ Function to produce each step.
+          -> (e -> Bool) -- ^ Check for terminal events to stop streaming
+          -> p           -- ^ Initial particle
+          -> [(e, p)]    -- ^ Resulting list of events and particle states.
+stream stepper continue p = next p
+  where next p =
+          let (e, p') = stepper p
+          in  (e, p') : if continue e then next p' else []
 
+-- | Fold an event list into a tally contrubution: [Event] -> TallyContrib
+
+-- | Fold tally contributions into global tally: [TallyContrib] -> GlobalTally
+
+-- | Sample particles from a source: Model -> Source -> [Particle]
+
+
+-- * These functions probably need to be part of a specific application.
+
+-- | Create a Model and Source from a problem specification.
+-- Spec -> (Model, Source)
+
+-- | Create an Problem specification from an Input source.
+-- | filename -> IO (Spec)
