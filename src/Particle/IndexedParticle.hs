@@ -28,6 +28,6 @@ data (Ix i, Space s) => IndexParticle i s = IndexParticle
 
 instance (Ix i, Space s, Approx s) => Approx (IndexParticle i s) where
     within_eps epsilon a b = (weps `on` piLocation) a b &&
-                             (weps `on` piTime) a b &&
-                             (piIndex a == piIndex b)
+                             (weps `on` piTime)     a b &&
+                             ((==) `on` piIndex)    a b
         where weps = within_eps epsilon
