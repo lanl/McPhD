@@ -12,7 +12,8 @@ import Data.Array.IArray
 
 import Particle.MeshedParticle
 import Mesh.Classes
-import Space.Classes
+import qualified Space.Classes as Space
+import Space.Classes as Space hiding (Motion)
 import Properties
 
 import MiniApp.Events
@@ -58,12 +59,10 @@ timeStepEnd_dist model particle =
     let time_left     = t_final model - pimTime particle
         location      = pimLocation particle
         distance      = gettingTo time_left (pimSpeed particle)
-        motion        = Motion location distance
+        motion        = Motion $ Space.Motion location distance
         particle'     = move particle distance
-        -- TODO: Ask Tim if EnergyWeight is the correct weighting factor.
-        finalMomentum = (engwValue . pimEnergyWeight) particle
-        limiter       = Census (Momentum finalMomentum $ direction location)
-    in (Event motion limiter, particle')
+        limiter       = Timeout
+    in (Events [motion, limiter], particle')
 
 -- | Create an event for absorption.
 absorption_event :: (Mesh m) => Model m -> P m -> Distance -> Outcome m

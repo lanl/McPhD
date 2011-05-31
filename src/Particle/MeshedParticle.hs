@@ -31,9 +31,9 @@ data (Mesh mesh) => MeshParticle mesh = MeshParticle
     , pimRand         :: !PureMT           -- ^ Source of Particle's random behavior
     }
 
--- | Move the particle the given distance. Assume cell remains
--- unchanged.  This method doesn't update energy and weight. That has
--- to be taken care of by the model.
+-- | Move the particle the given distance. Assume cell and other
+-- properties remain unchanged. Updating these has to be taken care of
+-- by the model.
 move :: (Mesh m) => MeshParticle m -> Distance -> MeshParticle m
 move particle distance =
     let elapsedTime = goingAt distance (pimSpeed particle)
@@ -43,6 +43,10 @@ move particle distance =
     in particle{ pimLocation = location +-> distance
                , pimTime     = time + elapsedTime
                }
+
+-- TODO: Ask Tim if EnergyWeight is needed here.
+momentum :: (Mesh m) => MeshParticle m -> Momentum (MeshSpace m)
+momentum particle = Momentum (engValue $ pimEnergy particle) (direction $ pimLocation particle)
 
 
 deriving instance ( Mesh mesh
