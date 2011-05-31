@@ -321,9 +321,11 @@
 ** TODO Derive inequalities for distance-to-face in Spherical1D.
 ** TODO Add isotropic scattering operation.
 ** TODO Convert Properties to use Positive or Non-negative values where possible.
-** TODO Move Mag class out of NormalizedValues to where both N.V. and Properties can use it. 
+** TODO Move Mag class out of NormalizedValues to where both N.V. and Properties can use it.
 ** TODO Create a 'Model' containing data and implement step :: Model -> Particle -> (Event, Particle)
-** Port Tim's streaming, events, and tallies over to the general code [2/3]
+** Complete streaming, events, and tallies [2/5]
+*** TODO [#A] Check physics of events with Tim.
+    Where to use energy versus energy weight.
 *** DONE Add a material property data type.
     CLOSED: [2011-05-27 Fri 17:29]
     :LOGBOOK:
@@ -337,6 +339,10 @@
     - Use the general data types for particle, mesh and space.
     - [X] Copy Tim's event structure
     - [X] Copy Tim's approach to streaming via recursion and termination
+*** TODO Add outcome creators for [1/3]
+    - [X] End of time step
+    - [ ] Mesh/Cell crossing
+    - [ ] Scattering and Absorption
 *** TODO Rest of basic branch [0/3]
     - [ ] Tally type
     - [ ] Tally fold

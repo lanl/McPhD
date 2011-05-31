@@ -1,14 +1,12 @@
 {-# LANGUAGE StandaloneDeriving, FlexibleContexts, UndecidableInstances #-}
 
-
+module MiniApp.Model where
 {-| MiniApp Model
 
 Provide a function which returns an event arising from the interaction
 of the particle with the material at each step.
 
-
 -}
-module MiniApp.Model where
 
 import Data.Array.IArray
 
@@ -67,9 +65,19 @@ timeStepEnd_dist model particle =
         limiter       = Census (Momentum finalMomentum $ direction location)
     in (Event motion limiter, particle')
 
+-- | Create an event for absorption.
+absorption_event :: (Mesh m) => Model m -> P m -> Distance -> Outcome m
+absorption_event particle distance = undefined
+  -- let particle' = move particle distance
+  --     motion    = Motion (pimLocation particle) distance
+
+
+
 -- | Compute an Outcome for scattering
 scatter_dist :: (Mesh m) => Model m -> P m -> Outcome m
 scatter_dist = undefined
+  -- let sigma_abs  = sig_abs  $ local_physics model
+  --     sigma_scat = sig_scat $ local_physics model
 
 
 -- | Compute and Outcome for mesh crossing events.

@@ -31,12 +31,15 @@ data (Mesh mesh) => MeshParticle mesh = MeshParticle
     , pimRand         :: !PureMT           -- ^ Source of Particle's random behavior
     }
 
--- | Move the particle the given distance. Assume cell remains unchanged.
+-- | Move the particle the given distance. Assume cell remains
+-- unchanged.  This method doesn't update energy and weight. That has
+-- to be taken care of by the model.
 move :: (Mesh m) => MeshParticle m -> Distance -> MeshParticle m
 move particle distance =
     let elapsedTime = goingAt distance (pimSpeed particle)
         time        = pimTime particle
         location    = pimLocation particle
+        motion      = Motion location distance
     in particle{ pimLocation = location +-> distance
                , pimTime     = time + elapsedTime
                }

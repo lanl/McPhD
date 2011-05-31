@@ -16,6 +16,7 @@ module MiniApp.Events where
 
 import Space.Classes
 import Mesh.Classes
+import Properties
 
 -- | Type of Scattering Limiters
 data CollideType = Scatter | Absorb  deriving (Eq, Show, Ord)  -- More kinds to come.
@@ -26,7 +27,7 @@ data BoundaryType = Cell | Escape | Reflect deriving (Eq, Show, Ord)
 -- | Combining the limiters into a single data type with tally information.
 data (Mesh m) => Limiter m = Collide  { collideType   :: CollideType
                                       , deltaMomentum :: Momentum (MeshSpace m)
-                                      , energyDep     :: Double -- For now
+                                      , energyDep     :: EnergyWeight
                                       }
                            | Boundary { boundaryType :: BoundaryType
                                       , faceIndex    :: MeshFace m
@@ -39,9 +40,9 @@ deriving instance (Mesh m, Show m
                   , Show (Momentum (MeshSpace m))) => Show (Limiter m)
 
 -- | An Event is motion, and a limiter.
-data (Mesh m) => Event m = Event { 
+data (Mesh m) => Event m = Event {
       eventMotion  :: Motion (MeshSpace m)
-    , eventLimiter :: Limiter m 
+    , eventLimiter :: Limiter m
     }
 deriving instance (Mesh m
                   , Show (Limiter m)
@@ -57,4 +58,3 @@ isFinalLimiter (Collide Absorb _ _) = True
 isFinalLimiter (Boundary Escape _)  = True
 isFinalLimiter (Census _)           = True
 isFinalLimiter _                    = False
-
