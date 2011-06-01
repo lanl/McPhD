@@ -10,6 +10,7 @@ of the particle with the material at each step.
 
 import Data.Array.IArray
 
+import RandomSamples
 import Particle.MeshedParticle
 import Mesh.Classes
 import qualified Space.Classes as Space
@@ -23,7 +24,9 @@ type P = MeshParticle
 
 -- | Outcomes are Event, Particle pairs that might happen (candidates)
 -- or finally do happen.
-type Outcome m = (Event m, P m)
+data Outcome m = Outcome { distance :: !Distance
+                         , event    :: (Event m)
+                         , particle :: P m }
 
 -- | Properties of the space.
 data (Space s) => Physics s = Physics {
@@ -54,22 +57,30 @@ localPhysics model particle = (physics model) ! (pimCell particle)
 
 -- | Compute an Outcome for reaching the timestep end.
 -- TODO: This is a lot of bookkeeping for the simplest limiter!
-timeStepEnd_dist :: (Mesh m) => Model m -> P m -> Outcome m
-timeStepEnd_dist model particle =
+timeStepEnd_outcome :: (Mesh m) => Model m -> P m -> Outcome m
+timeStepEnd_outcome model particle =
     let time_left     = t_final model - pimTime particle
         location      = pimLocation particle
         distance      = gettingTo time_left (pimSpeed particle)
         motion        = Motion $ Space.Motion location distance
         particle'     = move particle distance
         limiter       = Timeout
-    in (Events [motion, limiter], particle')
+    in Outcome distance (Events [motion, limiter]) particle'
+
 
 -- | Create an event for absorption.
-absorption_event :: (Mesh m) => Model m -> P m -> Distance -> Outcome m
-absorption_event particle distance = undefined
-  -- let particle' = move particle distance
-  --     motion    = Motion (pimLocation particle) distance
-
+absorption_outcome :: (Mesh m) => Model m -> P m -> Outcome m
+absorption_outcome model particle = 
+  let opacity         = sig_abs $ localPhysics model particle 
+      (distance, rng) = sampleExponential (1.0/(opValue opacity)) (pimRand particle)
+      location        = pimLocation particle
+      motion          = Motion $ Space.Motion location (Distance distance)
+      particle'       = move particle (Distance distance)
+      particle''      = particle'{pimRand = rng}
+      momentum        = pimWeightedMomentum particle' -- ^ All momentum despoited
+      energy          = pimWeightedEnergy particle' -- ^ All energy deposited
+      limiter         = Collide Scatter momentum energy
+  in Outcome (Distance distance) (Events [motion, limiter]) particle''
 
 
 -- | Compute an Outcome for scattering

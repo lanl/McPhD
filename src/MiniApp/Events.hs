@@ -40,7 +40,7 @@ data (Mesh m) => Event m = Motion   { motion        :: Space.Motion (MeshSpace m
                                     }
                          | Collide  { collideType   :: CollideType
                                     , deltaMomentum :: Space.Momentum (MeshSpace m)
-                                    , energyDep     :: EnergyWeight
+                                    , energyDep     :: Energy
                                     }
                          | Boundary { boundaryType  :: BoundaryType
                                     , faceIndex     :: MeshFace m

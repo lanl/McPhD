@@ -39,15 +39,15 @@ move particle distance =
     let elapsedTime = goingAt distance (pimSpeed particle)
         time        = pimTime particle
         location    = pimLocation particle
-        motion      = Motion location distance
     in particle{ pimLocation = location +-> distance
                , pimTime     = time + elapsedTime
                }
 
--- TODO: Ask Tim if EnergyWeight is needed here.
-momentum :: (Mesh m) => MeshParticle m -> Momentum (MeshSpace m)
-momentum particle = Momentum (engValue $ pimEnergy particle) (direction $ pimLocation particle)
+pimWeightedEnergy :: (Mesh m) => MeshParticle m -> Energy
+pimWeightedEnergy particle = applyWeight (pimEnergyWeight particle) (pimEnergy particle)
 
+pimWeightedMomentum :: (Mesh m) => MeshParticle m -> Momentum (MeshSpace m)
+pimWeightedMomentum particle = Momentum (engValue $ pimWeightedEnergy particle) (direction $ pimLocation particle)
 
 deriving instance ( Mesh mesh
                   , Show (MeshSpace mesh)
