@@ -283,6 +283,12 @@
 
    import qualified Space.Classes as Space
    import Space.Classes as Space hiding (Motion)
+** Typeclasses
+
+   Take a look at [[file:Particle/Classes.hs::class%20Particle%20p%20where][this typeclass]] and this [[file:MiniApp/Particle.hs::instance%20(Mesh%20m)%20%3D>%20P.Particle%20(Particle%20m)%20where][instantiation]]. Notice that
+   there is no need for the mesh context in the class definition, even
+   though it appears in the instance. I've been thinking about this
+   all wrong. The parameters don't propagate.
 
 * Directory and file structure
 
@@ -301,7 +307,7 @@
 
 * Questions                                                        :QUESTION:
 ** What's the right functional description of scattering?               :TIM:
-   
+
    scatteringOp :: Model -> Particle -> (Momentum, Energy, Particle)
 
    Computes the new particle along with deposited Momentum and
@@ -385,4 +391,3 @@
 ** TODO [#C] Convert Properties to use Positive or Non-negative values where possible.
 ** TODO [#C] Replace "variant" with "deviant" in function names and comments.
 ** TODO [#B] Move Mag class out of NormalizedValues to where both N.V. and Properties can use it.
- 

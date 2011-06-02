@@ -8,14 +8,11 @@ import System.Random.Mersenne.Pure64
 
 import Mesh.Classes
 import Space.Classes
+import Utils.Combinators
 import RandomNumbers
 import Properties
 import Approx
 
--- | A variation on 'apply' which lifts the second argument.
-(<*^>) :: (Applicative f) => f (a -> b) -> a -> f b
-(<*^>) g a = g <*> (pure a)
-infixl 4 <*^>
 
 
 -- | Data type for a particle moving through a space with a
