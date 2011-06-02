@@ -45,4 +45,4 @@ instance Space Spherical1D where
     stream (Vector2 x y) (Distance d) = Vector2 (x+d) y
     position s  = Radius $ vmag s
     direction s = normalize s
-    
+    make (Radius pos) dir = pos *| (normalized_value dir)

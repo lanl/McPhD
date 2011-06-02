@@ -46,6 +46,8 @@ instance Mesh Cartesian3DMesh where
 
   size m = let Dimensions x y z = c3Ddimensions m in x*y*z
 
+  cellRange = undefined
+
   cell_find = undefined
 
   cell_neighbor = undefined

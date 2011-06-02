@@ -27,7 +27,6 @@ data SphericalMesh = SphericalMesh
                      } deriving Show
 
 
-
 instance Mesh SphericalMesh where
   type MeshCell  SphericalMesh = SphCell
   type MeshFace  SphericalMesh = SphericalDirection
@@ -35,6 +34,9 @@ instance Mesh SphericalMesh where
 
   -- | # cells = # stored radii
   size = Seq.length . radii
+  
+  -- | Cells indexed from zero to size-1
+  cellRange m = (0, size m-1)
 
   -- | Search the mesh for the cell containing the given location.
   cell_find mesh location =
