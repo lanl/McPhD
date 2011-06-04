@@ -277,11 +277,27 @@
 
 * Ideas
 ** Using Particles as random generators
-   
+
    When we move to using random generators through a typeclass
    interface, make particles instances as well. This will capture the
    common pattern of extracting the rng, creating the sample, and
    returning the modified particle along with the sampled result.
+
+** Convert Particle into a state monad.
+
+   Many, many functions involve 'threading state' where the state is
+   the particle.
+
+** Unify the absorption and scattering functions.
+
+   Use a single model function for particles interacting with the
+   medium. It's possible to combine the opacities (simple addition?)
+   and then select which kind of event occurred.
+
+   mediumInteraction :: Model -> Particle -> Outcome
+
+   Inside the Outcome is the event, containing momemtum/energy
+   deposition, the new particle, and the distance travelled.
 
 * Techniques:
 ** Importing
@@ -301,18 +317,18 @@
 
 * Directory and file structure
 
-  A common pattern in sub-directories is appearing:
+  I've adopted a common pattern for many of the sub-directories:
 
   source/
-  Foo/
-  Classes.hs
-  InstanceA.hs
-  InstanceB.hs
-  Test/
-  Arbitrary.hs   -- Arbitrary instances for Foo data. Maybe split on data types.
-  InstanceA_arbitrary.hs
-  InstanceA_test.hs  -- Tests for each data type
-  InstanceB_test.hs
+  - Foo/
+    - Classes.hs
+    - InstanceA.hs
+    - InstanceB.hs
+    - Test/
+      - Arbitrary.hs   -- Arbitrary instances for Foo data. Maybe split on data types.
+      - InstanceA_arbitrary.hs
+      - InstanceA_test.hs  -- Tests for each data type
+      - InstanceB_test.hs
 
 * Questions                                                        :QUESTION:
 ** What's the right functional description of scattering?               :TIM:
@@ -364,8 +380,8 @@
    :LOGBOOK:
    - State "DONE"       from "TODO"       [2011-05-27 Fri 17:29]
    :END:
-** WAITING [#A] Check physics of events with Tim.
-   CLOSED: [2011-05-31 Tue 10:07]
+** DONE [#A] Check physics of events with Tim.
+   CLOSED: [2011-06-04 Sat 00:18]
    :LOGBOOK:
    - State "WAITING"    from "TODO"       [2011-05-31 Tue 10:08] \\
      Sent email to Tim about momentum and energy quantites.
@@ -382,18 +398,18 @@
     :LOGBOOK:
     - State "DONE"       from "TODO"       [2011-05-31 Tue 10:22]
     :END:
-*** TODO [#A] Add outcome creators for [2/4]                           :NEXT:
+*** TODO [#A] Add outcome creators for [3/4]                           :NEXT:
     - [X] End of time step
     - [ ] Mesh/Cell crossing
-    - [ ] Scattering
+    - [X] Scattering
     - [X] Absorption
-*** TODO [#C] Add distance-to-face to Cartesian3D mesh.
-*** TODO [#B] Property and unit tests for distance-to-face calculations
 *** TODO [#A] Create a 'Model' containing data and implement step :: Model -> Particle -> (Event, Particle) [1/2]
     - [X] Model data type
     - [ ] Step function
       Waiting on [[*%5B#A%5D%20Add%20outcome%20creators%20for%20%5B1/3%5D][Add outcome creators]]
 *** TODO [#A] Add a Tally Type
+** TODO [#B] Property and unit tests for distance-to-face calculations
+** TODO [#C] Add distance-to-face to Cartesian3D mesh.
 ** TODO [#A] Add a tally fold operation
 ** TODO [#A] Add Function to source and generate multiple particles.
 ** TODO [#C] Derive inequalities for distance-to-face in Spherical1D.

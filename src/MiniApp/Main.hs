@@ -16,6 +16,7 @@ import MonteCarlo
 import MiniApp.Particle
 import MiniApp.Events as Events
 import MiniApp.Model as Model
+import MiniApp.Physics as Physics
 
 particles :: [Particle SphericalMesh]
 particles = []
@@ -34,7 +35,7 @@ model = Model { mesh    = sphMesh
               , t_final = Time 10.0
               }
 
-streamOperator :: Particle SphericalMesh 
+streamOperator :: Particle SphericalMesh
                   -> [(Event SphericalMesh, Particle SphericalMesh)]
 streamOperator = stream (step model) Events.isFinalEvent
 

@@ -4,16 +4,11 @@
 
 Events of particle motion fall into categories:
 
- - Motion: Movement of the particle. Generally followed by another event which stopped it. 
-
  - Collisions: Consist of various kinds of physical scattering and absoroption
 
  - Boundaries: Geometric interfaces, e.g. cells, mesh boundaries.
 
  - Timeout: Particle reached end of the time-step.
-
- - Events: Multiple events combined into one.
-
 -}
 module MiniApp.Events where
 
@@ -26,19 +21,17 @@ data CollideType = Scatter | Absorb  deriving (Eq, Show, Ord)  -- More kinds to 
 finalCollision :: CollideType -> Bool
 finalCollision Scatter = False
 finalCollision Absorb  = True
-  
+
 -- | Type of Boundary Events
 data BoundaryType = Cell | Escape | Reflect deriving (Eq, Show, Ord)
 finalBoundary :: BoundaryType -> Bool
-finalBoundary Cell = False
-finalBoundary Escape = True
+finalBoundary Cell    = False
+finalBoundary Escape  = True
 finalBoundary Reflect = False
 
 
 -- | Combining the event types into a single data type with tally information.
-data (Mesh m) => Event m = Motion   { motion        :: Space.Motion (MeshSpace m)
-                                    }
-                         | Collide  { collideType   :: CollideType
+data (Mesh m) => Event m = Collide  { collideType   :: CollideType
                                     , deltaMomentum :: Space.Momentum (MeshSpace m)
                                     , energyDep     :: Energy
                                     }
@@ -46,21 +39,18 @@ data (Mesh m) => Event m = Motion   { motion        :: Space.Motion (MeshSpace m
                                     , faceIndex     :: MeshFace m
                                     }
                          | Timeout
-                         | Events   { events        :: [Event m] 
-                                    }
-                         
+
 deriving instance (Mesh m, Show m
                   , Show (MeshSpace m)
                   , Show (MeshFace m)
                   , Show (Space.Momentum (MeshSpace m))) => Show (Event m)
 
 
--- | Returns True if the event stops the particle streaming.
--- I don't use a catch-all pattern because I want to be warned if this list is inexhaustive
-isFinalEvent :: (Mesh m) => Event m -> Bool
-isFinalEvent Motion{}           = False
-isFinalEvent Timeout            = True
-isFinalEvent (c@Collide{})      = finalCollision $ collideType c
-isFinalEvent (b@Boundary{})     = finalBoundary  $ boundaryType b
-isFinalEvent (Events eventList) = any isFinalEvent eventList 
 
+-- | Returns True if the event stops the particle streaming.  I don't
+-- use a catch-all pattern because I want to be warned if this list is
+-- inexhaustive
+isFinalEvent :: (Mesh m) => Event m -> Bool
+isFinalEvent Timeout        = True
+isFinalEvent (c@Collide{})  = finalCollision $ collideType c
+isFinalEvent (b@Boundary{}) = finalBoundary  $ boundaryType b
