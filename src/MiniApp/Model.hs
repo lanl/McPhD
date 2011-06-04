@@ -23,10 +23,11 @@ import Properties
 import MiniApp.Events
 
 -- | Outcomes are a Distance, Event and Particle which might happen
--- (candidates) or finally do happen. 
+-- (candidates) or finally do happen.
 data Outcome m = Outcome { distance :: !Distance
                          , event    :: (Event m)
-                         , particle :: Particle m }
+                         , particle :: Particle m
+                         }
 
 -- | Properties of the material.
 data (Space s) => Physics s = Physics {
@@ -54,18 +55,18 @@ localPhysics model particle = (physics model) ! (cell particle)
 -- TODO: This is a lot of bookkeeping for the simplest limiter!
 timeStepEnd_outcome :: (Mesh m) => Model m -> Particle m -> Outcome m
 timeStepEnd_outcome model particle =
-    let time_left     = t_final model - time particle
-        distance      = gettingTo time_left (speed particle)
-        motion        = Motion $ Space.Motion (location particle) distance
-        particle'     = P.move particle distance
-        limiter       = Timeout
+    let time_left = t_final model - time particle
+        distance  = gettingTo time_left (speed particle)
+        motion    = Motion $ Space.Motion (location particle) distance
+        particle' = P.move particle distance
+        limiter   = Timeout
     in Outcome distance (Events [motion, limiter]) particle'
 
 
 -- | Create an event for absorption.
 absorption_outcome :: (Mesh m) => Model m -> Particle m -> Outcome m
-absorption_outcome model particle = 
-  let opacity         = sig_abs $ localPhysics model particle 
+absorption_outcome model particle =
+  let opacity         = sig_abs $ localPhysics model particle
       (distance, rng) = sampleExponential (1.0/(opValue opacity)) (rand particle)
       motion          = Motion $ Space.Motion (location particle) (Distance distance)
       particle'       = P.move particle (Distance distance)

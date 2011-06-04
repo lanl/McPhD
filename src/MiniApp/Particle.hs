@@ -53,8 +53,8 @@ deriving instance ( Mesh mesh
 
 sampleDistance :: (Mesh m) => Opacity -> Particle m -> (Distance, Particle m)
 sampleDistance opacity particle = let
-  (distance, rng) = sampleExponential (1.0/ (opValue opacity)) (rand particle)
-  particle' = particle{rand=rng}                  
+  (distance, rng) = sampleExponential (1.0/(opValue opacity)) (rand particle)
+  particle' = particle{rand=rng}
   in (Distance distance, particle')
 
 instance (Approx (MeshSpace mesh), Mesh mesh) => Approx (Particle mesh) where
@@ -84,5 +84,3 @@ createParticle mesh location time energy weight speed seed =
   <*^> speed
   <*^> (makePureMT seed)
   where cell = cell_find mesh location
-
-            
