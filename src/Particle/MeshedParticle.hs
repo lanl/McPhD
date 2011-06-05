@@ -8,14 +8,11 @@ import System.Random.Mersenne.Pure64
 
 import Mesh.Classes
 import Space.Classes
+import Utils.Combinators
 import RandomNumbers
 import Properties
 import Approx
 
--- | A variation on 'apply' which lifts the second argument.
-(<*^>) :: (Applicative f) => f (a -> b) -> a -> f b
-(<*^>) g a = g <*> (pure a)
-infixl 4 <*^>
 
 
 -- | Data type for a particle moving through a space with a
@@ -31,19 +28,23 @@ data (Mesh mesh) => MeshParticle mesh = MeshParticle
     , pimRand         :: !PureMT           -- ^ Source of Particle's random behavior
     }
 
--- | Move the particle the given distance. Assume cell remains
--- unchanged.  This method doesn't update energy and weight. That has
--- to be taken care of by the model.
+-- | Move the particle the given distance. Assume cell and other
+-- properties remain unchanged. Updating these has to be taken care of
+-- by the model.
 move :: (Mesh m) => MeshParticle m -> Distance -> MeshParticle m
 move particle distance =
     let elapsedTime = goingAt distance (pimSpeed particle)
         time        = pimTime particle
         location    = pimLocation particle
-        motion      = Motion location distance
     in particle{ pimLocation = location +-> distance
                , pimTime     = time + elapsedTime
                }
 
+pimWeightedEnergy :: (Mesh m) => MeshParticle m -> Energy
+pimWeightedEnergy particle = applyWeight (pimEnergyWeight particle) (pimEnergy particle)
+
+pimWeightedMomentum :: (Mesh m) => MeshParticle m -> Momentum (MeshSpace m)
+pimWeightedMomentum particle = Momentum (engValue $ pimWeightedEnergy particle) (direction $ pimLocation particle)
 
 deriving instance ( Mesh mesh
                   , Show (MeshSpace mesh)

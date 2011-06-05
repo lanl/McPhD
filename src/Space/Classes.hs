@@ -12,6 +12,7 @@ class Space s where
   stream    :: s -> Distance -> s
   position  :: s -> Position s
   direction :: s -> Direction s
+  make      :: Position s -> Direction s -> s
 
 -- | Motion is a combination of a starting location and a distance.
 data (Space s) => Motion s = Motion s Distance

@@ -3,40 +3,25 @@
 module MiniApp.Model where
 {-| MiniApp Model
 
-Provide a function which returns an event arising from the interaction
-of the particle with the material at each step.
+Defines the Model, which is the combination of data and operations
+which are sufficient to determine the next event in a particle history.
 
 -}
 
 import Data.Array.IArray
 
-import Particle.MeshedParticle
 import Mesh.Classes
-import Space.Classes
+import qualified Particle.Classes as P
+
 import Properties
 
+import MiniApp.Particle
 import MiniApp.Events
+import MiniApp.Physics
+import MiniApp.Outcome
 
--- * Aliases
-type P = MeshParticle
 
--- | Outcomes are Event, Particle pairs that might happen (candidates)
--- or finally do happen.
-type Outcome m = (Event m, P m)
 
--- | Properties of the space.
-data (Space s) => Physics s = Physics {
-      sig_abs   :: !Opacity
-    , sig_scat  :: !Opacity
-    , mvel      :: !(Velocity s)
-    , tempE     :: !Temperature
-    , rhoNucl   :: !Density
-    , rhoEMinus :: !NDensity
-    , rhoEPlis  :: !NDensity
-    }
-
-deriving instance (Space s, Eq   (Velocity s)) => Eq   (Physics s)
-deriving instance (Space s, Show (Velocity s)) => Show (Physics s)
 
 -- | The physical model. Consists of a mesh, space properties indexed
 -- by mesh cell and the end of time-step
@@ -47,42 +32,39 @@ data (Mesh m) => Model m = Model {
     }
 
 -- | Extract the physics data for the Particle's cell.
-localPhysics :: (Mesh m) => Model m -> P m -> Physics (MeshSpace m)
-localPhysics model particle = (physics model) ! (pimCell particle)
+localPhysics :: (Mesh m) => Model m -> Particle m -> Physics (MeshSpace m)
+localPhysics model particle = (physics model) ! (cell particle)
 
+
+-- | Advance the particle one step, according to the model.
+--
+-- This function could be quite general, if given a list of functions
+-- which produce outcomes. (Contractors)
+step :: (Mesh m) => Model m -> Particle m -> (Event m, Particle m)
+step model particle =
+    -- | Compute the outcome of physics, the mesh and the timestep.
+    let outcomes = [ physicsOutcome (localPhysics model particle) particle,
+                     timeStepOutcome model particle,
+                     meshOutcome model particle]
+    -- | Smallest distance wins.
+    in result (foldl1 min outcomes)
+
+
+-- * Functions which compute particular kinds of outcomes, resulting
+-- from interaction with the mesh, the timestep and the medium. Each
+-- of these has the same type:
+--
+--   Model m -> Particle m -> Outcome m
 
 -- | Compute an Outcome for reaching the timestep end.
 -- TODO: This is a lot of bookkeeping for the simplest limiter!
-timeStepEnd_dist :: (Mesh m) => Model m -> P m -> Outcome m
-timeStepEnd_dist model particle =
-    let time_left     = t_final model - pimTime particle
-        location      = pimLocation particle
-        distance      = gettingTo time_left (pimSpeed particle)
-        motion        = Motion location distance
-        particle'     = move particle distance
-        -- TODO: Ask Tim if EnergyWeight is the correct weighting factor.
-        finalMomentum = (engwValue . pimEnergyWeight) particle
-        limiter       = Census (Momentum finalMomentum $ direction location)
-    in (Event motion limiter, particle')
+timeStepOutcome :: (Mesh m) => Model m -> Particle m -> Outcome m
+timeStepOutcome model particle =
+    let time_left = t_final model - time particle
+        distance  = gettingTo time_left (speed particle)
+        particle' = P.move particle distance
+    in Outcome distance Timeout particle'
 
--- | Create an event for absorption.
-absorption_event :: (Mesh m) => Model m -> P m -> Distance -> Outcome m
-absorption_event particle distance = undefined
-  -- let particle' = move particle distance
-  --     motion    = Motion (pimLocation particle) distance
-
-
-
--- | Compute an Outcome for scattering
-scatter_dist :: (Mesh m) => Model m -> P m -> Outcome m
-scatter_dist = undefined
-  -- let sigma_abs  = sig_abs  $ local_physics model
-  --     sigma_scat = sig_scat $ local_physics model
-
-
--- | Compute and Outcome for mesh crossing events.
-boundary_dist :: (Mesh m) => Model m -> P m -> Outcome m
-boundary_dist = undefined
-
-step :: (Mesh m) => Model m -> MeshParticle m -> Outcome m
-step = undefined
+-- | Dispatch to the mesh's distance to boundary functions.
+meshOutcome :: (Mesh m) => Model m -> Particle m -> Outcome m
+meshOutcome model particle = undefined

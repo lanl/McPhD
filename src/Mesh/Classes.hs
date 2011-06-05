@@ -39,6 +39,9 @@ class (Space (MeshSpace m), Ix (MeshCell m)) => Mesh m where
   -- | Number of cells in the mesh
   size :: m -> Int
 
+  -- | Range of cell indices
+  cellRange :: m -> (MeshCell m, MeshCell m)
+
   -- | Potentially O(mesh_size) lookup
   cell_find :: m -> MeshSpace m -> Maybe (MeshCell m)
 

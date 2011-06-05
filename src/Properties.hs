@@ -37,8 +37,14 @@ newtype Distance = Distance { distValue :: Double } deriving
 newtype Time = Time { timeValue :: Double } deriving
                (Eq, Show, Num, Ord, Approx, Arbitrary, Mag)
 
+
+-- * Conversion functions for various properties.
+
 goingAt :: Distance -> Speed -> Time
 goingAt (Distance d) (Speed s) = Time (d/s)
 
 gettingTo :: Time -> Speed -> Distance
 gettingTo (Time t) (Speed s) = Distance (s*t)
+
+applyWeight :: EnergyWeight -> Energy -> Energy
+applyWeight (EnergyWeight wt) (Energy eng) = Energy $ wt*eng

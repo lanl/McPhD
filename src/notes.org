@@ -275,21 +275,72 @@
     will never work. GHC will not look which of A or B hold in order
     to choose the instance.
 
+* Ideas
+** Using Particles as random generators
+
+   When we move to using random generators through a typeclass
+   interface, make particles instances as well. This will capture the
+   common pattern of extracting the rng, creating the sample, and
+   returning the modified particle along with the sampled result.
+
+** Convert Particle into a state monad.
+
+   Many, many functions involve 'threading state' where the state is
+   the particle.
+
+** Unify the absorption and scattering functions.
+
+   Use a single model function for particles interacting with the
+   medium. It's possible to combine the opacities (simple addition?)
+   and then select which kind of event occurred.
+
+   mediumInteraction :: Model -> Particle -> Outcome
+
+   Inside the Outcome is the event, containing momemtum/energy
+   deposition, the new particle, and the distance travelled.
+
+* Techniques:
+** Importing
+
+   Importing a constructor which overloads a local one, without
+   qualifying the entire imported module:
+
+   import qualified Space.Classes as Space
+   import Space.Classes as Space hiding (Motion)
+
+** Typeclasses
+
+   Take a look at [[file:Particle/Classes.hs::class%20Particle%20p%20where][this typeclass]] and this [[file:MiniApp/Particle.hs::instance%20(Mesh%20m)%20%3D>%20P.Particle%20(Particle%20m)%20where][instantiation]]. Notice that
+   there is no need for the mesh context in the class definition, even
+   though it appears in the instance. I've been thinking about this
+   all wrong. The parameters don't propagate.
+
 * Directory and file structure
 
-  A common pattern in sub-directories is appearing:
+  I've adopted a common pattern for many of the sub-directories:
 
   source/
-  Foo/
-  Classes.hs
-  InstanceA.hs
-  InstanceB.hs
-  Test/
-  Arbitrary.hs   -- Arbitrary instances for Foo data. Maybe split on data types.
-  InstanceA_arbitrary.hs
-  InstanceA_test.hs  -- Tests for each data type
-  InstanceB_test.hs
+  - Foo/
+    - Classes.hs
+    - InstanceA.hs
+    - InstanceB.hs
+    - Test/
+      - Arbitrary.hs   -- Arbitrary instances for Foo data. Maybe split on data types.
+      - InstanceA_arbitrary.hs
+      - InstanceA_test.hs  -- Tests for each data type
+      - InstanceB_test.hs
 
+* Questions                                                        :QUESTION:
+** What's the right functional description of scattering?               :TIM:
+
+   scatteringOp :: Model -> Particle -> (Momentum, Energy, Particle)
+
+   Computes the new particle along with deposited Momentum and
+   Energy. Model provides parameters needed in computation.
+
+** Is energy weight really just a significance weight?                  :TIM:
+
+   After all, it is applied to momemtum quantities as well.
 * Tasks:
 ** DONE Make indices for Cartesian3D and Spherical meshes into Ix instances.
    CLOSED: [2011-05-05 Thu 16:53]
@@ -316,34 +367,52 @@
    :LOGBOOK:
    - State "DONE"       from "TODO"       [2011-05-27 Fri 17:29]
    :END:
-** TODO Add distance-to-face to Cartesian3D mesh.
-** TODO Property and unit tests for distance-to-face calculations
-** TODO Derive inequalities for distance-to-face in Spherical1D.
-** TODO Add isotropic scattering operation.
-** TODO Convert Properties to use Positive or Non-negative values where possible.
-** TODO Move Mag class out of NormalizedValues to where both N.V. and Properties can use it.
-** TODO Create a 'Model' containing data and implement step :: Model -> Particle -> (Event, Particle)
-** Complete streaming, events, and tallies [2/5]
-*** TODO [#A] Check physics of events with Tim.
-    Where to use energy versus energy weight.
-*** DONE Add a material property data type.
-    CLOSED: [2011-05-27 Fri 17:29]
+** DONE Implement basic streaming [2/2]
+   CLOSED: [2011-05-27 Fri 17:29]
+   :LOGBOOK:
+   - State "DONE"       from "TODO"       [2011-05-27 Fri 17:29]
+   :END:
+   - Use the general data types for particle, mesh and space.
+   - [X] Copy Tim's event structure
+   - [X] Copy Tim's approach to streaming via recursion and termination
+** DONE Add a material property data type.
+   CLOSED: [2011-05-27 Fri 17:29]
+   :LOGBOOK:
+   - State "DONE"       from "TODO"       [2011-05-27 Fri 17:29]
+   :END:
+** DONE [#A] Check physics of events with Tim.
+   CLOSED: [2011-06-04 Sat 00:18]
+   :LOGBOOK:
+   - State "WAITING"    from "TODO"       [2011-05-31 Tue 10:08] \\
+     Sent email to Tim about momentum and energy quantites.
+   :END:
+   Where to use energy versus energy weight.
+
+   - In [[file:~/work/Projects/HaskellIMC/source/basic/src/MC.hs::collEvent%20dCol%20(dp%20omega')%20(Energy%20$%20nrg%20*%20w)][MC.hs]] he uses weight * energy when creating a collision event.
+   - What about momentum? This is computed [[file:~/work/Projects/HaskellIMC/source/basic/src/MC.hs::dp%20%3D%20elasticScatterMomDep%20e%20omega][here]], using the energy of the particle.
+   - Function [[file:~/work/Projects/HaskellIMC/source/basic/src/Collision.hs::sampleCollision%20::%20Cell%20->%20Energy%20->%20Direction%20->%20Sigma.Lepton%20-][sampleCollision]] return an Event.
+** TODO [#A] Add isotropic scattering operation.
+** TODO [#A] MiniApp [1/6]
+*** DONE Convert Motion/Limiter event model to treating motion as an event.
+    CLOSED: [2011-05-31 Tue 10:22]
     :LOGBOOK:
-    - State "DONE"       from "TODO"       [2011-05-27 Fri 17:29]
+    - State "DONE"       from "TODO"       [2011-05-31 Tue 10:22]
     :END:
-*** DONE Implement basic streaming [2/2]
-    CLOSED: [2011-05-27 Fri 17:29]
-    :LOGBOOK:
-    - State "DONE"       from "TODO"       [2011-05-27 Fri 17:29]
-    :END:
-    - Use the general data types for particle, mesh and space.
-    - [X] Copy Tim's event structure
-    - [X] Copy Tim's approach to streaming via recursion and termination
-*** TODO Add outcome creators for [1/3]
+*** TODO [#A] Add outcome creators for [3/4]                           :NEXT:
     - [X] End of time step
     - [ ] Mesh/Cell crossing
-    - [ ] Scattering and Absorption
-*** TODO Rest of basic branch [0/3]
-    - [ ] Tally type
-    - [ ] Tally fold
-    - [ ] Multiple particles
+    - [X] Scattering
+    - [X] Absorption
+*** TODO [#A] Create a 'Model' containing data and implement step :: Model -> Particle -> (Event, Particle) [1/2]
+    - [X] Model data type
+    - [ ] Step function
+      Waiting on [[*%5B#A%5D%20Add%20outcome%20creators%20for%20%5B1/3%5D][Add outcome creators]]
+*** TODO [#A] Add a Tally Type
+** TODO [#B] Property and unit tests for distance-to-face calculations
+** TODO [#C] Add distance-to-face to Cartesian3D mesh.
+** TODO [#A] Add a tally fold operation
+** TODO [#A] Add Function to source and generate multiple particles.
+** TODO [#C] Derive inequalities for distance-to-face in Spherical1D.
+** TODO [#C] Convert Properties to use Positive or Non-negative values where possible.
+** TODO [#C] Replace "variant" with "deviant" in function names and comments.
+** TODO [#B] Move Mag class out of NormalizedValues to where both N.V. and Properties can use it.
