@@ -21,8 +21,6 @@ import MiniApp.Physics
 import MiniApp.Outcome
 
 
-
-
 -- | The physical model. Consists of a mesh, space properties indexed
 -- by mesh cell and the end of time-step
 data (Mesh m) => Model m = Model {
@@ -43,9 +41,9 @@ localPhysics model particle = (physics model) ! (cell particle)
 step :: (Mesh m) => Model m -> Particle m -> (Event m, Particle m)
 step model particle =
     -- | Compute the outcome of physics, the mesh and the timestep.
-    let outcomes = [ physicsOutcome (localPhysics model particle) particle,
-                     timeStepOutcome model particle,
-                     meshOutcome model particle]
+    let outcomes = [ physicsOutcome (localPhysics model particle) particle
+                   , timeStepOutcome model particle
+                   , meshOutcome model particle]
     -- | Smallest distance wins.
     in result (foldl1 min outcomes)
 
@@ -57,7 +55,6 @@ step model particle =
 --   Model m -> Particle m -> Outcome m
 
 -- | Compute an Outcome for reaching the timestep end.
--- TODO: This is a lot of bookkeeping for the simplest limiter!
 timeStepOutcome :: (Mesh m) => Model m -> Particle m -> Outcome m
 timeStepOutcome model particle =
     let time_left = t_final model - time particle
@@ -68,3 +65,6 @@ timeStepOutcome model particle =
 -- | Dispatch to the mesh's distance to boundary functions.
 meshOutcome :: (Mesh m) => Model m -> Particle m -> Outcome m
 meshOutcome model particle = undefined
+
+
+materialOutcome :: (Mesh m) => Contractor
