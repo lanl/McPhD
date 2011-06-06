@@ -9,12 +9,11 @@ import MiniApp.Events as Events
 import MiniApp.Model as Model
 import MiniApp.Particle
 
+-- Create a model
+
 -- Get some particles, somehow. Read a file for testing?
 particles :: [Particle]
 particles = []
 
-events = map (stream Model.step Events.isFinalEvent) particles 
 
-
-
-
+events = map (stream Model.step Events.isFinalEvent) particles
