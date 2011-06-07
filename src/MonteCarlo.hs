@@ -1,8 +1,26 @@
 module MonteCarlo where
+{- | Take application-specific stepping functions, particle event and tally
+data and combine them into a Monte Carlo simulation.
+-}
 
 import Data.Function
 
 import Properties
+
+
+-- ??? Better to make these function independent of the model? Then
+-- the application would provide functions like: Particle -> ...
+-- instead of Model -> Particle -> ...  It would likely do this by
+-- defining functions like Model -> Particle -> ... and provide
+-- closures of them by evaluating them over the model.
+--
+-- They could even just provide functions which use a model object
+-- defined in the miniApp module.
+--
+-- It just seems kind of odd to always be passing Model and Particle
+-- to these higher-level operators when only the particle changes over
+-- the course of the simulation. We don't really need to know about
+-- the model at this level.
 
 
 -- | Outcomes are a distance to an event, the event and the next
@@ -12,6 +30,7 @@ data Outcome e p = Outcome { distance :: Distance
                            , particle :: p
                            }
 
+-- We compare outcomes strictly on the basis of distance.
 instance Eq (Outcome e p) where
   (==) = (==) `on` distance
 
@@ -30,8 +49,8 @@ type Contractor model particle event
     = model -> particle -> Outcome event particle
 
 -- | Compute outcomes from contractors, and choose the closest one.
-step :: model -> particle -> [Contractor model particle event] -> (event, particle)
-step model particle contractors
+step :: model -> [Contractor model particle event] -> particle  -> (event, particle)
+step model contractors particle
     = result (minimum (map (\f -> f model particle) contractors))
 
 
@@ -46,3 +65,7 @@ stream stepper continue p = next p
   where next p =
           let (e, p') = stepper p
           in  (e, p') : if continue e then next p' else []
+
+
+streamMany :: (p -> [(e,p)]) -> [p] -> [[(e,p)]]
+streamMany = map

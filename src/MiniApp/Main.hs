@@ -1,6 +1,6 @@
+module Main where
 -- | A module for building a simple particle-transport application
 -- with elastic, non-relativistic physics.
-module Main where
 
 import Data.Sequence as Seq
 import Data.Array
@@ -15,8 +15,8 @@ import qualified MonteCarlo as MC
 
 import MiniApp.Particle
 import MiniApp.Events as Events
-import MiniApp.Model as Model
 import MiniApp.Physics as Physics
+import MiniApp.Model
 
 
 -- Create a mesh
@@ -36,16 +36,24 @@ model = Model { mesh    = sphMesh
               , t_final = Time 10.0
               }
 
+
 -- Create some particles
 particles :: [Particle SphericalMesh]
 particles = []
 
-streamOperator :: Particle SphericalMesh
-                  -> [(Event SphericalMesh, Particle SphericalMesh)]
-streamOperator = MC.stream (step model) Events.isFinalEvent
+streamOp :: (Particle SphericalMesh)
+            -> [(Event SphericalMesh, Particle SphericalMesh)]
+streamOp = MC.stream (MC.step model contractors) Events.isFinalEvent
 
 events :: [[(Event SphericalMesh, Particle SphericalMesh)]]
-events = map streamOperator particles
+events = MC.streamMany streamOp particles
+
+
+-- Fold tally function over lists of event lists.
+
+
+-- Fold Tallies into complete tally
+
 
 main :: IO ()
 main = do
