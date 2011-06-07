@@ -16,7 +16,7 @@ instance Eq (Outcome e p) where
   (==) = (==) `on` distance
 
 instance Ord (Outcome e p) where
-  (<=) = (<=) `on` distance
+  compare = compare `on` distance
 
 -- | Convert an outcome into the (event, particle) result.
 result :: Outcome ev part -> (ev, part)
