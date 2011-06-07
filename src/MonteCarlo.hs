@@ -32,7 +32,7 @@ type Contractor model particle event
 -- | Compute outcomes from contractors, and choose the closest one.
 step :: model -> particle -> [Contractor model particle event] -> (event, particle)
 step model particle contractors
-    = result (foldl1 min (fmap (\f -> f model particle) contractors))
+    = result (minimum (map (\f -> f model particle) contractors))
 
 
 
