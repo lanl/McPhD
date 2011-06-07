@@ -27,7 +27,7 @@ instance Mesh m => Eq (Outcome m) where
   (==) = (==) `on` distance
 
 instance (Mesh m) => Ord (Outcome m) where
-  (<=) = (<=) `on` distance
+  compare = compare `on` distance
 
 result :: Mesh m => Outcome m -> (Event m, Particle m)
 result (Outcome _ event particle) = (event, particle)

@@ -15,14 +15,14 @@ class Space s where
   make      :: Position s -> Direction s -> s
 
 -- | Motion is a combination of a starting location and a distance.
-data (Space s) => Motion s = Motion s Distance
+data Motion s = Motion s Distance
 deriving instance (Space s, Show s) => Show (Motion s)
 
 -- | Momentum is a weight (energy, mass) and direction.
-data (Space s) => Momentum s = Momentum Double (Direction s)
+data Momentum s = Momentum Double (Direction s)
 
--- | Velocity is a direction and speed. 
-data (Space s) => Velocity s = Velocity Speed (Direction s)
+-- | Velocity is a direction and speed.
+data Velocity s = Velocity Speed (Direction s)
 
 -- * Operations on spaces
 
