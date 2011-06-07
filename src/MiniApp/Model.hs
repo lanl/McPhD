@@ -67,4 +67,4 @@ meshOutcome :: (Mesh m) => Model m -> Particle m -> Outcome m
 meshOutcome model particle = undefined
 
 
-materialOutcome :: (Mesh m) => Contractor
+-- materialOutcome :: (Mesh m) => Contractor
