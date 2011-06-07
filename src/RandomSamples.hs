@@ -63,12 +63,12 @@ sample_annulus1D (Radius r_min) (Radius r_max) rand =
 
 
 sampleInterval :: (Double, Double) -> PureMT -> (Double, PureMT)
-sampleInterval (min, max) rand = 
+sampleInterval (min, max) rand =
   let (var, rand') = sampleVar rand
   in (generateInterval (min, max) var, rand')
 
 
 sampleExponential :: Double -> PureMT -> (Double, PureMT)
-sampleExponential lambda rand = 
+sampleExponential lambda rand =
   let (var, rand') = sampleVar rand
   in (generateExponential (Positive lambda) var, rand')
