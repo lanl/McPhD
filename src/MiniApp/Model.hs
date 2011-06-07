@@ -14,6 +14,7 @@ import Mesh.Classes
 import qualified Particle.Classes as P
 
 import Properties
+import qualified MonteCarlo as MC
 
 import MiniApp.Particle
 import MiniApp.Events
