@@ -9,6 +9,9 @@ which are sufficient to determine the next event in a particle history.
 -}
 
 import Data.Array.IArray
+import Data.Monoid
+
+import qualified Space.Classes as S
 
 import Mesh.Classes
 import qualified Particle.Classes as P
@@ -19,11 +22,13 @@ import qualified MonteCarlo as MC
 import MiniApp.Particle
 import MiniApp.Events
 import MiniApp.Physics
-import MiniApp.Outcome
 
+
+-- Aliases
+type Momentum m   = S.Momentum (MeshSpace m)
 
 -- Aliases for the MonteCarlo types we need.
-type Outcome m    = MC.Outcome (Event m) (Particle m)
+type Outcome m    = MC.Outcome    (Event m) (Particle m)
 type Contractor m = MC.Contractor (Model m) (Particle m) (Event m)
 
 
@@ -42,7 +47,6 @@ localPhysics model particle = (physics model) ! (cell particle)
 -- * Functions which compute outcomes, resulting from interaction with
 -- the mesh, the timestep and the medium. Each of these has the same
 -- type, called Contractor:
-
 --   Model m -> Particle m -> Outcome m
 
 -- | Compute an Outcome for reaching the timestep end.
@@ -65,3 +69,27 @@ materialContractor = undefined
 -- | A list of contractors that we hand to the step function.
 contractors :: (Mesh m) => [Contractor m]
 contractors = [timeStepContractor, meshContractor, materialContractor]
+
+
+
+-- | Tallies
+
+-- | Information tallied in each cell.
+data (Mesh m) => CellTally m = CellTally !(Momentum m) !Energy
+deriving instance (Mesh m, Show (Momentum m)) => Show (CellTally m)
+
+-- Need addition operators for momentum and energy for this.
+-- instance (Mesh m) => Monoid (CellTally m) where
+--     mempty = CellTally 0 0
+--     mappend (CellTally m1 e1) (CellTally m2 e2) = CellTally (m1+m2) (e1+e2)
+
+data EventCount = EventCount {
+      nEscape  :: !Int
+    , nReflect :: !Int
+    , nTimeout :: !Int
+    }
+
+instance Monoid EventCount where
+  mempty = EventCount 0 0 0
+  mappend (EventCount ne1 nr1 nt1) (EventCount ne2 nr2 nt2) =
+      EventCount (ne1+ne2) (nr1+nr2) (nt1+nt2)
