@@ -6,6 +6,9 @@ module MiniApp.Model where
 Defines the Model, which is the combination of data and operations
 which are sufficient to determine the next event in a particle history.
 
+Note that while this model is written to be polymorphic over the mesh,
+this is not required in general.
+
 -}
 
 import Data.Array.IArray
