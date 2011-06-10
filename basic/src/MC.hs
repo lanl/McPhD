@@ -30,21 +30,20 @@ step sig msh p@(Particle {cellIdx = cidx
                          ,P.dir  = o
                          ,energy  = e}) =
   withRandomParticle p $ do
-    omega' <- sampleDirectionIso msh (M.cell msh cidx) e o 
-    evt    <- pickEvent sig msh p omega'
-    let p' =  stream msh p omega' evt
+    (evt,omega') <- pickEvent sig msh p 
+    let p'       =  stream msh p evt omega'
     return (evt, p')
 
 -- | Computes a new particle from a particle, a direction and
 -- an event.
-stream :: Mesh m => m -> Particle -> Direction -> Event -> Particle
+stream :: Mesh m => m -> Particle -> Event -> Direction -> Particle
 stream msh
        p@(Particle { P.dir = omega
                    , P.pos = (Position x)
                    , time  = t
                    , cellIdx  = cidx
                    })
-       omega' event =
+       event omega' =
   case event of
     Collision {}                 -> p' { P.dir =  omega'   }
     Boundary  {bType = Reflect}  -> p' { P.dir = -omega    }
@@ -73,7 +72,7 @@ withRandomParticle (Particle { rng = rng }) m =
 
 -- | Determine the next event that occurs for a particle, and
 -- a new state for the particle.
-pickEvent :: Mesh m => Lepton -> m -> Particle -> Direction -> Rnd Event
+pickEvent :: Mesh m => Lepton -> m -> Particle -> Rnd (Event,Direction)
 pickEvent sig msh
           Particle { P.dir     = omega
                    , P.pos     = x
@@ -82,30 +81,20 @@ pickEvent sig msh
                    , time      = Time tcen
                    , energy    = e@(Energy nrg)
                    }
-          omega' = do
+          = do
   sel_dc <- random
-  sel_sc <- random
   let (dBdy, face) = distanceToBoundary msh mcell x omega
       dCol         = dCollide mcell e omega sig (URD sel_dc)
       dCen         = Distance $ c * tcen
-      mcell        = M.cell msh cidx
- 
-      dp :: Direction -> Momentum
-      dp = elasticScatterMomDep e omega
-
-      -- Events to consider:
-      collEvent = sampleCollision mcell e omega sig (URD sel_sc)
-      events        = [
-          collEvent dCol (dp omega') (Energy $ nrg * w)
+      mcell        = M.cell msh cidx 
+  (collEvent,omega') <- sampleCollision msh mcell e omega sig dCol wt
+  let events        = [
+          collEvent
         , boundaryEvent msh cidx dBdy face e wt
         , Timeout dCen
         ]
 
-  return (closestEvent events)
+  return ((closestEvent events),omega')
 
--- | Compute the elastic scattering momentum deposition:
--- E/c (k_i^ - k_f)
-elasticScatterMomDep :: Energy -> Direction -> Direction -> Momentum
-elasticScatterMomDep (Energy e) (Direction omega_i) (Direction omega_f) =
-  Momentum ((e / c) * (omega_i - omega_f))
+-- the end
 
