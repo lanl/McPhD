@@ -11,7 +11,7 @@ import Physical
 class Mesh m where
   samplePosition       :: m -> Rnd (Position, CellIdx)
   samplePositionInCell :: m -> Cell -> Rnd Position
-  sampleDirection      :: m -> Rnd Direction
+  sampleDirectionIso   :: m -> Rnd Direction
   distanceToBoundary   :: m -> Cell -> Position -> Direction -> (Distance, Face)
   cells                :: m -> Vector Cell
   cell                 :: m -> CellIdx -> Cell

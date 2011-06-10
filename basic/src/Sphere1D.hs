@@ -15,7 +15,7 @@ data Sphere1D = Sphere1D (Vector Cell) deriving Show
 
 instance Mesh Sphere1D where
 
-  sampleDirection _ = liftM (\ x -> Direction (2 * x - 1)) random
+  sampleDirectionIso _ = liftM (\ x -> Direction (2 * x - 1)) random
 
   samplePositionInCell _ c = do 
     xi <- random
