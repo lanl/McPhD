@@ -20,7 +20,7 @@ genParticlesInCells :: Mesh m => m -> RNG -> [(CellIdx,Int)] ->
                        FP ->  -- ^ e'
                       [Particle]
 genParticlesInCells msh rng nPerCell a e' = 
-  join $ map (genParticlesInCell msh rng a e') nPerCell
+  nPerCell >>= (genParticlesInCell msh rng a e')
 
 -- | generate a given number of particles in one cell
 genParticlesInCell :: Mesh m => m -> RNG ->
