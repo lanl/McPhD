@@ -9,16 +9,27 @@ which are sufficient to determine the next event in a particle history.
 -}
 
 import Data.Array.IArray
+import Data.Monoid
+
+import qualified Space.Classes as S
 
 import Mesh.Classes
 import qualified Particle.Classes as P
 
 import Properties
+import qualified MonteCarlo as MC
 
 import MiniApp.Particle
 import MiniApp.Events
 import MiniApp.Physics
-import MiniApp.Outcome
+
+
+-- Aliases
+type Momentum m   = S.Momentum (MeshSpace m)
+
+-- Aliases for the MonteCarlo types we need.
+type Outcome m    = MC.Outcome    (Event m) (Particle m)
+type Contractor m = MC.Contractor (Model m) (Particle m) (Event m)
 
 
 -- | The physical model. Consists of a mesh, space properties indexed
@@ -33,38 +44,52 @@ data (Mesh m) => Model m = Model {
 localPhysics :: (Mesh m) => Model m -> Particle m -> Physics (MeshSpace m)
 localPhysics model particle = (physics model) ! (cell particle)
 
-
--- | Advance the particle one step, according to the model.
---
--- This function could be quite general, if given a list of functions
--- which produce outcomes. (Contractors)
-step :: (Mesh m) => Model m -> Particle m -> (Event m, Particle m)
-step model particle =
-    -- | Compute the outcome of physics, the mesh and the timestep.
-    let outcomes = [ physicsOutcome (localPhysics model particle) particle
-                   , timeStepOutcome model particle
-                   , meshOutcome model particle]
-    -- | Smallest distance wins.
-    in result (foldl1 min outcomes)
-
-
--- * Functions which compute particular kinds of outcomes, resulting
--- from interaction with the mesh, the timestep and the medium. Each
--- of these has the same type:
---
+-- * Functions which compute outcomes, resulting from interaction with
+-- the mesh, the timestep and the medium. Each of these has the same
+-- type, called Contractor:
 --   Model m -> Particle m -> Outcome m
 
 -- | Compute an Outcome for reaching the timestep end.
-timeStepOutcome :: (Mesh m) => Model m -> Particle m -> Outcome m
-timeStepOutcome model particle =
+timeStepContractor :: (Mesh m) => Contractor m
+timeStepContractor model particle =
     let time_left = t_final model - time particle
         distance  = gettingTo time_left (speed particle)
         particle' = P.move particle distance
-    in Outcome distance Timeout particle'
+    in MC.Outcome distance Timeout particle'
 
 -- | Dispatch to the mesh's distance to boundary functions.
-meshOutcome :: (Mesh m) => Model m -> Particle m -> Outcome m
-meshOutcome model particle = undefined
+meshContractor :: (Mesh m) => Contractor m
+meshContractor = undefined
 
 
--- materialOutcome :: (Mesh m) => Contractor
+materialContractor :: (Mesh m) => Contractor m
+materialContractor = undefined
+
+
+-- | A list of contractors that we hand to the step function.
+contractors :: (Mesh m) => [Contractor m]
+contractors = [timeStepContractor, meshContractor, materialContractor]
+
+
+
+-- | Tallies
+
+-- | Information tallied in each cell.
+data (Mesh m) => CellTally m = CellTally !(Momentum m) !Energy
+deriving instance (Mesh m, Show (Momentum m)) => Show (CellTally m)
+
+-- Need addition operators for momentum and energy for this.
+-- instance (Mesh m) => Monoid (CellTally m) where
+--     mempty = CellTally 0 0
+--     mappend (CellTally m1 e1) (CellTally m2 e2) = CellTally (m1+m2) (e1+e2)
+
+data EventCount = EventCount {
+      nEscape  :: !Int
+    , nReflect :: !Int
+    , nTimeout :: !Int
+    }
+
+instance Monoid EventCount where
+  mempty = EventCount 0 0 0
+  mappend (EventCount ne1 nr1 nt1) (EventCount ne2 nr2 nt2) =
+      EventCount (ne1+ne2) (nr1+nr2) (nt1+nt2)
