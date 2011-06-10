@@ -35,7 +35,7 @@ genParticlesInCell msh rng a e' (cidx,n) =
 -- | Generate a single random particle.
 genCellParticle :: Mesh m => m -> CellIdx -> 
                    FP ->  -- ^ alpha  (power law parameters)
-                   FP ->  -- ^ e' (must be in comoving frame!)
+                   FP ->  -- ^ e' 
                    RNG -> 
                    Particle
 genCellParticle msh cidx a e' rng =
