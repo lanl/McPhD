@@ -18,8 +18,8 @@ data BoundType = Transmit | Reflect | Escape deriving (Show,Eq)
 data Event = 
     Collision { cType    :: CollType
               , dist     :: !Distance   -- ^ distance travelled to collision
-              , pDep     :: Momentum    -- ^ momentum transferred (k_i - k_f)
-              , eDep     :: Energy      -- ^ energy transferred (E_i - E_f)
+              , pDep     :: Momentum    -- ^ mom transfer w/c*(E_i*k_i - E_f*k_f)
+              , eDep     :: Energy      -- ^ energy transfer (E_i - E_f)
             }
   | Boundary { bType     :: BoundType
              , dist      :: !Distance   -- ^ distance to boundary
