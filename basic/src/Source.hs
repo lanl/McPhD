@@ -8,6 +8,9 @@ import Mesh
 import Particle
 import Physical
 import PRNG
+import Geometry
+import Material
+import Cell
 
 -- * particle generation
 
@@ -32,7 +35,7 @@ genParticlesInCell msh rng a e' (cidx,n) =
 -- | Generate a single random particle.
 genCellParticle :: Mesh m => m -> CellIdx -> 
                    FP ->  -- ^ alpha  (power law parameters)
-                   FP ->  -- ^ e'
+                   FP ->  -- ^ e' (must be in comoving frame!)
                    RNG -> 
                    Particle
 genCellParticle msh cidx a e' rng =
@@ -40,18 +43,19 @@ genCellParticle msh cidx a e' rng =
     let cll = cell msh cidx
     -- to do: sample energy, then sample direction 
     -- using Collision.sampleDirectionIso
-    d <- sampleDirection msh 
+    oc <- sampleDirectionIso msh 
     x <- samplePositionInCell msh cll
     de <- samplePowerLaw a e'  
     let 
         t  :: Time
         t  = 1
-        e  = Energy de
+        ec  = Energy de
         ew :: EnergyWeight
         ew = 1
+        (e,o) = comovingToLab ec oc (mvel $ mat cll)
     rng'   <- get
-    return (Particle x d t e ew cidx rng')
-
+    -- LT from comoving frame to lab frame
+    return (Particle x o t e ew cidx rng')
 
 -- * energy sampling
 
@@ -105,7 +109,7 @@ genParticle :: Mesh m => m -> RNG -> Particle
 genParticle msh rng =
   fst $ runRnd rng $ do
     (x, c) <- samplePosition  msh
-    d      <- sampleDirection msh
+    d      <- sampleDirectionIso msh
     let t  :: Time
         t  = 1
         e  :: Energy
