@@ -26,9 +26,7 @@ steps sig msh = go
 -- | Compute the next event for a given particle in a given mesh. Also
 -- returns the new state of the particle.
 step :: Mesh m => Lepton-> m -> Particle -> (Event, Particle)
-step sig msh p@(Particle {cellIdx = cidx
-                         ,P.dir  = o
-                         ,energy  = e}) =
+step sig msh p =
   withRandomParticle p $ do
     (evt,omega') <- pickEvent sig msh p 
     let p'       =  stream msh p evt omega'
@@ -77,9 +75,9 @@ pickEvent sig msh
           Particle { P.dir     = omega
                    , P.pos     = x
                    , cellIdx   = cidx
-                   , weight    = wt@(EnergyWeight w)
+                   , weight    = wt
                    , time      = Time tcen
-                   , energy    = e@(Energy nrg)
+                   , energy    = e
                    }
           = do
   sel_dc <- random

@@ -35,7 +35,7 @@ rejectorBnded (Positive x) (Alpha a) = r >= 0.0 && r <= 1.0
   where r = rejector x a
 
 -- * energy sampling test cases
-rejData = zip4 [1..(length rejxs)] rejxs rejas rejs :: 
+rejData = zip4 [1..(length rejxs)] rejxs rejas rejs 
 
 rejStr :: Int -> String
 rejStr i = "rej. case " ++ show i 

@@ -40,7 +40,7 @@ psnLEHighBnd s c = do
 -- * sampleDirection: direction cosine must be > -1.0 and < 1.0
 dirBnded :: Sphere1D -> Rnd Bool
 dirBnded s = do 
-  (Direction o) <- sampleDirection s
+  (Direction o) <- sampleDirectionIso s
   return $ -1.0 <= o && o <= 1.0
 
 -- | distance to boundary >= 0. 
