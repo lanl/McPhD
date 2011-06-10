@@ -24,8 +24,9 @@ instance Arbitrary Temperature where
   arbitrary = Temperature <$> ge0
 
 -- | Neutrino cross sections are so small that we typically
--- only see an interaction for very high densities. So, we 
--- steer the densities toward larger numbers.
+-- only see an interaction for very high densities. So, we steer
+-- the densities toward larger numbers. Changing this requires
+-- changing properties in Collision_Test (maybe elsewhere). 
 instance Arbitrary Density where
   arbitrary = do
     x <- choose (1.0,16.0)

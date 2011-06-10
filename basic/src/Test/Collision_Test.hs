@@ -4,10 +4,8 @@ module Test.Collision_Test where
 
 import Collision
 import Test.Arbitraries ()
-import Test.TestingTools ()
 import SoftEquiv
 import Physical
--- import Material
 
 import Test.QuickCheck
 import Test.Framework (testGroup)
@@ -15,7 +13,8 @@ import Test.Framework.Providers.QuickCheck2 (testProperty)
 
 -- * eventProbs should organize the probabilities of different collisions
 -- into a list that is (1) monotonically increasing, (2) with max element 
--- approximately equal to 1.0, with minimum element greater than 0.
+-- approximately equal to 1.0, (3) with minimum element greater than 0
+-- if nucleon density > 0.
 
 -- | eventProbs (1)
 prop_eventProbs_Monotonic :: Cell -> Energy -> Lepton -> Bool
@@ -29,7 +28,7 @@ prop_eventProbs_MaxLE1 :: Cell -> Energy -> Lepton -> Bool
 prop_eventProbs_MaxLE1 c e sig =
   softEquiv (maximum $ eventProbs c e sig) 1.0 1e-15
 
--- | eventProbs (3) 
+-- | eventProbs (3) (condition on density satisfied in Arbitrary
 prop_eventProbs_MinGT0 :: Cell -> Energy -> Lepton -> Bool
 prop_eventProbs_MinGT0 c e sig = (minimum $ eventProbs c e sig) > 0.0 
 
