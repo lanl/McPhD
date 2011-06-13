@@ -15,7 +15,7 @@ import Properties
 -- closures of them by evaluating them over the model.
 --
 -- They could even just provide functions which use a model object
--- defined in the miniApp module.
+-- defined in the miniApp module, to avoid the need for closures.
 --
 -- It just seems kind of odd to always be passing Model and Particle
 -- to these higher-level operators when only the particle changes over
@@ -65,6 +65,7 @@ stream stepper continue p = next p
   where next p =
           let (e, p') = stepper p
           in  (e, p') : if continue e then next p' else []
+
 
 
 streamMany :: (p -> [(e,p)]) -> [p] -> [[(e,p)]]

@@ -9,33 +9,33 @@ import Approx
 import NormalizedValues
 
 -- * Material Properties
-newtype Opacity = Opacity { opValue   :: Double } deriving
-                  (Eq, Show, Num, Ord, Approx, Arbitrary, Mag)
+newtype Opacity      = Opacity { opValue   :: Double }
+                     deriving (Eq, Show, Num, Ord, Approx, Arbitrary, Mag)
 
-newtype Energy = Energy { engValue  :: Double } deriving
-                 (Eq, Show, Num, Ord, Approx, Arbitrary, Mag)
+newtype Energy       = Energy { engValue  :: Double }
+                     deriving (Eq, Show, Num, Ord, Approx, Arbitrary, Mag)
 
-newtype EnergyWeight = EnergyWeight { engwValue :: Double } deriving
-                       (Eq, Show, Num, Ord, Approx, Arbitrary, Mag)
+newtype EnergyWeight = EnergyWeight { engwValue :: Double } 
+                     deriving (Eq, Show, Num, Ord, Approx, Arbitrary, Mag)
 
-newtype Temperature = Temperature { tempValue :: Double } deriving
-                      (Eq, Show, Num, Ord, Approx, Arbitrary, Mag)
+newtype Temperature  = Temperature { tempValue :: Double } 
+                     deriving (Eq, Show, Num, Ord, Approx, Arbitrary, Mag)
 
-newtype Density = Density { denValue  :: Double } deriving
-                  (Eq, Show, Num, Ord, Approx, Arbitrary, Mag)
+newtype Density      = Density { denValue  :: Double } 
+                     deriving (Eq, Show, Num, Ord, Approx, Arbitrary, Mag)
 
-newtype NDensity = NDensity { ndenValue :: Double } deriving
-                   (Eq, Show, Num, Ord, Approx, Arbitrary, Mag)
+newtype NDensity     = NDensity { ndenValue :: Double } 
+                     deriving (Eq, Show, Num, Ord, Approx, Arbitrary, Mag)
 
 -- * Space-time properties
-newtype Speed = Speed { spValue   :: Double } deriving
-                (Eq, Show, Num, Ord, Approx, Arbitrary, Mag)
+newtype Speed        = Speed { spValue   :: Double } 
+                     deriving (Eq, Show, Num, Ord, Approx, Arbitrary, Mag)
 
-newtype Distance = Distance { distValue :: Double } deriving
-                   (Eq, Show, Num, Ord, Approx, Arbitrary, Mag)
+newtype Distance     = Distance { distValue :: Double } 
+                     deriving (Eq, Show, Num, Ord, Approx, Arbitrary, Mag)
 
-newtype Time = Time { timeValue :: Double } deriving
-               (Eq, Show, Num, Ord, Approx, Arbitrary, Mag)
+newtype Time         = Time { timeValue :: Double } 
+                     deriving (Eq, Show, Num, Ord, Approx, Arbitrary, Mag)
 
 
 -- * Conversion functions for various properties.

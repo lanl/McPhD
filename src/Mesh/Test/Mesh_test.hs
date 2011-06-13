@@ -102,7 +102,7 @@ sph1D_dist = assertDist spherical_mesh
 -- * Cartesian1D mesh tests.
 
 cartesian1D_mesh :: Cartesian1DMesh
-cartesian1D_mesh = Cartesian1DMesh (Seq.fromList (fmap fromIntegral [0..100]))
+cartesian1D_mesh = Cartesian1DMesh (Seq.fromList (fmap fromIntegral ([0..100]::[Integer])))
                    Vacuum Reflection
 
 cart1DTestSize :: Assertion

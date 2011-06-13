@@ -42,11 +42,6 @@ instance (Mesh m) => P.Particle (Particle m) where
 weightedEnergy :: (Mesh m) => Particle m -> Energy
 weightedEnergy particle = applyWeight (weight particle) (energy particle)
 
-weightedMomentum :: (Mesh m) => Particle m -> Momentum (MeshSpace m)
-weightedMomentum particle = Momentum
-                            (engValue $ weightedEnergy particle)
-                            (direction $ location particle)
-
 deriving instance ( Mesh mesh
                   , Show (MeshSpace mesh)
                   , Show (MeshCell mesh)) => Show (Particle mesh)
