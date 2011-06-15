@@ -43,9 +43,6 @@ move particle distance =
 pimWeightedEnergy :: (Mesh m) => MeshParticle m -> Energy
 pimWeightedEnergy particle = applyWeight (pimEnergyWeight particle) (pimEnergy particle)
 
-pimWeightedMomentum :: (Mesh m) => MeshParticle m -> Momentum (MeshSpace m)
-pimWeightedMomentum particle = Momentum (engValue $ pimWeightedEnergy particle) (direction $ pimLocation particle)
-
 deriving instance ( Mesh mesh
                   , Show (MeshSpace mesh)
                   , Show (MeshCell mesh)) => Show (MeshParticle mesh)

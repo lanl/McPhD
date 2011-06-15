@@ -5,45 +5,47 @@
 
 * General notes:
 
-  Treat a particle that might be dead as a Maybe Particle? Or make
-  Alive/Dead into a monad.
+** Particle stepping and event generation
 
-  The only times I need the final complete state of the particle in an
-  Event are when it dies. Treat these differently then Events. Fates?
+   Treat a particle that might be dead as a Maybe Particle? Or make
+   Alive/Dead into a monad.
 
-  The life and times of a particle:
+   The only times I need the final complete state of the particle in an
+   Event are when it dies. Treat these differently then Events. Fates?
 
-  InFlight -> InFlight
-  InFlight -> Dead
+   The life and times of a particle:
 
-  I need an event which takes me to the final destination. Then, I need
-  to terminate the unfold.
+   InFlight -> InFlight
+   InFlight -> Dead
 
-  step :: Stuff -> Particle -> Maybe (Event, Particle)
+   I need an event which takes me to the final destination. Then, I need
+   to terminate the unfold.
 
-  Event should be called Step.
+   step :: Stuff -> Particle -> Maybe (Event, Particle)
 
-  step :: Stuff -> Particle -> Maybe (Step, Particle)
+   Event should be called Step.
 
-  So, while stepping, I decide the particle is done.
+   step :: Stuff -> Particle -> Maybe (Step, Particle)
 
-  InFlight --> Dead.
+   So, while stepping, I decide the particle is done.
 
-  Here, Step is something like:
+   InFlight --> Dead.
 
-  Step = { motion :: Motion , limiter :: Limiter }
+   Here, Step is something like:
 
-  The returned particle from step is Dead.
+   Step = { motion :: Motion , limiter :: Limiter }
 
-  The next step operation on the dead particle just returns Nothing.
+   The returned particle from step is Dead.
 
-  step :: _ Dead = Nothing
+   The next step operation on the dead particle just returns Nothing.
 
-  So, I get the final Step; Then I stop the unfold.
+   step :: _ Dead = Nothing
 
-  Put Events and Fates in the same data structure:
+   So, I get the final Step; Then I stop the unfold.
 
-  Step = (Motion, Event | Fate p)
+   Put Events and Fates in the same data structure:
+
+   Step = (Motion, Event | Fate p)
 
 * Deciding what to do to a particle
 
@@ -315,6 +317,58 @@
    though it appears in the instance. I've been thinking about this
    all wrong. The parameters don't propagate.
 
+* Lessons learned about abstraction and type classes
+** Parametric polymorphism versus type classes and type families.
+
+   Prefer parametric polymorphism to type classes. Type classes make
+   sense when you really need the overloaded functions that it
+   defines. For data types which are not unified bt a type class, but
+   have similar functions, create and provide these function to where
+   they are used.
+
+   This is vaguely analgous to using a C++ template class which is
+   completely generic with respect to the parameter, like
+   std::vector. Roughly, we want a type-class when we want automatic
+   overloading over many potential types. (Of course, C++ supports
+   overloading at the function level as well.) 
+
+   The other use for templates in C++ is code generation, where we
+   design templates for specialization over a known (but extensible)
+   collection of types. In a functional programming language, it is
+   easier (and more logical) to define and use seperate functions,
+   passing them as arguments as needed. Using C++ templates this way
+   is a method to perform functional composition in a language which
+   otherise doesn't support it.
+
+   An example that comes to mind is supplying a step method for
+   individual particle data types. A step function could be created for
+   each data type and passed along as needed.
+
+** Getting the right members of a type family.
+
+   Consider the case of momentum (as implemented in the code at 13
+   June 2011). Momentum is a property of the space, because it is a
+   vector quantity. It isn't independent of the family member for
+   direction, however. 
+
+   If we add it as another member of the type family, or in terms of
+   another member such as a genereralized vector for the space,
+   problems arise with type deduction. E.g. computations involving the
+   momemtum type will also involve the direction type, so conversions
+   are necessary between these types which need to be writter
+   seperately for each data type.
+
+   Trying to write a general momentum type takes hampers us with a
+   lack of flexibility where we need it. For example, defining
+   momentum as direction, plus a scalar for mass, gives a new
+   representation of vectors for which I don't have operators defined,
+   like I do for the standard AC-vector or other vector types.
+
+   There is also the issue of what concepts to include where. For
+   example, is momentuem really a property of the space at all? Should
+   it be defined on a model by model basis, despite being a universal
+   concept for wide classes of problems?
+
 * Directory and file structure
 
   I've adopted a common pattern for many of the sub-directories:
@@ -329,7 +383,7 @@
       - InstanceA_arbitrary.hs
       - InstanceA_test.hs  -- Tests for each data type
       - InstanceB_test.hs
-
+        
 * Questions                                                        :QUESTION:
 ** What's the right functional description of scattering?               :TIM:
 
@@ -413,6 +467,7 @@
 *** TODO [#A] Add a Tally Type
 ** TODO [#B] Property and unit tests for distance-to-face calculations
 ** TODO [#C] Add distance-to-face to Cartesian3D mesh.
+** TODO [#B] Merge Properties and Model.Physics files.
 ** TODO [#A] Add a tally fold operation
 ** TODO [#A] Add Function to source and generate multiple particles.
 ** TODO [#C] Derive inequalities for distance-to-face in Spherical1D.

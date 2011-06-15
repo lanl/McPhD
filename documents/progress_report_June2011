@@ -1,0 +1,120 @@
+Progress on the Parallel Haskell McPhD code
+LA-UR: 11-0341
+Unlimited Release
+
+
+Our goal is to build highly efficient Monte Carlo physics simulations
+using parallel Haskell. We're focusing on SMP performance though some
+combination explicit threading and pure parallel annotations.
+
+The Monte Carlo approach involves randomly sampling the space of
+solutions to generate data which contributes to the solution. For
+these physical problems, our samples are the tracks of particles as
+they move through space, interacting with a physical material as they
+go. Data collected from each particle trajectory is then combined into
+information needed to compute the solution. For example, the detailed
+information about the particle's interaction with the material is
+collected into a collective effect on the material properties.
+
+To date, we have a code base which includes two appraches to the
+problem. One is a specific and parallel-tuned application code
+targeting relatavisitc neutrino transport in stellar atmospheres. The
+other is building a more general environment for creating specific
+applications, such as this one.
+
+We recently presented to our colleagues in LANL some preliminary
+results on the parallel performance of the targeted application code.
+
+To give a sense of the approach to parallelization in this code,
+consider these high-level functions from an earlier serial version: 
+
+
+main :: IO ()
+main = do
+  (n, rest) <- parseCL
+  let tally = runMany infMesh simpleMat n
+  writeTally "tally" tally
+
+
+runMany :: Mesh -> Material -> Word32 -> RNG -> Tally
+runMany msh mat ntot rng = let
+  ps = genParticles ntot msh rng
+  tallies = map (runParticle msh mat) $ ps
+  in foldl' merge emptyTally tallies
+
+
+And consider the following changes for the parallel version
+
+main :: IO ()
+main = do
+  (n,sz) <- parseCL
+  let tally = feed infMesh simpleMat n sz prand
+  writeTally "tally" tally
+
+feed :: Mesh -> Material -> Word32 -> Word32 -> RNG -> Tally
+feed msh mat ntot chunkSz rng
+    | ntot <= chunkSz = runMany msh mat ntot rng
+    | otherwise       = t `par` (ts `pseq` (merge t ts))
+    where t  = runMany msh mat chunkSz g1
+          ts = feed msh mat (ntot - chunkSz) chunkSz g2
+          (g1,g2) = split g 
+
+
+We've wrapped function runMany in 'feed', which partitions the
+collection of generated particles into groups of size chunkSz, and
+issues these particles to runMany in parallel.
+
+With this simple change, we seeing upwards of 80% utitlization of up
+to 8 cores, for a performance improvement greater than a factor of
+6. We believe that performance can be further improved with different
+strategies for breaking down the work, and looking for additional
+parallelization opportunities in the collection of results.
+
+
+Our other branch of development is focused on finding useful
+abstractions and high-level functions to support programming a variety
+of Monte Carlo problems of this kind. We have identified a few such
+useful abstractions, and implemented them as type classes and type
+families.
+
+For example, "Space" is a general term for the physical space and
+imposed symmetries in which we can perform a simulation. We express
+this as follows:
+
+class Space s where
+  type Position s  :: *
+  type Direction s :: *
+  stream    :: s -> Distance -> s
+  position  :: s -> Position s
+  direction :: s -> Direction s
+  make      :: Position s -> Direction s -> s
+
+and implement specific spaces, such as one with the symmerty of the unit sphere:
+
+instance Space Spherical1D where
+    type Position  Spherical1D = Radius
+    type Direction Spherical1D = Normalized Vector2
+    stream (Vector2 x y) (Distance d) = Vector2 (x+d) y
+    position s  = Radius $ vmag s
+    direction s = normalize s
+    make (Radius pos) dir = pos *| (normalized_value dir)
+
+This allows the specific space data types to be used in a variety of
+contexts. Using ordinary parametric polymorphism is also effective:
+
+-- | Stream a single particle:
+stream :: (p -> (e,p))   -- ^ Function to produce each step. Comes from a model.
+          -> (e -> Bool) -- ^ Check for terminal events to stop streaming
+          -> p           -- ^ Initial particle
+          -> [(e, p)]    -- ^ Resulting list of events and particle states.
+stream stepper continue p = next p
+  where next p =
+          let (e, p') = stepper p
+          in  (e, p') : if continue e then next p' else []
+
+The above is our high-level routine function for generating a history
+from a single particle, recorded as a list of (event, particle) pairs,
+where the event and particle data types are provided for each problem.
+
+
+
