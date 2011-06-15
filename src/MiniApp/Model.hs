@@ -32,9 +32,7 @@ import MiniApp.Physics
 -- Aliases
 
 weightedMomentum :: (Mesh m) => Particle m -> Momentum (MeshSpace m)
-weightedMomentum particle = Momentum $ Quot 
-                            (engValue $ weightedEnergy particle)
-                            (S.direction $ location particle)
+weightedMomentum particle = undefined
 
 
 -- Aliases for the MonteCarlo types we need.

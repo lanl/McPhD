@@ -1,15 +1,21 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, TypeFamilies #-}
-module NormalizedValues (Mag(..), Quot(..), deQuot
-           , Normalized ()  -- Exporting type but not constructor.
-           , unsafe_makeNormal
-           , normalized_value
-           , normalVector1
-           , generateNormalVector1
-           , normalVector2
-           , generateNormalVector2
-           , normalVector3
-           , generateNormalVector3
-           ) where
+{-# LANGUAGE StandaloneDeriving, FlexibleContexts, UndecidableInstances, OverlappingInstances #-}
+
+module NormalizedValues (Mag(..)
+                        , Norm(..)
+                        , Quot(..)
+                        , Scaled(..)
+                        , Normalized ()  -- Exporting type but not constructor.
+                        , deQuot
+                        , unsafe_makeNormal
+                        , normalized_value
+                        , normalVector1
+                        , generateNormalVector1
+                        , normalVector2
+                        , generateNormalVector2
+                        , normalVector3
+                        , generateNormalVector3
+                        ) where
 
 import Vectors
 import Numerics
@@ -26,15 +32,16 @@ import Data.Vector.V1
 -- out. Calling normalize on a value which is statically known to be
 -- normalized would be a sign something is amiss.
 
-
 -- | A Num-like class for quantities that need to remain
 -- normalized. E.g. certain vectors.  Provides normalize and magnitude
 -- functions
 class Mag a where
-  normalize  :: a -> Normalized a
   magnitude  :: a -> Double
   magnitude2 :: a -> Double  -- ^ Square of the magnitude. Often faster.
   magnitude2 x = (magnitude x) ^ (2 ::Integer)
+
+class Mag a => Norm a where
+  normalize  :: a -> Normalized a
   split      :: a -> Quot a
   split x = Quot (magnitude x) (normalize x)
   join       :: Quot a -> a
@@ -43,37 +50,46 @@ class Mag a where
   elacs      :: Normalized a -> Double -> a
   elacs = flip scale
 
+instance Mag a => Mag (Normalized a) where
+  magnitude  = const 1.0
+  magnitude2 = const 1.0
+
 instance Mag Double where
-  normalize  d = Normalized $ if d < 0 then -1 else 1  -- Right biased.
-  magnitude  d = abs d
-  magnitude2 d = d*d
+  magnitude  = abs
+  magnitude2 = (^2)
+  
+instance Norm Double where
+  normalize d = Normalized $ if d < 0 then -1 else 1  -- Right biased.
   scale s (Normalized d) = s * d
 
-instance Mag Radius where
-  normalize  (Radius r) = Normalized $ Radius $ (normalized_value $ normalize r)
-  magnitude  (Radius r) = r
-  magnitude2 (Radius r) = r*r
-  scale s (Normalized (Radius r)) = Radius (s*r)
+deriving instance Mag Radius
+deriving instance Norm Radius
 
 -- See notes.org:Problematic instance declarations for thoughts on
 -- unifying these instance declarations
 
 instance Mag Vector1 where
-  normalize    = Normalized . vnormalise
   magnitude    = vmag
   magnitude2 d = vdot d d
+  
+instance Norm Vector1 where
+  normalize    = Normalized . vnormalise
   scale s (Normalized v) = s *| v
 
 instance Mag Vector2 where
-  normalize    = Normalized . vnormalise
   magnitude    = vmag
   magnitude2 d = vdot d d
+  
+instance Norm Vector2 where
+  normalize    = Normalized . vnormalise
   scale s (Normalized v) = s *| v
 
 instance Mag Vector3 where
-  normalize    = Normalized . vnormalise
   magnitude    = vmag
   magnitude2 d = vdot d d
+  
+instance Norm Vector3 where
+  normalize    = Normalized . vnormalise
   scale s (Normalized v) = s *| v
 
 
@@ -109,7 +125,17 @@ unsafe_makeNormal = Normalized
 -- A "quotient field" approach to normalized quantities. The
 -- directions are the quotient of the field and the positive reals
 
-data Mag v => Quot v = Quot { quotMag :: Double, quotDir :: Normalized v }
+data Norm v => Quot v = Quot { quotMag :: Double, quotDir :: Normalized v }
 
-deQuot :: Mag v => Quot v -> v
+deQuot :: Norm v => Quot v -> v
 deQuot (Quot mag dir) = scale mag dir
+
+deriving instance (Show v, Norm v) => Show (Quot v)
+
+-- A data type pairing vector types with scalar multiples. This is useful
+-- in computing vector-related quantities in models, without knowing
+-- too much about the underlying vector type
+
+data Mag v => Scaled v = Scaled { scalar :: Double, vec :: v }
+deriving instance (Show v, Mag v) => Show (Scaled v)
+

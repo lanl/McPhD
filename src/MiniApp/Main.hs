@@ -25,10 +25,10 @@ sphMesh = SphericalMesh (Seq.fromList (fmap Radius [1..100])) Vacuum
 
 
 -- Physical data
-cellData :: Physics Spherical1D
-cellData = Physics { sig_abs  = Opacity 1.0
-                   , sig_scat = Opacity 2.0
-                   }
+cellData :: Physics.Data Spherical1D
+cellData = Physics.Data { sig_abs  = Opacity 1.0
+                        , sig_scat = Opacity 2.0
+                        }
 
 
 -- Assemble the mesh, physics and final time into a model.
@@ -44,8 +44,7 @@ particles :: [Particle SphericalMesh]
 particles = []
 
 streamOp :: (Particle SphericalMesh)
-            -> [(Event SphericalMesh
-                , Particle SphericalMesh)]
+            -> [(Event SphericalMesh, Particle SphericalMesh)]
 
 streamOp = MC.stream (MC.step model contractors) Events.isFinalEvent
 

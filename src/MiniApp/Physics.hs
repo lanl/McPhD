@@ -15,7 +15,7 @@ data (Space s) => Data s = Data {
 
 
 -- | Define momentum
-newtype (Space s) => Momentum s = Momentum { momValue :: Quot (Direction s) }
+newtype (Space s) => Momentum s = Momentum { momValue :: Scaled (Direction s) }
 
 -- | This is more of a utitlity function, since other models could use
 -- it as well.
