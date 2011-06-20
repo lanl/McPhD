@@ -22,7 +22,7 @@ data Norm
 -- http://www.haskell.org/haskellwiki/Phantom_type by having an extra
 -- type parameter for the underlying data type.
 --
--- Don't export the constructor when used in other modules
+-- Hide this constructor when making a module.
 data NV a v = NV { val :: v } deriving (Show, Eq)
 
 -- Aliases for the normalized and general values
@@ -44,7 +44,9 @@ instance Applicative (NV Gen) where
 instance Functor (NV Gen) where
   fmap = (<$->)
   
--- | A weak application operator which removes the normalized status.
+-- | A function application operator which demotes the result to NV
+-- Gen. This is necessary to apply general functions to nornalized
+-- quantities.
 (<$->) :: (v -> b) -> NV a v -> NV Gen b
 (<$->) f = pure . f . val
 
@@ -62,7 +64,8 @@ instance Mag Norm v where
     normalize  = id
 
 -- | An instance for vectors. This will cause problems if I add other
--- contexts.
+-- contexts. See "Problematic instance declerations" in notes.org and
+-- the original NormalizedValues.hs for work-arounds.
 instance Vector v => Mag Gen v where
     magnitude  = vmag . val
     magnitude2 (NV v) = vdot v v
@@ -79,7 +82,7 @@ vecFunc :: Vector2 -> Vector2
 vecFunc (Vector2 x y) = Vector2 (x+y) (x-y)
 
 vecFunc2 :: Vector2 -> Double -> Vector2
-vecFunc2 (Vector2 x y) d = Vector2 (x+d) (x-d)
+vecFunc2 (Vector2 x y) d = Vector2 (x+d) (y-d)
 
 v  = general $ Vector2 0.5 (negate 1.0)
 m  = magnitude v
