@@ -13,23 +13,33 @@ import SoftEquiv
 
 data Sphere1D = Sphere1D (Vector Cell) deriving Show
 
+-- form mesh from sublist of cells and user limits. Also returns the number of
+-- cells not used from the start of the list.
+mkMesh :: [Cell] -> FP -> FP -> (Sphere1D, Int)
+mkMesh clls llim ulim = (Sphere1D $ V.fromList cellsInBounds,ndropped) 
+  where cellsInBounds = fst (L.span leUL $ snd (L.break geLL clls))
+        geLL, leUL :: Cell -> Bool
+        geLL (Cell {highB = Position hir}) = hir >= llim
+        leUL (Cell {lowB  = Position lor}) = lor <= ulim
+        ndropped = L.length $ fst (L.break geLL clls)
+
 instance Mesh Sphere1D where
 
   sampleDirectionIso _ = liftM (\ x -> Direction (2 * x - 1)) random
 
-  samplePositionInCell _ c = do 
+  samplePositionInCell _ cll = do 
     xi <- random
     let ri3 = ri * ri * ri
         ro3 = ro * ro * ro
-        (ri,ro) = (pos . lowB $ c, pos . highB $ c)
+        (ri,ro) = (pos . lowB $ cll, pos . highB $ cll)
         psn = Position ( (ri3 + (ro3 - ri3) * xi) ** (1.0/3.0) )
     return psn
 
   samplePosition msh = do
     r <- pickPoint (rmax msh)
-    let pos  = Position r
-        cell = findCell msh r
-    return (pos, cell)
+    let psn = Position r
+        cll = findCell msh r
+    return (psn, cll)
 
   -- distanceToBoundary :: m -> Cell -> Position -> Direction -> (Distance, Face)
   distanceToBoundary _ (Cell {highB = rhi, lowB = rlo})
@@ -81,8 +91,8 @@ instance Mesh Sphere1D where
 
   cell (Sphere1D msh) cidx = msh ! (idx cidx)
 
-  cellAcross _ c Lo = c - 1
-  cellAcross _ c Hi = c + 1
+  cellAcross _ cidx Lo = cidx - 1
+  cellAcross _ cidx Hi = cidx + 1
 
 -- | Check if the ray contacts the inner sphere.
 contactInner :: Position -> Position -> FP -> Bool -> Bool
@@ -100,17 +110,20 @@ pickPoint :: FP -> Rnd FP
 pickPoint r = liftM (\ rs -> r * L.maximum rs) (randoms 3)
 
 findCell :: Sphere1D -> FP -> CellIdx
-findCell (Sphere1D msh) r = convert (binarySearchBy cmp r msh)
+findCell (Sphere1D msh) r = exMaybe (binarySearchBy cmp r msh)
   where
     cmp :: FP -> Cell -> Ordering
-    cmp r (Cell { lowB = Position l, highB = Position h })
-      | r < l     = LT  -- TODO: check inclusive/exclusive bounds
-      | r >= h    = GT  -- TODO: dito
+    cmp x (Cell { lowB = Position l, highB = Position h })
+      | x < l     = LT  -- TODO: check inclusive/exclusive bounds
+      | x >= h    = GT  -- TODO: dito
       | otherwise = EQ
 
-    convert :: Maybe Int -> CellIdx
-    convert Nothing  = error "Sphere1D.findCell: malformed mesh"
-    convert (Just n) = CellIdx n
+    exMaybe :: Maybe Int -> CellIdx
+    exMaybe Nothing  = error "Sphere1D.findCell: malformed mesh"
+    exMaybe (Just n) = CellIdx n
 
 rmax :: Sphere1D -> FP
 rmax (Sphere1D msh) = pos . highB . V.last $ msh
+
+ncells :: Sphere1D -> Int
+ncells (Sphere1D v) = V.length v
