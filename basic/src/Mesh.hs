@@ -36,7 +36,7 @@ toBoundaryEvent Refl   = Boundary Reflect
 toBoundaryEvent Transp = Boundary Transmit
 
 boundaryEvent :: Mesh m => m -> CellIdx -> BoundaryEvent
-boundaryEvent msh cidx d face =
-  toBoundaryEvent (boundaryType msh cidx face) d face
+boundaryEvent msh cidx d fce =
+  toBoundaryEvent (boundaryType msh cidx fce) d fce
 
 

@@ -14,29 +14,29 @@ import Constants (pmg)
 
 -- | Compute individual opacities in one list.
 opacities :: Cell -> Energy -> Sigma.Lepton -> [Opacity]
-opacities c e sig = 
-  [ opNAbs c e
-  , opNElastic c e
-  , opEMinus c e sig
-  , opEPlus c e sig
+opacities cll en sig = 
+  [ opNAbs cll en
+  , opNElastic cll en
+  , opEMinus cll en sig
+  , opEPlus cll en sig
   ]
 
 -- | Total collision opacity
 opCollide :: Cell -> Energy -> Sigma.Lepton -> Opacity
-opCollide c e sigLep = sum $ opacities c e sigLep
+opCollide cll en sigLep = sum $ opacities cll en sigLep
 
 -- * nucleon opacities
 -- | Total nucleon opacity
 opN :: Cell -> Energy -> Opacity
-opN c e = (opNAbs c e) + (opNElastic c e)
+opN cll en = (opNAbs cll en) + (opNElastic cll en)
 
 -- | nucleon absorption
 opNAbs :: Cell -> Energy -> Opacity
-opNAbs c e = mkOp (rhoN c) (Sigma.nuNAbs e)
+opNAbs cll en = mkOp (rhoN cll) (Sigma.nuNAbs en)
 
 -- | nucleon elastic scattering
 opNElastic :: Cell -> Energy -> Opacity
-opNElastic c e = mkOp (rhoN c) (Sigma.nuNElastic e)
+opNElastic cll en = mkOp (rhoN cll) (Sigma.nuNElastic en)
 
 -- * lepton opacities: these are complicated by the need to sample the
 -- lepton energy, as well as differentiation of reaction by 
@@ -46,13 +46,13 @@ opNElastic c e = mkOp (rhoN c) (Sigma.nuNElastic e)
 -- | total lepton opacity, using mean matter temperature as measure of 
 -- lepton energy
 opLepton :: Cell -> Energy -> Sigma.Lepton -> Opacity
-opLepton c e s = (opEMinus c e s) + (opEPlus c e s)
+opLepton cll en s = (opEMinus cll en s) + (opEPlus cll en s)
   
 -- | electron opacity
 opEMinus :: Cell -> Energy -> Sigma.Lepton -> Opacity
-opEMinus cell e_nu sigmas = mkOp rho_e sigma
+opEMinus cell e_nu sigmas = mkOp rho_e sig
   where rho_e = rhoEMinus $ mat cell
-        sigma = (Sigma.e_minus sigmas) e_nu (tToEnergy cell)
+        sig = (Sigma.e_minus sigmas) e_nu (tToEnergy cell)
 
 -- | positron opacity
 opEPlus :: Cell -> Energy -> Sigma.Lepton -> Opacity
@@ -65,7 +65,7 @@ mkOp :: NDensity -> CrossSection -> Opacity
 mkOp n s = Opacity $ (nrho n) * (sigma s)
 
 tToEnergy :: Cell -> Energy
-tToEnergy c = Energy . temp . tempE $ mat c
+tToEnergy cll = Energy . temp . tempE $ mat cll
 
 rhoN :: Cell -> NDensity
 rhoN = nperCC . rhoNucl . mat 

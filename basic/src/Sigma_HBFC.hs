@@ -13,11 +13,11 @@ import Physical
 -- | nucleon absorption/emission
 
 nuNAbs :: Energy -> CrossSection
-nuNAbs (Energy e) = CrossSection $ 9e-44 * e*e
+nuNAbs (Energy nrg) = CrossSection $ 9e-44 * nrg * nrg
 
 -- | nu--nucleon elastic scattering
 nuNElastic :: Energy -> CrossSection
-nuNElastic (Energy e) = CrossSection $ 1.7e-44*e*e
+nuNElastic (Energy nrg) = CrossSection $ 1.7e-44* nrg * nrg
 
 -- -- | nu-nucleus elastic scatter: attempts to account
 -- -- | for coherent scattering from bound nucleons
@@ -27,7 +27,8 @@ nuNElastic (Energy e) = CrossSection $ 1.7e-44*e*e
 
 -- | if not too concerned about the balance between n's & p's:
 nuAElastic :: Energy -> NucleonNumber -> CrossSection
-nuAElastic (Energy e) (NucleonNumber a) = CrossSection $ 1.7e-44*a*a/6.0*e*e
+nuAElastic (Energy nrg) (NucleonNumber a) = 
+  CrossSection $ 1.7e-44*a*a/6.0*nrg*nrg
 
 
 -- NOTE: the lepton cross sections are complicated by dependence on

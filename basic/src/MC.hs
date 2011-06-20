@@ -1,4 +1,12 @@
-module MC where
+module MC 
+  (module MC
+  , module Cell
+  , module Event
+  , module P
+  , module Tally
+  )         
+  where
+
 
 import Cell
 import Event
@@ -21,7 +29,7 @@ steps :: Mesh m => Lepton -> m -> Particle -> [(Event, Particle)]
 steps sig msh = go
   where
     go p = case step sig msh p of
-             (e, p') -> (e, p') : if isContinuing e then go p' else []
+             (evt, p') -> (evt, p') : if isContinuing evt then go p' else []
 
 -- | Compute the next event for a given particle in a given mesh. Also
 -- returns the new state of the particle.
@@ -38,7 +46,7 @@ stream :: Mesh m => m -> Particle -> Event -> Direction -> Particle
 stream msh
        p@(Particle { P.dir = omega
                    , P.pos = (Position x)
-                   , time  = t
+                   , time  = tm
                    , cellIdx  = cidx
                    })
        event omega' =
@@ -55,7 +63,7 @@ stream msh
     d  = dist event
     x' :: Position
     x' = Position $ x +  (Physical.dir omega) * Physical.distance d
-    t' = t - Time (Physical.distance d / c)
+    t' = tm - Time (Physical.distance d / c)
     f = face event
     newCell :: Face -> CellIdx
     newCell = cellAcross msh cidx
@@ -64,9 +72,9 @@ stream msh
 -- random number generator from the particle in the beginning, and
 -- put it back in at the end of the computation.
 withRandomParticle :: Particle -> Rnd (a, Particle) -> (a, Particle)
-withRandomParticle (Particle { rng = rng }) m =
-  case runRnd rng m of
-    ((x, p), rng') -> (x, p { rng = rng' })
+withRandomParticle (Particle { rng = g }) m =
+  case runRnd g m of
+    ((x, p), g') -> (x, p { rng = g' })
 
 -- | Determine the next event that occurs for a particle, and
 -- a new state for the particle.
@@ -77,18 +85,18 @@ pickEvent sig msh
                    , cellIdx   = cidx
                    , weight    = wt
                    , time      = Time tcen
-                   , energy    = e
+                   , energy    = en
                    }
           = do
   sel_dc <- random
-  let (dBdy, face) = distanceToBoundary msh mcell x omega
-      dCol         = dCollide mcell e omega sig (URD sel_dc)
-      dCen         = Distance $ c * tcen
-      mcell        = M.cell msh cidx 
-  (collEvent,omega') <- sampleCollision msh mcell e omega sig dCol wt
-  let events        = [
+  let (dBdy, fce) = distanceToBoundary msh mcell x omega
+      dCol        = dCollide mcell en omega sig (URD sel_dc)
+      dCen        = Distance $ c * tcen
+      mcell       = M.cell msh cidx 
+  (collEvent,omega') <- sampleCollision msh mcell en omega sig dCol wt
+  let events      = [
           collEvent
-        , boundaryEvent msh cidx dBdy face e wt
+        , boundaryEvent msh cidx dBdy fce en wt
         , Timeout dCen
         ]
 

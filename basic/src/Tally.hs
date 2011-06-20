@@ -1,5 +1,6 @@
 {-# LANGUAGE TypeFamilies, MultiParamTypeClasses #-}
-module Tally where
+module Tally 
+  where
 
 import Control.DeepSeq
 import Control.Monad
@@ -38,14 +39,14 @@ instance GMV.MVector MVector CellTally where
   basicUnsafeSlice m n (MV_CellTally v) = MV_CellTally (GMV.basicUnsafeSlice m n v)
   basicOverlaps (MV_CellTally v1) (MV_CellTally v2) = GMV.basicOverlaps v1 v2
   basicUnsafeNew n = liftM MV_CellTally (GMV.basicUnsafeNew n)
-  basicUnsafeRead (MV_CellTally v) n = GMV.basicUnsafeRead v n >>= \ (m, e) -> return (CellTally m e)
-  basicUnsafeWrite (MV_CellTally v) n (CellTally m e) = GMV.basicUnsafeWrite v n (m, e)
+  basicUnsafeRead (MV_CellTally v) n = GMV.basicUnsafeRead v n >>= \ (m, w) -> return (CellTally m w)
+  basicUnsafeWrite (MV_CellTally v) n (CellTally m w) = GMV.basicUnsafeWrite v n (m, w)
 instance GV.Vector   Vector  CellTally where
   basicLength (V_CellTally v) = GV.basicLength v
   basicUnsafeFreeze (MV_CellTally v) = liftM V_CellTally (GV.basicUnsafeFreeze v)
   basicUnsafeThaw (V_CellTally v) = liftM MV_CellTally (GV.basicUnsafeThaw v)
   basicUnsafeSlice m n (V_CellTally v) = V_CellTally (GV.basicUnsafeSlice m n v)
-  basicUnsafeIndexM (V_CellTally v) n = GV.basicUnsafeIndexM v n >>= \ (m, e) -> return (CellTally m e)
+  basicUnsafeIndexM (V_CellTally v) n = GV.basicUnsafeIndexM v n >>= \ (m, w) -> return (CellTally m w)
 
 instance Unbox CellTally
 
@@ -100,18 +101,19 @@ tally msh = L.foldl' tallyImpl (emptyTally msh)
 
 -- | Add the data of one event and particle to the current tally.
 tallyImpl :: Tally -> (Event, Particle) -> Tally
-tallyImpl (Tally ec dep esc) (e, p) = 
-  Tally (countEvent e ec) (tDep e (cellIdx p) dep) (tEsc e esc)
+tallyImpl (Tally ec dep esc) (evt, p) = 
+  Tally (countEvent evt ec) (tDep evt (cellIdx p) dep) (tEsc evt esc)
 
 -- | Compute the deposition of a single event.
 tDep :: Event -> CellIdx -> PhysicsTally -> PhysicsTally
-tDep (Collision _ _ dp e) (CellIdx cidx) t = accum (<>) t [(cidx, CellTally dp e)]
-tDep _                    _              t = t
+tDep (Collision _ _ dp ed) (CellIdx cidx) tlly = 
+  accum (<>) tlly [(cidx, CellTally dp ed)]
+tDep _                     _              tlly = tlly
 
 -- tally an Escape event
 tEsc :: Event -> EscapeCount -> EscapeCount
-tEsc (Boundary {bType = Escape, bEnergy = e, bWeight = wt}) ec = 
-  (e,wt):ec
+tEsc (Boundary Escape _ _ ed wt) ec = (ed,wt):ec
+tEsc _ ec = ec
 
 -- TODO: It would be slightly cleaner, but potentially a bit less efficient,
 -- to have a function computing a CellTally from an event, and always add that

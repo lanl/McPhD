@@ -21,9 +21,9 @@ import PRNG
 -- compute distance to collision. Note that distance is in the lab frame!
 dCollide :: Cell -> Energy -> Direction ->
             Sigma.Lepton -> URD -> Distance
-dCollide c e o sig xi = dCollideComoving c ecom sig xi
-  where (ecom,_) = labToComoving e o v
-        v = (mvel $ mat c)
+dCollide cll en o sig xi = dCollideComoving cll ecom sig xi
+  where (ecom,_) = labToComoving en o v
+        v = (mvel $ mat cll)
 
 
 -- | Distance to generic collision: the lesser of -log(\xi/\simga_t) and huge
@@ -33,8 +33,8 @@ dCollide c e o sig xi = dCollideComoving c ecom sig xi
 dCollideComoving :: Cell -> 
                     Energy ->
                     Sigma.Lepton -> URD -> Distance
-dCollideComoving c e sig (URD xi) = Distance $ min (- (log xi) / sig_c) huge
-  where sig_c = mu $ opCollide c e sig
+dCollideComoving cll en sig (URD xi) = Distance $ min (- (log xi) / sig_c) huge
+  where sig_c = mu $ opCollide cll en sig
 
 
 -- | sampleCollision: 
@@ -64,11 +64,11 @@ sampleCollision m cll
 -- scattering is elastic and isotropic in comoving frame.
 sampleCollisionComoving :: Mesh m => m -> Cell -> Energy -> Sigma.Lepton -> 
                           Rnd (E.CollType,Energy,Direction)
-sampleCollisionComoving m c e sig = do
+sampleCollisionComoving m cll en sig = do
   xi <- random
   ocf <- sampleDirectionIso m
-  let ecf = e
-      evt = selectEvent c e sig (URD xi)
+  let ecf = en
+      evt = selectEvent cll en sig (URD xi)
   return (evt, ecf, ocf)
 
 
@@ -77,7 +77,7 @@ sampleCollisionComoving m c e sig = do
 -- a scattering event. Assign distance, momentum, and energy weight
 -- to that event. 
 selectEvent :: Cell -> Energy -> Sigma.Lepton -> URD -> E.CollType
-selectEvent c e sig (URD xi) 
+selectEvent cll en sig (URD xi) 
   -- the order here must match the order in eventProbs
   -- (that in turn comes from opacities).
   | xi < pNAbs     = E.NuclAbs 
@@ -86,10 +86,12 @@ selectEvent c e sig (URD xi)
   | xi < pEPlus    = E.EPlusInel 
   | otherwise      = error $ "Unable to assign event, xi = " ++ show xi ++ 
                      ", max event prob = " ++ show pEPlus
-  where [pNAbs, pNElastic, pEMinus, pEPlus] = eventProbs c e sig
+  where [pNAbs, pNElastic, pEMinus, pEPlus] = eventProbs cll en sig
 
 
 -- | Cumulative probabilities of scattering events.  
 eventProbs :: Cell -> Energy -> Sigma.Lepton -> [FP]
-eventProbs c e sig = scanl1 (+) $ map (/ sum ops) ops -- p_i = op_i/(sum_j op_j)
-  where ops = mu <$> opacities c e sig
+eventProbs cll en sig = scanl1 (+) $ map (/ sum ops) ops -- p_i = op_i/(sum_j op_j)
+  where ops = mu <$> opacities cll en sig
+
+-- end of file
