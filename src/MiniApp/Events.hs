@@ -16,6 +16,8 @@ import qualified Space.Classes as Space
 import Mesh.Classes hiding (Cell)
 import Properties
 
+import MiniApp.Physics
+
 -- | Type of Scattering Events
 data CollideType = Scatter | Absorb  deriving (Eq, Show, Ord)  -- More kinds to come.
 finalCollision :: CollideType -> Bool
@@ -32,7 +34,7 @@ finalBoundary Reflect = False
 
 -- | Combining the event types into a single data type with tally information.
 data (Mesh m) => Event m = Collide  { collideType   :: CollideType
-                                    , deltaMomentum :: Space.Momentum (MeshSpace m)
+                                    , deltaMomentum :: Momentum (MeshSpace m)
                                     , energyDep     :: Energy
                                     }
                          | Boundary { boundaryType  :: BoundaryType
@@ -43,7 +45,7 @@ data (Mesh m) => Event m = Collide  { collideType   :: CollideType
 deriving instance (Mesh m, Show m
                   , Show (MeshSpace m)
                   , Show (MeshFace m)
-                  , Show (Space.Momentum (MeshSpace m))) => Show (Event m)
+                  , Show (Momentum (MeshSpace m))) => Show (Event m)
 
 
 
