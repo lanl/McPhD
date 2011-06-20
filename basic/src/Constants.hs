@@ -17,3 +17,11 @@ tiny = 1e-300
 -- | Upper limit for event selection.
 huge :: FP
 huge = 1e+300
+
+-- | Boltzmann constant, MeV/K
+k_B :: Double
+k_B = 8.61734e-11
+
+
+-- eof
+
