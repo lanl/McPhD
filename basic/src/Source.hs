@@ -14,48 +14,50 @@ import Cell
 
 -- * particle generation
 
+type SrcStat = (CellIdx,Int,EnergyWeight) -- (cidx, # particles, ew/cell)
+
 -- | generate a given number of particles in each cell
-genParticlesInCells :: Mesh m => m -> RNG -> [(CellIdx,Int)] -> 
+genParticlesInCells :: Mesh m => m -> RNG -> [SrcStat] -> 
                        FP ->  -- ^ alpha (power law parameters)
                        FP ->  -- ^ e'
                       [Particle]
-genParticlesInCells msh rng nPerCell a e' = 
-  nPerCell >>= (genParticlesInCell msh rng a e')
+genParticlesInCells msh gen nPerCell a e' = 
+  nPerCell >>= (genParticlesInCell msh gen a e')
 
 -- | generate a given number of particles in one cell
 genParticlesInCell :: Mesh m => m -> RNG ->
                       FP ->  -- ^ alpha (power law parameters) 
                       FP ->  -- ^ e'
-                     (CellIdx,Int) ->
+                     SrcStat ->
                      [Particle]
-genParticlesInCell msh rng a e' (cidx,n) =
-  let rngs = take n (unfoldr (Just . split) rng)
-  in  map (genCellParticle msh cidx a e') rngs
+genParticlesInCell msh g a e' (cidx,n,ewt) =
+  let gs = take n (unfoldr (Just . split) g)
+  in  map (genCellParticle msh cidx ewt a e') gs
 
 -- | Generate a single random particle.
-genCellParticle :: Mesh m => m -> CellIdx -> 
+genCellParticle :: Mesh m => m -> 
+                   CellIdx -> 
+                   EnergyWeight ->
                    FP ->  -- ^ alpha  (power law parameters)
                    FP ->  -- ^ e' 
                    RNG -> 
                    Particle
-genCellParticle msh cidx a e' rng =
-  fst $ runRnd rng $ do
+genCellParticle msh cidx ewt a e' g =
+  fst $ runRnd g $ do
     let cll = cell msh cidx
     -- to do: sample energy, then sample direction 
     -- using Collision.sampleDirectionIso
     oc <- sampleDirectionIso msh 
-    x <- samplePositionInCell msh cll
+    x  <- samplePositionInCell msh cll
     de <- samplePowerLaw a e'  
     let 
-        t  :: Time
-        t  = 1
+        tm  :: Time
+        tm  = Time 1e4
         ec  = Energy de
-        ew :: EnergyWeight
-        ew = 1
-        (e,o) = comovingToLab ec oc (mvel $ mat cll)
-    rng'   <- get
+        (en,o) = comovingToLab ec oc (mvel $ mat cll)
+    g'   <- get
     -- LT from comoving frame to lab frame
-    return (Particle x o t e ew cidx rng')
+    return (Particle x o tm en ewt cidx g')
 
 -- * energy sampling
 
@@ -86,37 +88,45 @@ rejector x a = x**a * (exp (-a*x)) / exp (-a)
 evolFromLum :: [Luminosity] -> Time -> [Energy]
 evolFromLum ls (Time dt) = [Energy $ dt * l |(Luminosity l)<-ls]
 
--- | Compute number of particles emitted in each cell 
-srcNumsFromLum :: [Energy] -> Int -> [Int]
-srcNumsFromLum ePerCell nTot = nPerCell
+-- | Compute number of particles emitted in each cell from energy emitted
+-- in each cell and total number of particles
+srcNumsFromEvol :: Int -> [Energy] -> [(Int,EnergyWeight)]
+srcNumsFromEvol nTot ePerCell = zip nPerCell wts
   where nPerCell = [round $ nt * frac  | frac <- fracs] :: [Int]
         fracs    = [ eC/eTot | (Energy eC) <- ePerCell]
+        wts      = map EnergyWeight fracs
         Energy eTot = sum ePerCell
         nt :: Double
         nt = fromIntegral nTot 
 
+calcSrcStats :: [Luminosity] -> Time -> Int -> [SrcStat]
+calcSrcStats ls dt ntot = zipWith zfunc stats [CellIdx i | i <- [1..n]]
+  where stats = srcNumsFromEvol ntot $ evolFromLum ls dt 
+        n     = length ls
+        zfunc :: (Int,EnergyWeight) -> CellIdx -> SrcStat
+        zfunc (i,wt) cidx = (cidx,i,wt)
 
 -- * older generation routine, useful for testing
 
 -- | Generate a number of random particles.
 genParticles :: Mesh m => Int -> m -> RNG -> [Particle]
-genParticles n msh rng =
-  let rngs = take n (unfoldr (Just . split) rng)
-  in  map (genParticle msh) rngs
+genParticles n msh g =
+  let gs = take n (unfoldr (Just . split) g)
+  in  map (genParticle msh) gs
 
 -- | Generate a single random particle.
 genParticle :: Mesh m => m -> RNG -> Particle
-genParticle msh rng =
-  fst $ runRnd rng $ do
-    (x, c) <- samplePosition  msh
-    d      <- sampleDirectionIso msh
-    let t  :: Time
-        t  = 1
-        e  :: Energy
-        e  = 1
-        ew :: EnergyWeight
-        ew = 1
-    rng'   <- get
-    return (Particle x d t e ew c rng')
+genParticle msh g =
+  fst $ runRnd g $ do
+    (x,cidx) <- samplePosition  msh
+    d        <- sampleDirectionIso msh
+    let tm :: Time
+        tm = 1
+        en :: Energy
+        en = 1
+        wt :: EnergyWeight
+        wt = 1
+    g'   <- get
+    return (Particle x d tm en wt cidx g')
 
 -- 
