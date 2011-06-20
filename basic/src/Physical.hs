@@ -45,5 +45,7 @@ newtype NucleonNumber = NucleonNumber {nnucl :: FP } deriving (Eq, Show, Num)
 newtype Distance     = Distance     { distance :: FP } deriving (Eq, Show, Num, Ord)
 -- | MeV/sec
 newtype Luminosity   = Luminosity   { lum :: FP } deriving (Eq,Show,Num,Ord)
+-- | dimensionless
+newtype ElectronFraction = ElectronFraction {ef :: FP} deriving (Eq,Show,Num,Ord)
 
 -- end of file
