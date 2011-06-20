@@ -13,5 +13,8 @@ data Particle = Particle {
   , rng     :: !RNG
   }
 
+-- may want to expand on NuX in the future
+data PType = NuE | NuEBar | NuX
+
 -- end of file
 
