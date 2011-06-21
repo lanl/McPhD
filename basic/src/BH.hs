@@ -13,7 +13,7 @@ import Numerical
 -- import System.Exit
 import TryNSave
 import MC
--- import Physical
+import Physical 
 import Sphere1D
 import Mesh
 -- import qualified Data.Vector as V
@@ -30,16 +30,20 @@ runSim (CLOpts { nps = n
                , outputF = outfile
                , llimit = ll
                , ulimit = ul
-               , chunkSz = chunkSize}
+               , chunkSz = chunkSize
+               , simTime = dt
+               , alpha   = a
+               }
        ) = do
   (clls, lnuer, lnuebarr, lnuxr) <- readMatStateP infile
-  let (msh,ndropped) = makeMesh clls ll ul
+  let (msh,ndropped) = mkMesh clls ll ul
       mshsz = ncells msh
-      lnue    = trim ndropped mshsz lnuer
-      lnuebar = trim ndropped mshsz lnuebarr
-      lnux    = trim ndropped mshsz lnuxr
-      tlly   = runManyParticles n chunkSize msh
-  writeTally outfile tlly
+      lnue  = trim ndropped mshsz lnuer
+      -- lnuebar = trim ndropped mshsz lnuebarr
+      -- lnux    = trim ndropped mshsz lnuxr
+      statsNuE  = calcSrcStats lnue dt n
+      tllyNuE   = runManyParticles statsNuE chunkSize msh a 
+  writeTally (outfile ++ "_nuE") tllyNuE
   return ()
 
 trim :: Int -> Int -> [a] -> [a]
@@ -48,10 +52,15 @@ trim d t l = take t $ drop d l
 
 -- | Perform the simulation for several (at least one) particles
 -- in a given mesh.
-runManyParticles :: Mesh m => Int -> Int -> m -> Tally
-runManyParticles !n !chnkSz msh =
+runManyParticles :: Mesh m => 
+                    [SrcStat] ->
+                    Int ->   -- chunkSize
+                    m -> 
+                    FP -> -- ^ alpha 
+                    Tally
+runManyParticles stats !chnkSz msh alph =
   let
-    particles = genParticles n msh testRNG
+    particles = genParticlesInCells msh testRNG stats alph
     tallies   = L.map (runParticle nuE msh) particles
     chunked   = chunk chnkSz tallies
     res       = L.map (L.foldl1' merge) chunked
@@ -82,16 +91,18 @@ main = do
 -- Command line processing 
 
 data CLOpts = CLOpts {
-    nps :: Int
-  , inputF :: String
-  , outputF :: String
-  , llimit :: FP
-  , ulimit :: FP
+    nps     :: Int
+  , inputF  :: FilePath
+  , outputF :: FilePath
+  , llimit  :: FP
+  , ulimit  :: FP
   , chunkSz :: Int
+  , simTime :: Time
+  , alpha   :: FP
   } deriving (Show,Eq)
 
 defaultOpts :: CLOpts
-defaultOpts = CLOpts 0 "" "tally" 0 1e12 (-1)
+defaultOpts = CLOpts 0 "" "tally" 0 1e12 (-1) (Time 1e-7) 2.0
 
 options :: [OptDescr (CLOpts -> CLOpts)]
 options = 
@@ -113,6 +124,12 @@ options =
   ,Option ['s']  ["chunk-size"] 
             (ReqArg (\f opts -> opts { chunkSz = read f}) "sz") 
             "chunk size (defaults to nps)"
+  ,Option ['d']  ["dt"] 
+            (ReqArg (\f opts -> opts { simTime = Time (read f)}) "t") 
+            "sim time in sec"
+  ,Option ['a']  ["alpha"] 
+            (ReqArg (\f opts -> opts { alpha =  (read f)}) "a") 
+            "alpha"
           ]
 
 getOpts :: [String] -> IO (CLOpts,[String])
@@ -124,10 +141,6 @@ getOpts argv =
 header :: String
 header = "Usage: BH [OPTION...] N_Particles Input_File"
 
-checkOptsArgsM :: CLOpts -> Maybe CLOpts
-checkOptsArgsM opts = 
-  checkNPs opts >>= checkInput >>= checkOutput >>= checkLimits >>= checkChunk
-
 checkOpts :: CLOpts -> IO CLOpts
 checkOpts os = case checkOptsArgsM os of 
                  Just opts -> return opts
@@ -136,7 +149,13 @@ checkOpts os = case checkOptsArgsM os of
 
 -- To do: instead of checking CL options in Maybe, use a
 -- Writer monad that accumulates particular objections. 
-checkNPs, checkInput, checkOutput, checkLimits, checkChunk :: CLOpts -> Maybe CLOpts
+checkOptsArgsM :: CLOpts -> Maybe CLOpts
+checkOptsArgsM opts = 
+  checkNPs opts >>= checkInput >>= checkOutput >>= checkLimits 
+             >>= checkChunk >>= checkTime >>= checkAlpha
+
+checkNPs, checkInput, checkOutput, checkLimits :: CLOpts -> Maybe CLOpts
+checkChunk, checkTime, checkAlpha :: CLOpts -> Maybe CLOpts
 checkNPs os@(CLOpts {nps = n}) = if n > 0 then Just os else Nothing
 
 -- To do: for files, need better check--this forces us into IO. 
@@ -151,16 +170,12 @@ checkLimits os@(CLOpts {llimit = ll, ulimit = ul}) =
   then Just os
   else Nothing
 
+checkTime os@(CLOpts {simTime = Time dt}) = if dt > 0.0 then Just os else Nothing
+
+checkAlpha os@(CLOpts {alpha = a}) = if a > 0.0 then Just os else Nothing
+
 checkChunk os@(CLOpts {nps = n, chunkSz = sz}) = 
   if sz > 0 then Just os else Just os{chunkSz = n}
-
--- readable :: FilePath -> IO Bool
--- readable f = fileAccess True False False
-
--- existsAndReadable :: FilePath -> IO Bool
--- existsAndReadable f = 
---   if fileExist f 
---   then Just readable f
 
 -- version
 -- $Id$
