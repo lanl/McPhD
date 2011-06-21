@@ -28,7 +28,8 @@ library
                  random >= 1,
                  mtl >= 1,
                  deepseq >= 1,
-                 parallel >= 3.1
+                 parallel >= 3.1,
+                 csv >= 0.1.2
 
 executable  basic
   hs-source-dirs:  src
