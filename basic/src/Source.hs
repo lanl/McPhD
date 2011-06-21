@@ -42,7 +42,9 @@ genCellParticle :: Mesh m => m ->
 genCellParticle msh cidx ewt a g =
   fst $ runRnd g $ do
     let cll = cell msh cidx
-        e'  = temp . tempE $ mat cll
+        -- Mean energy of Planck-ish Fermionic distribution is 
+        -- 7 pi^4/(180 zeta(3)) * (k_B T), ~ 3.15137
+        e'  = 3.15137 * (temp . tempE $ mat cll)
     -- to do: sample energy, then sample direction 
     -- using Collision.sampleDirectionIso
     oc <- sampleDirectionIso msh 
