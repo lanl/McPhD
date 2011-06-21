@@ -87,9 +87,9 @@ data (Mesh m) => CellTally m = CellTally !(Momentum m) !Energy
 deriving instance (Mesh m, Show (Momentum m)) => Show (CellTally m)
 
 -- Need addition operators for momentum and energy for this.
--- instance (Mesh m) => Monoid (CellTally m) where
---     mempty = CellTally 0 0
---     mappend (CellTally m1 e1) (CellTally m2 e2) = CellTally (m1+m2) (e1+e2)
+instance (Num (Momentum m), Mesh m) => Monoid (CellTally m) where
+    mempty = CellTally 0 0
+    mappend (CellTally m1 e1) (CellTally m2 e2) = CellTally (m1+m2) (e1+e2)
 
 data EventCount = EventCount {
       nEscape  :: !Int
