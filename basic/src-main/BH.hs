@@ -36,10 +36,8 @@ runSim (CLOpts { nps = n
   let (msh,ndropped) = mkMesh clls ll ul
       mshsz = ncells msh
       lnue  = trim ndropped mshsz lnuer
-      -- lnuebar = trim ndropped mshsz lnuebarr
-      -- lnux    = trim ndropped mshsz lnuxr
-      statsNuE  = calcSrcStats lnue  n
-      tllyNuE   = runManyParticles statsNuE n chunkSize msh
+      statsNuE  = calcSrcStats lnue dt n
+      tllyNuE   = runManyParticles statsNuE chunkSize msh a 
   writeTally (outfile ++ "_nuE") tllyNuE
   return ()
 
