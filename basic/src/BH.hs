@@ -6,17 +6,14 @@
 {-# LANGUAGE BangPatterns #-}
 
 import Control.Parallel.Strategies
--- import Data.Maybe (fromMaybe)
 import System.Console.GetOpt
 import System.Environment
 import Numerical
--- import System.Exit
 import TryNSave
 import MC
 import Physical 
 import Sphere1D
 import Mesh
--- import qualified Data.Vector as V
 import Data.List as L
 import Source
 import PRNG
@@ -39,10 +36,11 @@ runSim (CLOpts { nps = n
   let (msh,ndropped) = mkMesh clls ll ul
       mshsz = ncells msh
       lnue  = trim ndropped mshsz lnuer
-      -- lnuebar = trim ndropped mshsz lnuebarr
-      -- lnux    = trim ndropped mshsz lnuxr
       statsNuE  = calcSrcStats lnue dt n
       tllyNuE   = runManyParticles statsNuE chunkSize msh a 
+      -- and so on for nu_e^bar and nu_x
+      -- lnuebar = trim ndropped mshsz lnuebarr
+      -- lnux    = trim ndropped mshsz lnuxr
   writeTally (outfile ++ "_nuE") tllyNuE
   return ()
 
