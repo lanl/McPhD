@@ -48,3 +48,4 @@ instance Space Spherical1D where
     direction s = normalize s
     scale direction scalar = (normalized_value direction) |* scalar
     make (Radius pos) dir = pos *| (normalized_value dir)
+

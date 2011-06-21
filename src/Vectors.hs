@@ -20,3 +20,5 @@ sphericalToNormalCartesian (AzimuthAngle phi) (ZenithAngle theta) = let
   y = (sin theta) * (sin phi)
   z = (cos theta)
   in Vector3 x y z
+
+

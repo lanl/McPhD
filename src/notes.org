@@ -475,3 +475,7 @@
 ** TODO [#C] Replace "variant" with "deviant" in function names and comments.
 ** TODO [#B] Move Mag class out of NormalizedValues to where both N.V. and Properties can use it.
 ** TODO [#C] Add 'fromList' or other builder functions to mesh classes.
+
+ 7.7.2.3 of the GHC User Guide
+
+[[http://www.haskell.org/ghc/docs/7.0.3/html/users_guide/type-families.html#id636192][Equality type constraints]]
