@@ -36,11 +36,10 @@ runSim (CLOpts { nps = n
   let (msh,ndropped) = mkMesh clls ll ul
       mshsz = ncells msh
       lnue  = trim ndropped mshsz lnuer
-      statsNuE  = calcSrcStats lnue dt n
-      tllyNuE   = runManyParticles statsNuE chunkSize msh a 
-      -- and so on for nu_e^bar and nu_x
       -- lnuebar = trim ndropped mshsz lnuebarr
       -- lnux    = trim ndropped mshsz lnuxr
+      statsNuE  = calcSrcStats lnue  n
+      tllyNuE   = runManyParticles statsNuE n chunkSize msh
   writeTally (outfile ++ "_nuE") tllyNuE
   return ()
 
@@ -129,6 +128,7 @@ options =
             (ReqArg (\f opts -> opts { alpha =  (read f)}) "a") 
             "alpha"
           ]
+
 
 getOpts :: [String] -> IO (CLOpts,[String])
 getOpts argv = 
