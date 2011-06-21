@@ -19,32 +19,30 @@ type SrcStat = (CellIdx,Int,EnergyWeight) -- (cidx, # particles, ew/cell)
 -- | generate a given number of particles in each cell
 genParticlesInCells :: Mesh m => m -> RNG -> [SrcStat] -> 
                        FP ->  -- ^ alpha (power law parameters)
-                       FP ->  -- ^ e'
                       [Particle]
-genParticlesInCells msh gen nPerCell a e' = 
-  nPerCell >>= (genParticlesInCell msh gen a e')
+genParticlesInCells msh gen nPerCell a = 
+  nPerCell >>= (genParticlesInCell msh gen a)
 
 -- | generate a given number of particles in one cell
 genParticlesInCell :: Mesh m => m -> RNG ->
                       FP ->  -- ^ alpha (power law parameters) 
-                      FP ->  -- ^ e'
                      SrcStat ->
                      [Particle]
-genParticlesInCell msh g a e' (cidx,n,ewt) =
+genParticlesInCell msh g a (cidx,n,ewt) =
   let gs = take n (unfoldr (Just . split) g)
-  in  map (genCellParticle msh cidx ewt a e') gs
+  in  map (genCellParticle msh cidx ewt a) gs
 
 -- | Generate a single random particle.
 genCellParticle :: Mesh m => m -> 
                    CellIdx -> 
                    EnergyWeight ->
                    FP ->  -- ^ alpha  (power law parameters)
-                   FP ->  -- ^ e' 
                    RNG -> 
                    Particle
-genCellParticle msh cidx ewt a e' g =
+genCellParticle msh cidx ewt a g =
   fst $ runRnd g $ do
     let cll = cell msh cidx
+        e'  = temp . tempE $ mat cll
     -- to do: sample energy, then sample direction 
     -- using Collision.sampleDirectionIso
     oc <- sampleDirectionIso msh 
