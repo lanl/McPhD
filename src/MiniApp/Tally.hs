@@ -9,14 +9,18 @@ import Data.Monoid
 import qualified Data.Map as Map
 
 import Utils.Combinators
-
 import Mesh.Classes
-import qualified Space.Classes as Space
+import qualified Space.Classes as S
 
 import Properties
 import MiniApp.Physics
 import MiniApp.Events
 import MiniApp.Particle
+
+-- * Aliases
+
+type MomentumM m = Momentum (MeshSpace m)
+
 
 -- * Tally data structures
 
@@ -37,15 +41,14 @@ data Tally m = Tally { counts  :: EventCount
 
 
 
-
 -- * Combining events and tallies
 
 -- | Add an event to the running tally.
-addEvent :: (Mesh m, Num (Momentum (MeshSpace m))) => (Event m, Particle m) -> Tally m -> Tally m
+addEvent :: (Mesh m, Num (MomentumM m)) => (Event m, Particle m) -> Tally m -> Tally m
 addEvent eAndP tally = tally <> eventToTally eAndP
 
 -- | Convert an event into a mini-tally.
-eventToTally :: (Mesh m, Num (Momentum (MeshSpace m))) => (Event m, Particle m) -> Tally m
+eventToTally :: (Mesh m, Num (MomentumM m)) => (Event m, Particle m) -> Tally m
 eventToTally (event, Particle{cell=inCell}) = 
   Tally (eventToCount event) (Map.singleton inCell $ eventToCellTally event )
 
@@ -58,34 +61,15 @@ eventToCount Collide{}            = EventCount 0 0 0
 eventToCount Boundary{}           = EventCount 0 0 0
 
 -- | Convert an event into the corresponding CellTally
-eventToCellTally :: (Mesh m, Space.Space (MeshSpace m)
-                    , Num (Momentum (MeshSpace m))) => Event m -> CellTally (MeshSpace m)
+eventToCellTally :: (Mesh m, S.Space (MeshSpace m)
+                    , Num (MomentumM m)) => Event m -> CellTally (MeshSpace m)
 eventToCellTally Timeout    = mempty
 eventToCellTally Boundary{} = mempty
 eventToCellTally (Collide _ momentumDep energyDep) = CellTally momentumDep energyDep
 
 
 
--- * Instance declarations
-
--- | Show CellTally
-deriving instance (Space.Space s, Show (Momentum s)) => Show (CellTally s)
-
--- | Monoid CellTally for folding tallies together
-instance (Num (Momentum s), Space.Space s) => Monoid (CellTally s) where
-    mempty = CellTally 0 0
-    mappend (CellTally m1 e1) (CellTally m2 e2) = CellTally (m1 + m2) (e1 + e2)
-
--- | Monoid EventCount, for folding tallies together.
-instance Monoid EventCount where
-  mempty = EventCount 0 0 0
-  mappend (EventCount ne1 nr1 nt1) (EventCount ne2 nr2 nt2) =
-      EventCount (ne1+ne2) (nr1+nr2) (nt1+nt2)
-
--- | Show Tally
-deriving instance (Show (MeshCell m)
-                  , Space.Space (MeshSpace m)
-                  , Show (Momentum (MeshSpace m))) => Show (Tally m)
+-- * Monoid instance declarations
 
 -- I'll eat my hat if there isn't a more idomatic way to do this.
 -- | Monoid of Tallies
@@ -94,6 +78,25 @@ instance (Mesh m, Ord (MeshCell m)) => Monoid (Tally m) where
   mappend s t = Tally { counts  = mappend (counts s)  (counts t)
                       , perCell = mappend (perCell s) (perCell t)
                       }
+-- | Monoid CellTally
+instance (Num (Momentum s), S.Space s) => Monoid (CellTally s) where
+    mempty = CellTally 0 0
+    mappend (CellTally m1 e1) (CellTally m2 e2) = CellTally (m1 + m2) (e1 + e2)
+
+-- | Monoid EventCount
+instance Monoid EventCount where
+  mempty = EventCount 0 0 0
+  mappend (EventCount ne1 nr1 nt1) (EventCount ne2 nr2 nt2) =
+      EventCount (ne1+ne2) (nr1+nr2) (nt1+nt2)
+
+-- | Show CellTally
+deriving instance (S.Space s, Show (Momentum s)) => Show (CellTally s)
+
+-- | Show Tally
+deriving instance (Show (MeshCell m)
+                  , S.Space (MeshSpace m)
+                  , Show (MomentumM m)) => Show (Tally m)
+
 
 
 

@@ -49,10 +49,12 @@ type Contractor model particle event
     = model -> particle -> Outcome event particle
 
 -- | Compute outcomes from contractors, and choose the closest one.
-step :: model -> [Contractor model particle event] -> particle  -> (event, particle)
+step :: model 
+     -> [Contractor model particle event] 
+     -> particle 
+     -> (event, particle)
 step model contractors particle
     = result (minimum (map (\f -> f model particle) contractors))
-
 
 
 
@@ -67,6 +69,9 @@ stream stepper continue p = next p
           in  (e, p') : if continue e then next p' else []
 
 
-
 streamMany :: (p -> [(e,p)]) -> [p] -> [[(e,p)]]
 streamMany = map
+
+createTally :: ( (e,p) -> t -> (e,p) ) -> t -> [(e,p)] -> t
+createTally = foldl
+
