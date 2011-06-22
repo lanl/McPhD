@@ -4,9 +4,11 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module MiniApp.Tally where
-    
+
 import Data.Monoid
 import qualified Data.Map as Map
+
+import Utils.Combinators
 
 import Mesh.Classes
 import qualified Space.Classes as Space
@@ -19,24 +21,52 @@ import MiniApp.Particle
 -- * Tally data structures
 
 -- | Information tallied in each cell.
-data CellTally s = CellTally !(Momentum s) !Energy 
+data CellTally s = CellTally !(Momentum s) !Energy
 
 -- | Final events for particles, tallied globally
-data EventCount = EventCount { nEscape  :: !Int 
-                             , nReflect :: !Int 
-                             , nTimeout :: !Int 
+data EventCount = EventCount { nEscape  :: !Int
+                             , nReflect :: !Int
+                             , nTimeout :: !Int
                              } deriving (Show, Eq)
 
--- | Events, plus per-cell tallies.
+-- | The complete tally is the combination of all event contributions,
+-- indexed by cell, plus the global counts.
 data Tally m = Tally { counts  :: EventCount
-                     , perCell :: Map.Map (MeshCell m) (CellTally (MeshSpace m)) 
+                     , perCell :: Map.Map (MeshCell m) (CellTally (MeshSpace m))
                      }
-                                
-data TallyContrib m = TallyContrib { contribCell   :: MeshCell m, 
-                                     contribEffect :: CellTally m,
-                                     contribCount  :: EventCount}
 
--- * Instance declarations 
+
+
+
+-- * Combining events and tallies
+
+-- | Add an event to the running tally.
+addEvent :: (Mesh m, Num (Momentum (MeshSpace m))) => (Event m, Particle m) -> Tally m -> Tally m
+addEvent eAndP tally = tally <> eventToTally eAndP
+
+-- | Convert an event into a mini-tally.
+eventToTally :: (Mesh m, Num (Momentum (MeshSpace m))) => (Event m, Particle m) -> Tally m
+eventToTally (event, Particle{cell=inCell}) = 
+  Tally (eventToCount event) (Map.singleton inCell $ eventToCellTally event )
+
+-- | Convert an event into an EventCount
+eventToCount :: (Mesh m) => Event m -> EventCount
+eventToCount (Boundary Escape _)  = EventCount 1 0 0
+eventToCount (Boundary Reflect _) = EventCount 0 1 0
+eventToCount Timeout              = EventCount 0 0 1
+eventToCount Collide{}            = EventCount 0 0 0
+eventToCount Boundary{}           = EventCount 0 0 0
+
+-- | Convert an event into the corresponding CellTally
+eventToCellTally :: (Mesh m, Space.Space (MeshSpace m)
+                    , Num (Momentum (MeshSpace m))) => Event m -> CellTally (MeshSpace m)
+eventToCellTally Timeout    = mempty
+eventToCellTally Boundary{} = mempty
+eventToCellTally (Collide _ momentumDep energyDep) = CellTally momentumDep energyDep
+
+
+
+-- * Instance declarations
 
 -- | Show CellTally
 deriving instance (Space.Space s, Show (Momentum s)) => Show (CellTally s)
@@ -53,22 +83,18 @@ instance Monoid EventCount where
       EventCount (ne1+ne2) (nr1+nr2) (nt1+nt2)
 
 -- | Show Tally
-deriving instance (Show (MeshCell m), Space.Space (MeshSpace m), Show (Momentum (MeshSpace m))) => Show (Tally m)
+deriving instance (Show (MeshCell m)
+                  , Space.Space (MeshSpace m)
+                  , Show (Momentum (MeshSpace m))) => Show (Tally m)
 
 -- I'll eat my hat if there isn't a more idomatic way to do this.
 -- | Monoid of Tallies
 instance (Mesh m, Ord (MeshCell m)) => Monoid (Tally m) where
   mempty      = Tally { counts  = mempty, perCell = mempty }
   mappend s t = Tally { counts  = mappend (counts s)  (counts t)
-                      , perCell = mappend (perCell s) (perCell t) 
+                      , perCell = mappend (perCell s) (perCell t)
                       }
 
-eventToCount :: (Mesh m) => Event m -> EventCount
-eventToCount Timeout            = EventCount 0 0 1
-eventToCount Collide{}          = EventCount 0 0 0
-eventToCount (Boundary Escape _)  = EventCount 1 0 0
-eventToCount (Boundary Reflect _) = EventCount 0 1 0
-eventToCount (Boundary _ _)       = EventCount 0 0 0
 
 
 
