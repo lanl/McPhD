@@ -25,7 +25,7 @@ import Properties
 
 -- | Outcomes are a distance to an event, the event and the next
 -- particle state.
-data Outcome e p = Outcome { distance :: Distance
+data Outcome e p = Outcome { distance :: !Distance -- ^ Strict, becuase we use it to select winners.
                            , event    :: e
                            , particle :: p
                            }
@@ -41,6 +41,11 @@ instance Ord (Outcome e p) where
 result :: Outcome ev part -> (ev, part)
 result (Outcome _ event particle) = (event, particle)
 
+
+-- ??? Just use Outcome instead of (event, particle) elsewhere?  This
+-- doesn't seem any more restritive than requiring apps to use the
+-- Contractor type and (e,p). The higher level functions can still be
+-- written polymorphicaly over the tally, particle and outcome types.
 
 
 -- | Contractors are functions which take a model, a particle and
@@ -68,10 +73,6 @@ stream stepper continue p = next p
           let (e, p') = stepper p
           in  (e, p') : if continue e then next p' else []
 
-
-streamMany :: (p -> [(e,p)]) -> [p] -> [[(e,p)]]
-streamMany = map
-
-createTally :: ( (e,p) -> t -> (e,p) ) -> t -> [(e,p)] -> t
-createTally = foldl
-
+executeMC :: (p->o) -> (o->t) -> (t->t->t) -> [p] -> t
+executeMC stream collapse combine initial =
+    foldl1 combine (map (collapse . stream) initial)

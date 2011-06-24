@@ -42,7 +42,7 @@ type Spherical1D = Vector2
 instance Space Spherical1D where
     type Position  Spherical1D = Radius
     type Direction Spherical1D = Normalized Vector2
-    type Momentum  Spherical1D = Vector2
+    type Velocity  Spherical1D = Vector2
     stream (Vector2 x y) (Distance d) = Vector2 (x+d) y
     position s  = Radius $ vmag s
     direction s = normalize s

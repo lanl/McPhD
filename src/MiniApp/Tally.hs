@@ -19,7 +19,7 @@ import MiniApp.Particle
 
 -- * Aliases
 
-type MomentumM m = Momentum (MeshSpace m)
+type MomentumM m = Velocity (MeshSpace m)
 
 
 -- * Tally data structures

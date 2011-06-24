@@ -27,10 +27,6 @@ import MiniApp.Physics
 import MiniApp.Tally
 
 
--- | We usually need the weighted particle momentum 
-weightedMomentum :: (Mesh m) => Particle m -> Momentum (MeshSpace m)
-weightedMomentum particle = undefined
-
 -- * Aliases for the MonteCarlo types.
 
 type Outcome m    = MC.Outcome    (Event m) (Particle m)

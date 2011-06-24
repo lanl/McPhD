@@ -24,10 +24,13 @@ data (Mesh mesh) => Particle mesh = Particle
     , location     :: !(MeshSpace mesh) -- ^ Location in mesh's space.
     , time         :: !Time             -- ^ Elapsed Time
     , energy       :: !Energy           -- ^ Particle energy
-    , weight       :: !EnergyWeight     -- ^ Particle's significance weighting
+    , weight       :: !EnergyWeight     -- ^ Particle's energy weight
     , speed        :: !Speed            -- ^ Speed of motion.
     , rand         :: !PureMT           -- ^ Source of Particle's random behavior
     }
+
+
+type MomentumM m = Velocity (MeshSpace m)
 
 instance (Mesh m) => P.Particle (Particle m) where
 -- | Move the particle the given distance. Assume cell and other
@@ -41,6 +44,10 @@ instance (Mesh m) => P.Particle (Particle m) where
 
 weightedEnergy :: (Mesh m) => Particle m -> Energy
 weightedEnergy particle = applyWeight (weight particle) (energy particle)
+
+weightedMomentum :: (Space (MeshSpace m), Mesh m) => Particle m -> MomentumM m
+weightedMomentum particle = scale (direction $ location particle) $
+                            (engwValue $ weight particle)*(spValue $ speed particle) 
 
 deriving instance ( Mesh mesh
                   , Show (MeshSpace mesh)
