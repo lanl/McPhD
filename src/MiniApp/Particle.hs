@@ -18,7 +18,7 @@ import Approx
 
 -- | Data type for a particle moving through a space with a
 -- mesh. Indexed on the mesh itself.
-data (Mesh mesh) => Particle mesh = Particle
+data Particle mesh = Particle
     {
       cell         :: !(MeshCell mesh)  -- ^ Current cell in mesh.
     , location     :: !(MeshSpace mesh) -- ^ Location in mesh's space.
@@ -45,9 +45,10 @@ instance (Mesh m) => P.Particle (Particle m) where
 weightedEnergy :: (Mesh m) => Particle m -> Energy
 weightedEnergy particle = applyWeight (weight particle) (energy particle)
 
-weightedMomentum :: (Space (MeshSpace m), Mesh m) => Particle m -> MomentumM m
-weightedMomentum particle = scale (direction $ location particle) $
-                            (engwValue $ weight particle)*(spValue $ speed particle) 
+weightedMomentum :: (Mesh m) => Particle m -> MomentumM m
+weightedMomentum particle =
+  scale (location particle) (direction $ location particle) $
+  (engwValue $ weight particle) * (spValue $ speed particle)
 
 deriving instance ( Mesh mesh
                   , Show (MeshSpace mesh)
