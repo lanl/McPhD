@@ -14,6 +14,9 @@ radial outward vector.
       O------------------------P-----------> r_vec
    Origin                   Particle
 
+We can also assume, without loss of generality, that \eta >= 0, since
+other eta values can be obtained via rotation.
+
 The equations of motion in this coordinate system are most naturally
 expressed in terms of r^2, r\xi and r\eta:
 
@@ -46,6 +49,5 @@ instance Space Spherical1D where
     stream (Vector2 x y) (Distance d) = Vector2 (x+d) y
     position s  = Radius $ vmag s
     direction s = normalize s
-    scale _ direction scalar = normalized_value direction |* scalar
-    make (Radius pos) dir = pos *| (normalized_value dir)
-
+    make (Radius pos) dir = pos *| (fix_eta $ normalized_value dir)
+      where fix_eta (Vector2 x y) = Vector2 x (abs y)
