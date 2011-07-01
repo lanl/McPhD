@@ -25,10 +25,11 @@ import Properties
 
 -- | Outcomes are a distance to an event, the event and the next
 -- particle state.
-data Outcome e p = Outcome { distance :: !Distance -- ^ Strict, becuase we use it to select winners.
-                           , event    :: e
-                           , particle :: p
-                           }
+data Outcome e p = Outcome { 
+  distance   :: !Distance   -- ^ Strict, becuase we use it to select winners.
+  , event    :: e
+  , particle :: p
+  }
 
 -- We compare outcomes strictly on the basis of distance.
 instance Eq (Outcome e p) where

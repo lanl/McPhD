@@ -13,10 +13,15 @@ Events of particle motion fall into categories:
 module SphericalApp.Events where
 
 import qualified Space.Classes as Space
-import Mesh.Classes hiding (Cell)
+import Space.Spherical1D
+
+import qualified Mesh.Classes as Mesh hiding (Cell)
+import Mesh.Spherical
+
 import Properties
 
 import SphericalApp.Physics
+
 
 -- | Type of Scattering Events
 data CollideType = Scatter | Absorb  deriving (Eq, Show, Ord)  -- More kinds to come.
@@ -34,11 +39,11 @@ finalBoundary Reflect = False
 
 -- | Combining the event types into a single data type with tally information.
 data Event = Collide  { collideType   :: CollideType
-                      , deltaMomentum :: Momentum
+                      , deltaMomentum :: Space.Velocity Spherical1D
                       , energyDep     :: Energy
                       }
            | Boundary { boundaryType  :: BoundaryType
-                      , faceIndex     :: MeshFace Spherical1D
+                      , faceIndex     :: Mesh.MeshFace SphericalMesh
                       }
            | Timeout deriving Show
 

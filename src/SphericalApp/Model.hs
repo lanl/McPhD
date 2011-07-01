@@ -13,8 +13,10 @@ this is not required in general.
 
 import Data.Array.IArray
 
-import Mesh.Classes
-import qualified Particle.Classes as P
+import Mesh.Classes as Mesh
+import Mesh.Spherical
+
+import qualified Particle.Classes as Particle
 
 import Properties
 import qualified MonteCarlo as MC
@@ -26,7 +28,7 @@ import SphericalApp.Physics
 
 -- * Aliases for the MonteCarlo types.
 
-type Cell = MeshCell Spherical
+type Cell        = Mesh.MeshCell SphericalMesh
 type Outcome     = MC.Outcome    Event Particle
 type Contractor  = MC.Contractor Model Particle Event
 
@@ -34,7 +36,7 @@ type Contractor  = MC.Contractor Model Particle Event
 -- | The physical model. Consists of a mesh, space properties indexed
 -- by mesh cell and the end of time-step
 data Model = Model {
-      mesh    :: Spherical
+      mesh    :: SphericalMesh
     , physics :: Array Cell Data
     , t_final :: Time
     }
@@ -53,7 +55,7 @@ timeStepContractor :: Contractor
 timeStepContractor model particle =
     let time_left = t_final model - time particle
         distance  = gettingTo time_left (speed particle)
-        particle' = P.move particle distance
+        particle' = Particle.move particle distance
     in MC.Outcome distance Timeout particle'
 
 -- | Contractor for face and boundary crossings in the mesh.

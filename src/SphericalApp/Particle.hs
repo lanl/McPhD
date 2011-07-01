@@ -27,8 +27,8 @@ type VelocityT = Velocity Spherical1D
 -- mesh. Indexed on the mesh itself.
 data Particle = Particle
     {
-      cell         :: !Cell             -- ^ Current cell in mesh.
-    , location     :: !Space            -- ^ Location in mesh's space.
+      cell         :: !CellT            -- ^ Current cell in mesh.
+    , location     :: !SpaceT           -- ^ Location in mesh's space.
     , time         :: !Time             -- ^ Elapsed Time
     , energy       :: !Energy           -- ^ Particle energy
     , weight       :: !EnergyWeight     -- ^ Particle's energy weight
@@ -71,7 +71,7 @@ instance Approx Particle where
       where close f = ((within_eps epsilon) `on` f) a b
             exact f = f a == f b
 
-createParticle :: Spherical
+createParticle :: SphericalMesh
                   -> Spherical1D
                   -> Time
                   -> Energy

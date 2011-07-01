@@ -9,7 +9,12 @@ import Data.Monoid
 import qualified Data.Map as Map
 
 import Utils.Combinators
+
+import Mesh.Classes as Mesh
 import Mesh.Spherical
+
+import Space.Classes as Space
+import Space.Spherical1D
 
 import Properties
 import SphericalApp.Physics
@@ -17,9 +22,9 @@ import SphericalApp.Events
 import SphericalApp.Particle
 
 -- * Aliases
-type Momentum = Vector2
-type Space = Spherical1D
-type Cell  = MeshCell Spherical
+type Momentum = Space.Velocity Spherical1D
+type Space    = Spherical1D
+type Cell     = Mesh.MeshCell SphericalMesh
 
 -- * Tally data structures
 
@@ -35,7 +40,7 @@ data EventCount = EventCount { nEscape  :: !Int
 -- | The complete tally is the combination of all event contributions,
 -- indexed by cell, plus the global counts.
 data Tally = Tally { counts  :: EventCount
-                   , perCell :: Map.Map Cell CellTally)
+                   , perCell :: Map.Map Cell CellTally
                    }
 
 
