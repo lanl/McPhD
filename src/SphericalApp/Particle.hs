@@ -1,13 +1,16 @@
 {-# LANGUAGE FlexibleContexts, GeneralizedNewtypeDeriving, UndecidableInstances, NoMonomorphismRestriction, StandaloneDeriving #-}
 
-module MiniApp.Particle where
+module SphericalApp.Particle where
 
 import Data.Function
 import Control.Applicative
 import System.Random.Mersenne.Pure64
 
 import Mesh.Classes
+import Mesh.Spherical
+
 import Space.Classes
+import Space.Spherical1D
 import qualified Particle.Classes as P
 
 import RandomSamples
@@ -16,22 +19,25 @@ import Properties
 import Utils.Combinators
 import Approx
 
+type CellT     = MeshCell SphericalMesh
+type SpaceT    = Spherical1D
+type VelocityT = Velocity Spherical1D
+
 -- | Data type for a particle moving through a space with a
 -- mesh. Indexed on the mesh itself.
-data Particle mesh = Particle
+data Particle = Particle
     {
-      cell         :: !(MeshCell mesh)  -- ^ Current cell in mesh.
-    , location     :: !(MeshSpace mesh) -- ^ Location in mesh's space.
+      cell         :: !Cell             -- ^ Current cell in mesh.
+    , location     :: !Space            -- ^ Location in mesh's space.
     , time         :: !Time             -- ^ Elapsed Time
     , energy       :: !Energy           -- ^ Particle energy
     , weight       :: !EnergyWeight     -- ^ Particle's energy weight
     , speed        :: !Speed            -- ^ Speed of motion.
     , rand         :: !PureMT           -- ^ Source of Particle's random behavior
-    }
+    } deriving (Show)
 
 
-
-instance (Mesh m) => P.Particle (Particle m) where
+instance P.Particle Particle where
 -- | Move the particle the given distance. Assume cell and other
 -- properties remain unchanged. Updating these has to be taken care of
 -- by the model.
@@ -41,25 +47,21 @@ instance (Mesh m) => P.Particle (Particle m) where
                , time     = (time particle) + elapsedTime
                }
 
-weightedEnergy :: (Mesh m) => Particle m -> Energy
+weightedEnergy :: Particle -> Energy
 weightedEnergy particle = applyWeight (weight particle) (energy particle)
 
-weightedMomentum :: (Mesh m) => Particle m -> Velocity (MeshSpace m)
+weightedMomentum :: Particle -> VelocityT
 weightedMomentum particle =
   scale (location particle) (direction $ location particle) $
   (engwValue $ weight particle) * (spValue $ speed particle)
 
-deriving instance ( Mesh mesh
-                  , Show (MeshSpace mesh)
-                  , Show (MeshCell mesh)) => Show (Particle mesh)
-
-sampleDistance :: (Mesh m) => Opacity -> Particle m -> (Distance, Particle m)
+sampleDistance :: Opacity -> Particle -> (Distance, Particle)
 sampleDistance opacity particle = let
   (distance, rng) = sampleExponential (1.0/(opValue opacity)) (rand particle)
   particle' = particle{rand=rng}
   in (Distance distance, particle')
 
-instance (Approx (MeshSpace mesh), Mesh mesh) => Approx (Particle mesh) where
+instance Approx Particle where
     within_eps epsilon a b = close time
                              && close energy
                              && close location
@@ -69,14 +71,14 @@ instance (Approx (MeshSpace mesh), Mesh mesh) => Approx (Particle mesh) where
       where close f = ((within_eps epsilon) `on` f) a b
             exact f = f a == f b
 
-createParticle :: (Mesh m) => m
-                      -> (MeshSpace m)
-                      -> Time
-                      -> Energy
-                      -> EnergyWeight
-                      -> Speed
-                      -> Seed
-                      -> Maybe (Particle m)
+createParticle :: Spherical
+                  -> Spherical1D
+                  -> Time
+                  -> Energy
+                  -> EnergyWeight
+                  -> Speed
+                  -> Seed
+                  -> Maybe Particle
 createParticle mesh location time energy weight speed seed =
   Particle <$> cell
   <*^> location

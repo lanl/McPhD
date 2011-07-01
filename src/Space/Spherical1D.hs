@@ -49,3 +49,19 @@ instance Space Spherical1D where
     scale _ direction scalar = normalized_value direction |* scalar
     make (Radius pos) dir = pos *| (normalized_value dir)
 
+
+sph1Dstream :: Spherical1D -> Distance -> Spherical1D
+sph1Dstream (Vector2 x y) (Distance d) = Vector2 (x+d) y
+
+sph1Dposition :: Spherical1D -> Radius
+sph1Dposition = Radius . vmag
+
+sph1Ddirection :: Spherical1D -> Normalized Vector2
+sph1Ddirection = normalize
+
+sph1DdirScale :: Normalized Vector2 -> Double -> Vector2
+sph1DdirScale v scalar = (normalized_value v) |* scalar
+
+sph1Dmake :: Radius -> Normalized Vector2 -> Spherical1D
+sph1Dmake (Radius r) v = sph1DdirScale v r
+

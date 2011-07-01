@@ -13,11 +13,12 @@ import Properties
 import Numerics
 import qualified MonteCarlo as MC
 
-import MiniApp.Particle
-import MiniApp.Events as Events
-import MiniApp.Physics as Physics
+import SphericalApp.Particle
+import SphericalApp.Events as Events
+import SphericalApp.Physics as Physics
+import SphericalApp.Tally as Tally
 
-import MiniApp.Model
+import SphericalApp.Model
 
 
 -- Create a mesh
@@ -42,16 +43,19 @@ model = Model { mesh    = sphMesh
 
 -- Define our Monte Carlo operators for streaming a particle and creating a tally.
 
-streamOp :: (Particle SphericalMesh)
-            -> [(Event SphericalMesh, Particle SphericalMesh)]
+streamOp :: Particle -> [(Event, Particle)]
 streamOp = MC.stream (MC.step model contractors) Events.isFinalEvent
+
+tallyOp :: [(Event, Particle)] -> Tally
+tallyOp = MC.monoidTally eventToTally
+
+mapOperation :: Particle -> Tally
+mapOperation p = streamOp p
 
 
 -- Create some particles
 particles :: [Particle SphericalMesh]
 particles = []
-
-
 
 
 
@@ -65,3 +69,5 @@ particles = []
 main :: IO ()
 main = do
   print "I did it!"
+
+

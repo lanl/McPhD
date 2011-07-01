@@ -4,9 +4,9 @@ data and combine them into a Monte Carlo simulation.
 -}
 
 import Data.Function
+import Data.Monoid
 
 import Properties
-
 
 -- ??? Better to make these function independent of the model? Then
 -- the application would provide functions like: Particle -> ...
@@ -73,6 +73,14 @@ stream stepper continue p = next p
           let (e, p') = stepper p
           in  (e, p') : if continue e then next p' else []
 
-executeMC :: (p->o) -> (o->t) -> (t->t->t) -> [p] -> t
-executeMC stream collapse combine initial =
-    foldl1 combine (map (collapse . stream) initial)
+
+-- | A helper function for collapsing Monoid tallies.
+monoidTally :: (Monoid t) => (d -> t) -> [d] -> t
+monoidTally toTally datums = mconcat (map toTally datums)
+
+
+-- | This is the top-level structure of the MonteCarlo algorithm.
+simulate :: (p->t) -> (t->t->t) -> [p] -> t
+simulate mapFunction foldFunction initial =
+    foldl1 foldFunction (map mapFunction initial)
+
