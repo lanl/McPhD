@@ -25,7 +25,7 @@ import Properties
 
 -- | Outcomes are a distance to an event, the event and the next
 -- particle state.
-data Outcome e p = Outcome { 
+data Outcome e p = Outcome {
   distance   :: !Distance   -- ^ Strict, becuase we use it to select winners.
   , event    :: e
   , particle :: p
@@ -55,9 +55,9 @@ type Contractor model particle event
     = model -> particle -> Outcome event particle
 
 -- | Compute outcomes from contractors, and choose the closest one.
-step :: model 
-     -> [Contractor model particle event] 
-     -> particle 
+step :: model
+     -> [Contractor model particle event]
+     -> particle
      -> (event, particle)
 step model contractors particle
     = result (minimum (map (\f -> f model particle) contractors))
@@ -81,7 +81,6 @@ monoidTally toTally datums = mconcat (map toTally datums)
 
 
 -- | This is the top-level structure of the MonteCarlo algorithm.
-simulate :: (p->t) -> (t->t->t) -> [p] -> t
-simulate mapFunction foldFunction initial =
-    foldl1 foldFunction (map mapFunction initial)
-
+simulate :: (p->tc) -> (t->tc->t) -> t -> [p] -> t
+simulate makeTally foldTally initTally particles =
+    foldl foldTally initTally (map makeTally particles)

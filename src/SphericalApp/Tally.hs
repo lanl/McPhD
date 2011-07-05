@@ -41,7 +41,7 @@ data EventCount = EventCount { nEscape  :: !Int
 -- indexed by cell, plus the global counts.
 data Tally = Tally { counts  :: EventCount
                    , perCell :: Map.Map Cell CellTally
-                   }
+                   } deriving Show
 
 
 -- * Combining events and tallies
@@ -90,4 +90,3 @@ instance Monoid EventCount where
   mempty = EventCount 0 0 0
   mappend (EventCount ne1 nr1 nt1) (EventCount ne2 nr2 nt2) =
       EventCount (ne1+ne2) (nr1+nr2) (nt1+nt2)
-

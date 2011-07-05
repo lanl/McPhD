@@ -50,7 +50,7 @@ instance Space Spherical1D where
     position s  = Radius $ vmag s
     direction s = normalize s
     scale _ direction scalar = normalized_value direction |* scalar
-	make (Radius pos) dir = pos *| (fix_eta $ normalized_value dir)
+    make (Radius pos) dir = pos *| (fix_eta $ normalized_value dir)
       where fix_eta (Vector2 x y) = Vector2 x (abs y)
 
 
@@ -68,4 +68,3 @@ sph1DdirScale v scalar = (normalized_value v) |* scalar
 
 sph1Dmake :: Radius -> Normalized Vector2 -> Spherical1D
 sph1Dmake (Radius r) v = sph1DdirScale v r
-

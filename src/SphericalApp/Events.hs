@@ -38,12 +38,12 @@ finalBoundary Reflect = False
 
 
 -- | Combining the event types into a single data type with tally information.
-data Event = Collide  { collideType   :: CollideType
-                      , deltaMomentum :: Space.Velocity Spherical1D
-                      , energyDep     :: Energy
+data Event = Collide  { collideType :: CollideType
+                      , momentumDep :: Space.Velocity Spherical1D
+                      , energyDep   :: Energy
                       }
-           | Boundary { boundaryType  :: BoundaryType
-                      , faceIndex     :: Mesh.MeshFace SphericalMesh
+           | Boundary { boundaryType :: BoundaryType
+                      , faceIndex    :: Mesh.MeshFace SphericalMesh
                       }
            | Timeout deriving Show
 

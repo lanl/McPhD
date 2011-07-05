@@ -42,7 +42,7 @@ data Model = Model {
     }
 
 -- | Extract the physics data for the Particle's cell.
-localPhysics :: Model -> Particle -> Data 
+localPhysics :: Model -> Particle -> Data
 localPhysics model particle = (physics model) ! (cell particle)
 
 -- * Functions which compute outcomes, resulting from interaction with
@@ -58,18 +58,45 @@ timeStepContractor model particle =
         particle' = Particle.move particle distance
     in MC.Outcome distance Timeout particle'
 
+
 -- | Contractor for face and boundary crossings in the mesh.
 meshContractor :: Contractor
 meshContractor = undefined
 
--- | Contractor for scattering and absorption events.
-materialContractor :: Contractor
-materialContractor = undefined
+
+-- | Contractor for scattering event
+scatteringContractor :: Contractor
+scatteringContractor model particle =
+  let Data{sig_scat=opacity} = localPhysics model particle
+      (distance, particle')  = sampleDistance opacity particle
+      particle''             = isotropicScatter particle'
+      event = Collide
+              { collideType = Scatter
+              , momentumDep = (weightedMomentum particle - weightedMomentum particle'')
+              , energyDep   = (weightedEnergy   particle - weightedEnergy particle'')
+              }
+  in MC.Outcome distance event particle''
+
+isotropicScatter = id
+
+-- | Contractor for scattering event
+absorptionContractor :: Contractor
+absorptionContractor model particle =
+  let Data{sig_abs=opacity} = localPhysics model particle
+      (distance, particle') = sampleDistance opacity particle
+      event = Collide
+              { collideType = Absorb
+              , momentumDep = (weightedMomentum particle')
+              , energyDep   = (weightedEnergy   particle')
+              }
+  in MC.Outcome distance event particle'
+
+
 
 -- | A list of contractors that we hand to the step function.
 contractors :: [Contractor]
-contractors = [timeStepContractor, meshContractor, materialContractor]
-
-
-
-
+contractors = [ timeStepContractor
+              , meshContractor
+              , scatteringContractor
+              , absorptionContractor
+              ]

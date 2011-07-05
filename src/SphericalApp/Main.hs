@@ -1,6 +1,6 @@
 module Main where
 -- | A module for building a simple particle-transport application
--- with elastic, non-relativistic physics.
+-- with elastic, non-relativistic physics, in Spherical Coordinates.
 
 import Data.Sequence as Seq
 import Data.Array
@@ -42,28 +42,25 @@ model = Model { mesh    = sphMesh
 
 -- Define our Monte Carlo operators for streaming a particle and creating a tally.
 
-streamOp :: Particle -> [(Event, Particle)]
-streamOp = MC.stream (MC.step model contractors) Events.isFinalEvent
+streamParticle :: Particle -> [(Event, Particle)]
+streamParticle = MC.stream (MC.step model contractors) Events.isFinalEvent
 
-tallyOp :: [(Event, Particle)] -> Tally
-tallyOp = MC.monoidTally eventToTally
+tallyEvents :: [(Event, Particle)] -> Tally
+tallyEvents = MC.monoidTally eventToTally
 
-mapOp :: Particle -> Tally
-mapOp = tallyOp . streamOp
+combineTally :: Tally -> Tally -> Tally
+combineTally = mappend
 
-foldOp :: Tally -> Tally -> Tally
-foldOp = mappend
-
+initialTally :: Tally
+initialTally = mempty
 
 -- Create some particles
 particles :: [Particle]
 particles = []
 
 result :: Tally
-result = MC.simulate mapOp foldOp particles
+result = MC.simulate (tallyEvents . streamParticle) combineTally initialTally particles
 
 main :: IO ()
 main = do
-  print "I did it!"
-
-
+  print result

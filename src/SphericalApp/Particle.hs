@@ -57,7 +57,7 @@ weightedMomentum particle =
 
 sampleDistance :: Opacity -> Particle -> (Distance, Particle)
 sampleDistance opacity particle = let
-  (distance, rng) = sampleExponential (1.0/(opValue opacity)) (rand particle)
+  (distance, rng) = sampleExponential (opValue opacity) (rand particle)
   particle' = particle{rand=rng}
   in (Distance distance, particle')
 
