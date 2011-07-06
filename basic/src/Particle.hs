@@ -14,7 +14,7 @@ data Particle = Particle {
   }
 
 -- may want to expand on NuX in the future
-data PType = NuE | NuEBar | NuX
+data PType = NuE | NuEBar | NuX deriving Show
 
 -- end of file
 
