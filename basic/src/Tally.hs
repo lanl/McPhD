@@ -28,8 +28,8 @@ data Tally = Tally {
 
 instance NFData Tally
 
-data CellTally = CellTally !Momentum !Energy
-  deriving (Show)
+data CellTally = CellTally {ctMom :: !Momentum, ctEnergy :: !Energy}
+  deriving (Show,Eq)
 
 newtype instance MVector s CellTally = MV_CellTally (MVector s (Momentum, Energy))
 newtype instance Vector    CellTally = V_CellTally  (Vector    (Momentum, Energy))
