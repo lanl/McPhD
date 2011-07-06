@@ -14,8 +14,6 @@ import Cell
 
 -- * particle generation
 
-type SrcStat = (CellIdx,Int,EnergyWeight) -- (cidx, # particles, ew/cell)
-
 -- | generate a given number of particles in each cell
 genParticlesInCells :: Mesh m => m -> RNG -> [SrcStat] -> 
                        FP ->  -- ^ alpha (power law parameters)
@@ -28,7 +26,7 @@ genParticlesInCell :: Mesh m => m -> RNG ->
                       FP ->  -- ^ alpha (power law parameters) 
                      SrcStat ->
                      [Particle]
-genParticlesInCell msh g a (cidx,n,ewt) =
+genParticlesInCell msh g a (cidx,n,ewt,_) =
   let gs = take n (unfoldr (Just . split) g)
   in  map (genCellParticle msh cidx ewt a) gs
 
@@ -84,6 +82,9 @@ rejector x a = x**a * (exp (-a*x)) / exp (-a)
 
 -- * source statistics
 
+-- | (cidx, # particles, ew, total energy) for each cell
+type SrcStat = (CellIdx,Int,EnergyWeight,Energy) 
+
 -- | Compute energy emitted in cell volume from luminosity in each cell
 evolFromLum :: [Luminosity] -> Time -> [Energy]
 evolFromLum ls (Time dt) = [Energy $ dt * l |(Luminosity l)<-ls]
@@ -94,17 +95,19 @@ srcNumsFromEvol :: Int -> [Energy] -> [(Int,EnergyWeight)]
 srcNumsFromEvol nTot ePerCell = zip nPerCell wts
   where nPerCell = [round $ nt * frac  | frac <- fracs] :: [Int]
         fracs    = [ eC/eTot | (Energy eC) <- ePerCell]
-        wts      = map EnergyWeight fracs
+        wts      = [EnergyWeight $ op eC nv | (Energy eC,nv) <- zip ePerCell nPerCell]
+        op en n = if n /= 0 then (en/ fromIntegral n) else 0.0
         Energy eTot = sum ePerCell
         nt :: Double
         nt = fromIntegral nTot 
 
 calcSrcStats :: [Luminosity] -> Time -> Int -> [SrcStat]
-calcSrcStats ls dt ntot = zipWith zfunc stats [CellIdx i | i <- [1..n]]
-  where stats = srcNumsFromEvol ntot $ evolFromLum ls dt 
+calcSrcStats ls dt ntot = zipWith3 zfunc es stats [CellIdx i | i <- [1..n]]
+  where stats = srcNumsFromEvol ntot es
+        es    = evolFromLum ls dt 
         n     = length ls
-        zfunc :: (Int,EnergyWeight) -> CellIdx -> SrcStat
-        zfunc (i,wt) cidx = (cidx,i,wt)
+        zfunc :: Energy -> (Int,EnergyWeight) -> CellIdx -> SrcStat
+        zfunc en (i,wt) cidx = (cidx,i,wt,en)
 
 -- * older generation routine, useful for testing
 
