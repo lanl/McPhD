@@ -8,6 +8,9 @@
 import Control.Parallel.Strategies
 import System.Console.GetOpt
 import System.Environment
+import System.FilePath.Posix (isValid)
+import Text.Printf
+
 import Numerical
 import TryNSave
 import MC
@@ -18,7 +21,6 @@ import Data.List as L
 import Source
 import PRNG
 import Sigma_HBFC
-import System.FilePath.Posix (isValid)
 
 
 runSim :: CLOpts -> IO ()
@@ -34,12 +36,39 @@ runSim (CLOpts { nps = n
        ) = do
   (clls, lnuer, lnuebarr, lnuxr) <- readMatStateP infile
   let (msh,ndropped) = mkMesh clls ll ul
-      mshsz = ncells msh
-      lnue  = trim ndropped mshsz lnuer
-      statsNuE  = calcSrcStats lnue dt n
-      tllyNuE   = runManyParticles statsNuE chunkSize msh a 
+      mshsz          = ncells msh
+
+  let lnue           = trim ndropped mshsz lnuer
+      statsNuE       = calcSrcStats lnue dt n
+  summarizeStats statsNuE NuE
+  let tllyNuE        = runManyParticles statsNuE chunkSize msh a 
   writeTally (outfile ++ "_nuE") tllyNuE
+  summarizeTally tllyNuE
+
+  let lnuebar           = trim ndropped mshsz lnuebarr
+      statsNuebar       = calcSrcStats lnuebar dt n
+  summarizeStats statsNuebar NuEBar
+  let tllyNuebar        = runManyParticles statsNuebar chunkSize msh a 
+  writeTally (outfile ++ "_nuebar") tllyNuebar
+  summarizeTally tllyNuebar
+
+  let lnux           = trim ndropped mshsz lnuxr
+      statsNux       = calcSrcStats lnux dt n
+  summarizeStats statsNux NuX
+  let tllyNux        = runManyParticles statsNux chunkSize msh a 
+  writeTally (outfile ++ "_nux") tllyNux
+  summarizeTally tllyNux
+
   return ()
+
+summarizeStats :: [SrcStat] -> PType -> IO ()
+summarizeStats stats typ = do
+  let ntot   = sum (map (\(_,b,_,_) -> b) stats)
+      meanEW = sum (map (\(_,_,c,_) -> c) stats)
+      etot   = sum (map (\(_,_,_,d) -> d) stats)
+      fmtstr = "For %s:\n\t%i particles\n\t%e total energy\n\t%e mean energy weight"
+      outstr = printf fmtstr (show typ) (ntot) (e etot) (ew meanEW)
+  putStrLn outstr
 
 trim :: Int -> Int -> [a] -> [a]
 trim d t l = take t $ drop d l
