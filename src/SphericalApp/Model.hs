@@ -13,12 +13,13 @@ this is not required in general.
 
 import Data.Array.IArray
 
-import Mesh.Classes as Mesh
+import Mesh.Classes as Mesh hiding (cell)
 import Mesh.Spherical
 
 import qualified Particle.Classes as Particle
 
 import Properties
+import Numerics
 import qualified MonteCarlo as MC
 
 import SphericalApp.Particle
@@ -29,6 +30,7 @@ import SphericalApp.Physics
 -- * Aliases for the MonteCarlo types.
 
 type Cell        = Mesh.MeshCell SphericalMesh
+type Face        = Mesh.MeshFace SphericalMesh
 type Outcome     = MC.Outcome    Event Particle
 type Contractor  = MC.Contractor Model Particle Event
 
@@ -61,7 +63,16 @@ timeStepContractor model particle =
 
 -- | Contractor for face and boundary crossings in the mesh.
 meshContractor :: Contractor
-meshContractor = undefined
+meshContractor model particle =
+    let m = mesh model
+        c = cell particle
+        l = location particle
+        crossing = cell_boundary m c l
+    in makeOutcome crossing
+        where makeOutcome (distance, neighbor) =
+                  let event     = convertNeighbor neighbor
+                      particle' = Particle.move particle distance
+                  in MC.Outcome distance event particle'
 
 
 -- | Contractor for scattering event
@@ -69,13 +80,14 @@ scatteringContractor :: Contractor
 scatteringContractor model particle =
   let Data{sig_scat=opacity} = localPhysics model particle
       (distance, particle')  = sampleDistance opacity particle
-      particle''             = isotropicScatter particle'
+      particle''             = Particle.move particle distance
+      particle'''            = isotropicScatter particle''
       event = Collide
               { collideType = Scatter
-              , momentumDep = (weightedMomentum particle - weightedMomentum particle'')
-              , energyDep   = (weightedEnergy   particle - weightedEnergy particle'')
+              , momentumDep = (weightedMomentum particle - weightedMomentum particle''')
+              , energyDep   = (weightedEnergy   particle - weightedEnergy particle''')
               }
-  in MC.Outcome distance event particle''
+  in MC.Outcome distance event particle'''
 
 isotropicScatter = id
 

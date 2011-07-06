@@ -15,13 +15,10 @@ module SphericalApp.Events where
 import qualified Space.Classes as Space
 import Space.Spherical1D
 
-import qualified Mesh.Classes as Mesh hiding (Cell)
+import qualified Mesh.Classes as Mesh
 import Mesh.Spherical
 
 import Properties
-
-import SphericalApp.Physics
-
 
 -- | Type of Scattering Events
 data CollideType = Scatter | Absorb  deriving (Eq, Show, Ord)  -- More kinds to come.
@@ -30,21 +27,42 @@ finalCollision Scatter = False
 finalCollision Absorb  = True
 
 -- | Type of Boundary Events
-data BoundaryType = Cell | Escape | Reflect deriving (Eq, Show, Ord)
+data BoundaryType = Face | Escape | Reflect deriving (Eq, Show, Ord)
 finalBoundary :: BoundaryType -> Bool
-finalBoundary Cell    = False
+finalBoundary Face    = False
 finalBoundary Escape  = True
 finalBoundary Reflect = False
 
+-- This is kind of ridiculous. I want different names for the mesh and
+-- event contexts, but there's an almost perfect 1-1 correspondence
+-- between the two.
+--
+-- Face means the same thing in both contexts.
+--
+-- Self might mean more than Reflect. E.g. hitting the origin in
+-- Spherical coordaintes and still being in cell 0. Although, this
+-- could be considered a kind of reflection.
+--
+-- There may be more than one kind of Boundary. E.g. physical versus
+-- computational domain. The latter would probably just be tallied as
+-- a face crossing.
+convertMeshCross :: Mesh.Crossing -> BoundaryType
+convertMeshCross Mesh.Face     = Face
+convertMeshCross Mesh.Boundary = Escape
+convertMeshCross Mesh.Self     = Reflect
+
+convertNeighbor :: Mesh.NeighborT SphericalMesh -> Event
+convertNeighbor (Mesh.Neighbor _ face crossing) =
+  BoundaryCross (convertMeshCross crossing) face
 
 -- | Combining the event types into a single data type with tally information.
-data Event = Collide  { collideType :: CollideType
-                      , momentumDep :: Space.Velocity Spherical1D
-                      , energyDep   :: Energy
-                      }
-           | Boundary { boundaryType :: BoundaryType
-                      , faceIndex    :: Mesh.MeshFace SphericalMesh
-                      }
+data Event = Collide       { collideType :: CollideType
+                           , momentumDep :: Space.Velocity Spherical1D
+                           , energyDep   :: Energy
+                           }
+           | BoundaryCross { boundaryType :: BoundaryType
+                           , faceIndex    :: Mesh.MeshFace SphericalMesh
+                           }
            | Timeout deriving Show
 
 
@@ -52,6 +70,6 @@ data Event = Collide  { collideType :: CollideType
 -- use a catch-all pattern because I want to be warned if this list is
 -- inexhaustive
 isFinalEvent :: Event -> Bool
-isFinalEvent Timeout        = True
-isFinalEvent (c@Collide{})  = finalCollision $ collideType c
-isFinalEvent (b@Boundary{}) = finalBoundary  $ boundaryType b
+isFinalEvent Timeout             = True
+isFinalEvent (c@Collide{})       = finalCollision $ collideType c
+isFinalEvent (b@BoundaryCross{}) = finalBoundary  $ boundaryType b

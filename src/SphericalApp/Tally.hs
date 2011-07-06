@@ -10,21 +10,20 @@ import qualified Data.Map as Map
 
 import Utils.Combinators
 
-import Mesh.Classes as Mesh
+import Mesh.Classes hiding (cell)
 import Mesh.Spherical
 
 import Space.Classes as Space
 import Space.Spherical1D
 
 import Properties
-import SphericalApp.Physics
 import SphericalApp.Events
 import SphericalApp.Particle
 
 -- * Aliases
 type Momentum = Space.Velocity Spherical1D
 type Space    = Spherical1D
-type Cell     = Mesh.MeshCell SphericalMesh
+type Cell     = MeshCell SphericalMesh
 
 -- * Tally data structures
 
@@ -57,16 +56,16 @@ eventToTally (event, Particle{cell=inCell}) =
 
 -- | Convert an event into an EventCount
 eventToCount :: Event -> EventCount
-eventToCount (Boundary Escape _)  = EventCount 1 0 0
-eventToCount (Boundary Reflect _) = EventCount 0 1 0
-eventToCount Timeout              = EventCount 0 0 1
-eventToCount Collide{}            = EventCount 0 0 0
-eventToCount Boundary{}           = EventCount 0 0 0
+eventToCount (BoundaryCross Escape  _) = EventCount 1 0 0
+eventToCount (BoundaryCross Reflect _) = EventCount 0 1 0
+eventToCount Timeout                   = EventCount 0 0 1
+eventToCount Collide{}                 = EventCount 0 0 0
+eventToCount BoundaryCross{}           = EventCount 0 0 0
 
 -- | Convert an event into the corresponding CellTally
 eventToCellTally :: Event -> CellTally
-eventToCellTally Timeout    = mempty
-eventToCellTally Boundary{} = mempty
+eventToCellTally Timeout         = mempty
+eventToCellTally BoundaryCross{} = mempty
 eventToCellTally (Collide _ momentumDep energyDep) = CellTally momentumDep energyDep
 
 
