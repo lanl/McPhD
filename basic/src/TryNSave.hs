@@ -4,6 +4,7 @@
 -- (c) Copyright 2011 LANSLLC, all rights reserved
 
 module TryNSave (writeTally
+                ,summarizeTally
                 ,readMatStateP)
     where
 
@@ -12,6 +13,7 @@ import Cell
 import Text.CSV
 import Physical
 import Data.List (zip4)
+import qualified Data.Vector.Unboxed as V
 import Constants (k_B,pmg)
 import Material
 import Particle
@@ -19,6 +21,29 @@ import Particle
 
 writeTally :: String -> Tally -> IO ()
 writeTally name = writeFile name . show 
+
+summarizeTally :: Tally -> IO ()
+summarizeTally (Tally cntrs dep esc) = do
+  -- summarize global events
+  let (Energy totEDep) = V.sum (V.map (\ct -> ctEnergy ct) dep)
+      (Momentum totMDep) = V.sum (V.map (\ct -> ctMom ct) dep)
+  mapM_ putStrLn $ 
+          ("Total energy deposited: " ++ show totEDep) :
+          "Scatters:" :
+           ("\tnucleon elastic: " ++ show (nNuclEl cntrs)) :
+           ("\tnu_e--electron scatters: " ++ show (nEMinusInel cntrs)) :
+           ("\tnu_e_bar--positron scatters: " ++ show (nEPlusInel cntrs)) :
+          "\tnu_x--electron scatters: FIX ME!"  :
+          "\tnu_x_bar--positron scatters: FIX ME!"  :
+          "Absorptions:" :
+           ("\tnu_i nucleon absorptions: " ++ show (nNuclAbs cntrs)) :
+          "Mesh:" :
+           ("\tcell boundary crossings: " ++ show (nTransmit cntrs)) :
+           ("\treflections: " ++ show (nReflect cntrs)) :
+           ("\tescapes: " ++ show (nEscape cntrs)) :
+          "Timeouts:" :
+           ("\ttimeouts: " ++ show (nTimeout cntrs)) :
+          "==================================================" : []
 
 type CellGeom = (Position,Position,BoundaryCondition,BoundaryCondition)
 
