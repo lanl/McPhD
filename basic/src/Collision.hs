@@ -50,8 +50,8 @@ sampleCollision m cll
                 elin@(Energy eli) olin@(Direction oli)
                 sig dCol (EnergyWeight wt) = do
   let v       = (mvel $ mat cll)
-      (eci,_) = labToComoving elin olin v
-  (collType,ecf,ocf) <- sampleCollisionComoving m cll eci sig 
+      (eci,oci) = labToComoving elin olin v
+  (collType,ecf,ocf) <- sampleCollisionComoving m cll eci oci sig 
   let (Energy elf, ol'@(Direction olf)) = comovingToLab ecf ocf v
       edep = Energy $ wt * (eli - elf)
       pdep = Momentum $ wt/c*(eli*oli - elf*olf) 
@@ -62,15 +62,20 @@ sampleCollision m cll
 -- neutrino energy (comoving), and a uniform random deviate, select
 -- a scattering event. Determine final energy and momentum: at present,
 -- scattering is elastic and isotropic in comoving frame.
-sampleCollisionComoving :: Mesh m => m -> Cell -> Energy -> Sigma.Lepton -> 
-                          Rnd (E.CollType,Energy,Direction)
-sampleCollisionComoving m cll en sig = do
+sampleCollisionComoving :: Mesh m => m -> Cell -> Energy -> Direction -> 
+                           Sigma.Lepton -> 
+                           Rnd (E.CollType,Energy,Direction)
+sampleCollisionComoving m cll en oci sig = do
   xi <- random
-  ocf <- sampleDirectionIso m
-  let ecf = en
-      evt = selectEvent cll en sig (URD xi)
+  let evt = selectEvent cll en sig (URD xi)
+  (ecf,ocf) <- getNewState evt m cll en oci
   return (evt, ecf, ocf)
 
+getNewState :: Mesh m => E.CollType -> m -> Cell -> Energy -> Direction -> Rnd (Energy,Direction)
+getNewState E.NuclAbs    _ _ e o = Sigma.newStateNAbs e o
+getNewState E.NuclEl     m _ e o = Sigma.newStateNElastic m e o
+getNewState E.EMinusInel m c e o = Sigma.newStateEMinusInel m c e o
+getNewState E.EPlusInel  m c e o = Sigma.newStateEPlusInel m c e o
 
 -- | sample a collision event in the comoving frame: Given the cell, 
 -- neutrino energy (comoving), and a uniform random deviate, select
