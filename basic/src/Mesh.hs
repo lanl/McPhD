@@ -1,4 +1,7 @@
-module Mesh where
+module Mesh 
+  ( module Mesh
+  , module Cell)
+ where
 
 import Data.Vector as V
 
