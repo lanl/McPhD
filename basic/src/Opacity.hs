@@ -2,11 +2,13 @@
  -  material properties. -}
 
 module Opacity (
-    module Opacity
-  , module Cell
+                module Opacity
+               ,module Cell
+               ,module Sigma
   ) where
 
 import qualified Sigma_HBFC as Sigma
+import Mesh
 import Cell
 import Material
 import Physical

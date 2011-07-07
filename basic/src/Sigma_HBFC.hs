@@ -1,15 +1,47 @@
-{- | Analytic microscopic neutrino cross sections.
+{-# LANGUAGE TupleSections #-}
+
+{- | Analytic microscopic neutrino cross sections and interaction functions.
  - From Herant, Benz, Fryer, and Colgate: Ap. J. 435:339-361 (1994).
  - Cross sections are in cm^2, energies in MeV
  -}
 
-module Sigma_HBFC where
+module Sigma_HBFC 
+  where
 
+import Material (tempE)
 import Physical
+import Mesh
+import PRNG
+import Control.Monad
 
 
--- * neutrino--baryon events
--- ------------------------
+-- * interactions 
+type PState  = (Energy,Direction)
+type Scatter = Energy -> Direction -> Rnd PState
+
+newStateNAbs :: Scatter
+newStateNAbs _ _ = return (Energy 0.0, Direction 0.0)
+
+newStateNElastic :: Mesh m => m -> Scatter
+newStateNElastic m ei _ = liftM (ei, ) (sampleDirectionIso m)
+
+newStateEMinusInel :: Mesh m => m -> Cell -> Scatter
+newStateEMinusInel m cll ei _ = 
+  liftM (leptonEnergy cll ei, ) (sampleDirectionIso m)
+
+newStateEPlusInel  :: Mesh m => m -> Cell -> Scatter
+newStateEPlusInel m cll ei _  = 
+  liftM (leptonEnergy cll ei, ) (sampleDirectionIso m)
+
+-- | compute final neutrino energy using generic 
+-- material temperature (in energy units) as lepton energy
+leptonEnergy :: Cell -> Energy -> Energy
+leptonEnergy cll (Energy ei) = Energy ef 
+  where ef   = 1.0/4.0 * (ei - elep)
+        elep = temp . tempE . mat $ cll  
+
+-- * neutrino--baryon cross sections
+-- ---------------------------------
 -- | nucleon absorption/emission
 
 nuNAbs :: Energy -> CrossSection
@@ -36,24 +68,40 @@ nuAElastic (Energy nrg) (NucleonNumber a) =
 -- Python version. The corresponding opacity code figures out which
 -- species is involved, then branches to one of these functions....
 
--- * neutrino--lepton scattering
--- ----------------------------
+-- * neutrino--lepton scattering cross sections
+-- --------------------------------------------
 -- | nu_e--e^- & nu_bar_e--e^+ scattering
 nuEEMinus :: Energy -> Energy -> CrossSection
-nuEEMinus  (Energy e_nu) (Energy e_e) = CrossSection $ 9.2e-45 * e_nu * e_e
+nuEEMinus  (Energy e_nu) (Energy e_e) = CrossSection $ 0.0
 
 -- | nu_bar_e--e^- & nu_e--e^+ scattering
 nuEEPlus :: Energy -> Energy -> CrossSection
-nuEEPlus (Energy e_nu) (Energy e_e) = CrossSection $ 3.9e-45 * e_nu * e_e
+nuEEPlus (Energy e_nu) (Energy e_e) = CrossSection $ 0.0
 
 
 -- | nu_x--e^- & nu_bar_x--e^+ scattering
 nuXEMinus :: Energy -> Energy -> CrossSection
-nuXEMinus  (Energy e_nu) (Energy e_e) = CrossSection $ 1.8e-45 * e_nu * e_e
+nuXEMinus  (Energy e_nu) (Energy e_e) = CrossSection $ 0.0
 
 -- | nu_bar_x--e^- & nu_x--e^+ scattering
 nuXEPlus :: Energy -> Energy -> CrossSection
-nuXEPlus (Energy e_nu) (Energy e_e) = CrossSection $ 1.3e-45 * e_nu * e_e
+nuXEPlus (Energy e_nu) (Energy e_e) = CrossSection $ 0.0
+
+-- nuEEMinus :: Energy -> Energy -> CrossSection
+-- nuEEMinus  (Energy e_nu) (Energy e_e) = CrossSection $ 9.2e-45 * e_nu * e_e
+
+-- -- | nu_bar_e--e^- & nu_e--e^+ scattering
+-- nuEEPlus :: Energy -> Energy -> CrossSection
+-- nuEEPlus (Energy e_nu) (Energy e_e) = CrossSection $ 3.9e-45 * e_nu * e_e
+
+
+-- -- | nu_x--e^- & nu_bar_x--e^+ scattering
+-- nuXEMinus :: Energy -> Energy -> CrossSection
+-- nuXEMinus  (Energy e_nu) (Energy e_e) = CrossSection $ 1.8e-45 * e_nu * e_e
+
+-- -- | nu_bar_x--e^- & nu_x--e^+ scattering
+-- nuXEPlus :: Energy -> Energy -> CrossSection
+-- nuXEPlus (Energy e_nu) (Energy e_e) = CrossSection $ 1.3e-45 * e_nu * e_e
 
 
 
