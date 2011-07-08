@@ -5,19 +5,31 @@
 
 module TryNSave (writeTally
                 ,summarizeTally
+                ,summarizeStats
                 ,readMatStateP)
     where
 
 import Tally
 import Cell
-import Text.CSV
 import Physical
-import Data.List (zip4)
-import qualified Data.Vector.Unboxed as V
 import Constants (k_B,pmg)
 import Material
 import Particle
--- import Control.Monad
+import Source
+
+import Text.CSV
+import Text.Printf
+import Data.List (zip4)
+import qualified Data.Vector.Unboxed as V
+
+summarizeStats :: [SrcStat] -> PType -> IO ()
+summarizeStats stats typ = do
+  let ntot   = sum (map (\(_,b,_,_) -> b) stats)
+      meanEW = sum (map (\(_,_,c,_) -> c) stats)
+      etot   = sum (map (\(_,_,_,d) -> d) stats)
+      fmtstr = "For %s:\n\t%i particles\n\t%e total energy\n\t%e mean energy weight"
+      outstr = printf fmtstr (show typ) (ntot) (e etot) (ew meanEW)
+  putStrLn outstr
 
 writeTally :: String -> Tally -> IO ()
 writeTally name = writeFile name . show 
