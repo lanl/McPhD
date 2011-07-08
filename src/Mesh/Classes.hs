@@ -7,6 +7,7 @@ cell and face indexing schemes. -}
 
 module Mesh.Classes (Mesh (..)
                     , Neighbor (..)
+                    , NeighborT
                     , BoundaryCondition (..)
                     , boundary2neighbor) where
 
@@ -22,6 +23,8 @@ data Neighbor c = Cell { neighbor_cell :: c }
                 | Void -- ^ Edge of the simulation
                 | Self -- ^ Cell is it's own neighbor. E.g. reflection
                 deriving Show
+                         
+type NeighborT m = Neighbor (MeshCell m)
 
 data BoundaryCondition = Vacuum | Reflection deriving Show
 

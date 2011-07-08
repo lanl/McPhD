@@ -1,6 +1,8 @@
 module Main where
 -- | A module for building a simple particle-transport application
 -- with elastic, non-relativistic physics, in Spherical Coordinates.
+--
+
 
 import Data.Sequence as Seq
 import Data.Array
@@ -20,7 +22,7 @@ import SphericalApp.Tally as Tally
 import SphericalApp.Model
 
 
--- Create a mesh
+-- Create a mesh with 100 unit-sized cells and a vacuum boundary condition.
 sphMesh :: SphericalMesh
 sphMesh = SphericalMesh (Seq.fromList (fmap Radius [1..100])) Mesh.Vacuum
 
@@ -54,9 +56,22 @@ combineTally = mappend
 initialTally :: Tally
 initialTally = mempty
 
--- Create some particles
+-- Create some test particles
 particles :: [Particle]
-particles = []
+particles = map (\index -> fromJust $ createParticle 
+                           sphMesh 
+                           (make location direction) 
+                           (Time 10.0) 
+                           (Energy 1.0) 
+                           (EnergyWeight 1.0) 
+                           (Speed 1.0) 
+                           seed) [0..99]
+            where
+              location  = (fromIntgegral index) + 0.5
+              direction = normalVector2 (pi/2)
+              seed      = fromIntegral index
+
+
 
 result :: Tally
 result = MC.simulate (tallyEvents . streamParticle) combineTally initialTally particles

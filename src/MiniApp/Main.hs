@@ -43,7 +43,7 @@ model = Model { mesh    = sphMesh
 -- Define our Monte Carlo operators for streaming a particle and creating a tally.
 
 streamOp :: (Particle SphericalMesh)
-            -> [(Event SphericalMesh, Particle SphericalMesh)]
+            -> [MC.Outcome (Event SphericalMesh) (Particle SphericalMesh)]
 streamOp = MC.stream (MC.step model contractors) Events.isFinalEvent
 
 

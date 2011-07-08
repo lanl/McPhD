@@ -33,28 +33,6 @@ finalBoundary Face    = False
 finalBoundary Escape  = True
 finalBoundary Reflect = False
 
--- This is kind of ridiculous. I want different names for the mesh and
--- event contexts, but there's an almost perfect 1-1 correspondence
--- between the two.
---
--- Face means the same thing in both contexts.
---
--- Self might mean more than Reflect. E.g. hitting the origin in
--- Spherical coordaintes and still being in cell 0. Although, this
--- could be considered a kind of reflection.
---
--- There may be more than one kind of Boundary. E.g. physical versus
--- computational domain. The latter would probably just be tallied as
--- a face crossing.
-convertMeshCross :: Mesh.Crossing -> BoundaryType
-convertMeshCross Mesh.Face     = Face
-convertMeshCross Mesh.Boundary = Escape
-convertMeshCross Mesh.Self     = Reflect
-
-convertNeighbor :: Mesh.NeighborT SphericalMesh -> Event
-convertNeighbor (Mesh.Neighbor _ face crossing) =
-  BoundaryCross (convertMeshCross crossing) face
-
 -- | Combining the event types into a single data type with tally information.
 data Event = Collide       { collideType :: CollideType
                            , momentumDep :: Space.Velocity Spherical1D

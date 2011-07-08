@@ -29,8 +29,7 @@ import MiniApp.Physics
 -- * Aliases for the MonteCarlo types.
 
 type Outcome m    = MC.Outcome    (Event m) (Particle m)
-type Contractor m = MC.Contractor (Model m) (Particle m) (Event m)
-
+type Contractor m = MC.Contractor (Model m) (Event m) (Particle m)
 
 -- | The physical model. Consists of a mesh, space properties indexed
 -- by mesh cell and the end of time-step

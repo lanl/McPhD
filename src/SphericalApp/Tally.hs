@@ -4,26 +4,43 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module SphericalApp.Tally where
+-- | Module to define a tally for the Spherical Test problem.
+-- 
+-- The tally has two parts: 
+-- 1. Per-cell energy and momentum deposition
+-- 2. Aggregate counts of particle escapes, relfections and time-outs.
+--
+-- The tally is a monoid enabling mconcat for combining tallies.  
+--
+-- The same Tally data type is also used for each tally contribution,
+-- e.g. the result of each event. This means that the map from cells
+-- to the tallied data has a single element, but we can use mconcat
+-- for combining the running tally and the tally contributions as
+-- well.  A seperate data type which did not contain the map might be
+-- more efficient. The top-level MC functions can use distinct types
+-- for the tally and tally contributions.
 
 import Data.Monoid
 import qualified Data.Map as Map
 
 import Utils.Combinators
 
-import Mesh.Classes hiding (cell)
+import Mesh.Classes
 import Mesh.Spherical
 
 import Space.Classes as Space
 import Space.Spherical1D
 
 import Properties
+import MonteCarlo
+
 import SphericalApp.Events
 import SphericalApp.Particle
 
 -- * Aliases
 type Momentum = Space.Velocity Spherical1D
-type Space    = Spherical1D
 type Cell     = MeshCell SphericalMesh
+type OutcomeT = Outcome Event Particle
 
 -- * Tally data structures
 
@@ -31,10 +48,11 @@ type Cell     = MeshCell SphericalMesh
 data CellTally = CellTally !Momentum !Energy deriving (Eq, Show)
 
 -- | Final events for particles, tallied globally
-data EventCount = EventCount { nEscape  :: !Int
-                             , nReflect :: !Int
-                             , nTimeout :: !Int
-                             } deriving (Show, Eq)
+data EventCount = EventCount { 
+      nEscape  :: !Int
+    , nReflect :: !Int
+    , nTimeout :: !Int
+    } deriving (Show, Eq)
 
 -- | The complete tally is the combination of all event contributions,
 -- indexed by cell, plus the global counts.
@@ -46,12 +64,12 @@ data Tally = Tally { counts  :: EventCount
 -- * Combining events and tallies
 
 -- | Add an event to the running tally.
-addEvent :: Tally -> (Event, Particle) -> Tally
-addEvent tally eAndP = tally <> eventToTally eAndP
+addEvent :: Tally -> OutcomeT -> Tally
+addEvent tally eAndP = tally <> outcomeToTally eAndP
 
 -- | Convert an event into a mini-tally.
-eventToTally :: (Event, Particle) -> Tally
-eventToTally (event, Particle{cell=inCell}) =
+outcomeToTally :: OutcomeT -> Tally
+outcomeToTally (Outcome _ event Particle{cell=inCell}) =
   Tally (eventToCount event) (Map.singleton inCell $ eventToCellTally event )
 
 -- | Convert an event into an EventCount
