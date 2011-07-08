@@ -9,7 +9,7 @@ import Control.Parallel.Strategies
 import System.Console.GetOpt
 import System.Environment
 import System.FilePath.Posix (isValid)
-import Text.Printf
+import Control.Monad
 
 import Numerical
 import TryNSave
@@ -22,65 +22,57 @@ import Source
 import PRNG
 import Sigma_HBFC
 
-
 runSim :: CLOpts -> IO ()
-runSim (CLOpts { nps = n
-               , inputF = infile
+runSim opts@(CLOpts { inputF = infile
                , outputF = outfile
                , llimit = ll
                , ulimit = ul
-               , chunkSz = chunkSize
-               , simTime = dt
-               , alpha   = a
                }
        ) = do
+  -- read input, process into mesh, select corresponding luminosities
   (clls, lnuer, lnuebarr, lnuxr) <- readMatStateP infile
+  putStrLn "read material state file"
   let (msh,ndropped) = mkMesh clls ll ul
       mshsz          = ncells msh
-
-  let lnue           = trim ndropped mshsz lnuer
-      statsNuE       = calcSrcStats lnue dt n
-  summarizeStats statsNuE NuE
-  let tllyNuE        = runManyParticles statsNuE chunkSize msh a 
-  writeTally (outfile ++ "_nuE") tllyNuE
-  summarizeTally tllyNuE
-
-  let lnuebar           = trim ndropped mshsz lnuebarr
-      statsNuebar       = calcSrcStats lnuebar dt n
-  summarizeStats statsNuebar NuEBar
-  let tllyNuebar        = runManyParticles statsNuebar chunkSize msh a 
-  writeTally (outfile ++ "_nuebar") tllyNuebar
-  summarizeTally tllyNuebar
-
-  let lnux           = trim ndropped mshsz lnuxr
-      statsNux       = calcSrcStats lnux dt n
-  summarizeStats statsNux NuX
-  let tllyNux        = runManyParticles statsNux chunkSize msh a 
-  writeTally (outfile ++ "_nux") tllyNux
-  summarizeTally tllyNux
-
+      [lnue,lnuebar,lnux] = map (trim ndropped mshsz) [lnuer,lnuebarr,lnuxr]
+  -- run each species
+  tallies <- mapM (runOneSpecies msh opts) [(lnue,NuE),(lnuebar,NuEBar),(lnux,NuX)]
+  -- write out tallies
+  let outfs = map (outfile ++ ) ["_nuE","_nuEbar","_nuX"]
+  putStrLn "writing tallies"
+  zipWithM_ writeTally outfs tallies
   return ()
 
-summarizeStats :: [SrcStat] -> PType -> IO ()
-summarizeStats stats typ = do
-  let ntot   = sum (map (\(_,b,_,_) -> b) stats)
-      meanEW = sum (map (\(_,_,c,_) -> c) stats)
-      etot   = sum (map (\(_,_,_,d) -> d) stats)
-      fmtstr = "For %s:\n\t%i particles\n\t%e total energy\n\t%e mean energy weight"
-      outstr = printf fmtstr (show typ) (ntot) (e etot) (ew meanEW)
-  putStrLn outstr
-
-trim :: Int -> Int -> [a] -> [a]
-trim d t l = take t $ drop d l
-
+-- | run one neutrino species: 
+--     1. derive its source statistics (where to put particles) 
+--     2. print source statistics to stdout 
+--     3. run particles to get a tally
+--     4. print summary of tally
+-- TO DO: would be nice to put summarize___ in a writer monad: purify this
+runOneSpecies :: Mesh m => 
+                 m -> 
+                 CLOpts ->
+                 ([Luminosity],PType) -> 
+                 IO Tally
+runOneSpecies msh
+              (CLOpts { nps     = n
+                      , chunkSz = chunkSize
+                      , simTime = dt
+                      , alpha   = a})
+              (lnu,nuType) = do 
+  let statsNu = calcSrcStats lnu dt n
+  summarizeStats statsNu nuType
+  let tllyNu = runManyParticles statsNu chunkSize msh a
+  summarizeTally tllyNu
+  return tllyNu
 
 -- | Perform the simulation for several (at least one) particles
 -- in a given mesh.
 runManyParticles :: Mesh m => 
                     [SrcStat] ->
-                    Int ->   -- chunkSize
+                    Int ->   -- ^ chunkSize
                     m -> 
-                    FP -> -- ^ alpha 
+                    FP ->    -- ^ alpha 
                     Tally
 runManyParticles stats !chnkSz msh alph =
   let
@@ -100,6 +92,9 @@ chunk n = L.unfoldr go
     go xs = case splitAt n xs of
               ([], []) -> Nothing
               r        -> Just r
+
+trim :: Int -> Int -> [a] -> [a]
+trim d t l = take t $ drop d l
 
 main :: IO ()
 main = do
