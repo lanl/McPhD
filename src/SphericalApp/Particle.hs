@@ -6,7 +6,7 @@ import Data.Function
 import Control.Applicative
 import System.Random.Mersenne.Pure64
 
-import Mesh.Classes hiding (cell)
+import qualified Mesh.Classes as Mesh
 import Mesh.Spherical
 
 import Space.Classes
@@ -19,7 +19,7 @@ import Properties
 import Utils.Combinators
 import Approx
 
-type CellT     = MeshCell SphericalMesh
+type CellT     = Mesh.MeshCell SphericalMesh
 type SpaceT    = Spherical1D
 type VelocityT = Velocity Spherical1D
 
@@ -87,4 +87,4 @@ createParticle mesh location time energy weight speed seed =
   <*^> weight
   <*^> speed
   <*^> (makePureMT seed)
-  where cell = cell_find mesh location
+  where cell = Mesh.cell_find mesh location

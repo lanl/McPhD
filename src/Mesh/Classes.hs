@@ -34,8 +34,12 @@ boundaryToCrossing Vacuum     = Boundary
 boundaryToCrossing Reflection = Self
 
 -- | A type capturing information about a face crossing.
-data Neighbor c f = Neighbor { cell :: c, face :: f, crossing ::Crossing }
-                  deriving (Show, Eq)
+data Neighbor c f = Neighbor
+                    { cell :: c
+                    , face :: f
+                    , crossing :: Crossing
+                    } deriving (Show, Eq)
+
 type NeighborT m = Neighbor (MeshCell m) (MeshFace m)
 
 
