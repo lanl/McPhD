@@ -12,8 +12,7 @@ Events of particle motion fall into categories:
 -}
 module MiniApp.Events where
 
-import qualified Space.Classes as Space
-import Mesh.Classes hiding (Cell)
+import qualified Mesh.Classes as Mesh
 import Properties
 
 import MiniApp.Physics
@@ -33,26 +32,26 @@ finalBoundary Reflect = False
 
 
 -- | Combining the event types into a single data type with tally information.
-data (Mesh m) => Event m = Collide  { collideType   :: CollideType
-                                    , deltaMomentum :: Momentum (MeshSpace m)
-                                    , energyDep     :: Energy
-                                    }
-                         | Boundary { boundaryType  :: BoundaryType
-                                    , faceIndex     :: MeshFace m
-                                    }
-                         | Timeout
+data (Mesh.Mesh m) => Event m = Collide  { collideType   :: CollideType
+                                         , deltaMomentum :: Momentum (Mesh.MeshSpace m)
+                                         , energyDep     :: Energy
+                                         }
+                              | Boundary { boundaryType  :: BoundaryType
+                                         , faceIndex     :: Mesh.MeshFace m
+                                         }
+                              | Timeout
 
-deriving instance (Mesh m, Show m
-                  , Show (MeshSpace m)
-                  , Show (MeshFace m)
-                  , Show (Momentum (MeshSpace m))) => Show (Event m)
+deriving instance (Mesh.Mesh m, Show m
+                  , Show (Mesh.MeshSpace m)
+                  , Show (Mesh.MeshFace m)
+                  , Show (Momentum (Mesh.MeshSpace m))) => Show (Event m)
 
 
 
 -- | Returns True if the event stops the particle streaming.  I don't
 -- use a catch-all pattern because I want to be warned if this list is
 -- inexhaustive
-isFinalEvent :: (Mesh m) => Event m -> Bool
+isFinalEvent :: (Mesh.Mesh m) => Event m -> Bool
 isFinalEvent Timeout        = True
 isFinalEvent (c@Collide{})  = finalCollision $ collideType c
 isFinalEvent (b@Boundary{}) = finalBoundary  $ boundaryType b

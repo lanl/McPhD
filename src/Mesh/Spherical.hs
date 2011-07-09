@@ -16,25 +16,53 @@ import RandomSamples
 import NormalizedValues
 
 
-type SphCell = Int
-
-data SphericalDirection = Inward | Outward deriving (Eq, Ord, Show)
-
 data SphericalMesh = SphericalMesh
                      {
                        radii :: Seq Radius
-                     , bc    :: BoundaryCondition
+                     , bc    :: BoundaryCondition -- ^ Only one boudary on mesh
                      } deriving Show
+
+type SphNeighbor = NeighborT SphericalMesh
+type SphCell = Int
+data SphDir = Inward | Outward deriving (Eq, Ord, Show)
+
+-- | Expresses the impact of directions on a cell index.
+crossingToIndex :: Crossing -> SphCell -> SphDir-> SphCell
+crossingToIndex Face     cell Inward  = cell - 1
+crossingToIndex Face     cell Outward = cell + 1
+crossingToIndex Self     cell _       = cell
+crossingToIndex Boundary _ _          = -1
+
+-- | Convert boundary condition information and cell into the index of
+-- the neighboring cell.
+cellNeighbor :: SphericalMesh -> SphCell -> SphDir -> SphNeighbor
+
+cellNeighbor _ cell Inward =
+  let crossing = case cell of
+        0 -> Self
+        _ -> Face
+      nextCell = crossingToIndex crossing cell Inward
+  in Neighbor nextCell Inward crossing
+
+cellNeighbor mesh cell Outward =
+  let maxCell  = snd $ cellRange mesh
+      crossing = if (cell==maxCell)
+                 then boundaryToCrossing $ bc mesh
+                 else Face
+      nextCell = crossingToIndex crossing cell Outward
+  in Neighbor nextCell Outward crossing
+
+
 
 
 instance Mesh SphericalMesh where
   type MeshCell  SphericalMesh = SphCell
-  type MeshFace  SphericalMesh = SphericalDirection
+  type MeshFace  SphericalMesh = SphDir
   type MeshSpace SphericalMesh = Spherical1D
 
   -- | # cells = # stored radii
   size = Seq.length . radii
-  
+
   -- | Cells indexed from zero to size-1
   cellRange m = (0, size m-1)
 
@@ -44,15 +72,11 @@ instance Mesh SphericalMesh where
         pairs = Seq.zip (Radius 0 <| rads) (rads)
     in Seq.findIndexL (cellBoundsTest (==) location) pairs
 
-  cell_neighbor _ cell Inward
-      | cell == 0 = Cell cell -- Crossing origin.
-      | otherwise = Cell $ cell - 1
-  cell_neighbor mesh cell Outward
-      | cell == size mesh = Void
-      | otherwise         = Cell $ cell+1
+  cell_neighbor = cellNeighbor
 
-  cell_neighbors mesh cell = [(Inward,  cell_neighbor mesh cell Inward),
-                              (Outward, cell_neighbor mesh cell Outward) ]
+  cell_neighbors mesh cell = [ cell_neighbor mesh cell Inward
+                             , cell_neighbor mesh cell Outward
+                             ]
 
   is_in_mesh mesh location = (position location) < (outer_radius mesh)
 
@@ -71,16 +95,14 @@ instance Mesh SphericalMesh where
         (direction, rand'') = sampleNormalVector2 rand'
     in (radius *| normalized_value direction, rand'')
 
-  -- TODO: Move disqualifying comparison earlier to avoid sqrt when possible.
-  cell_boundary mesh cell (Vector2 r_xi r_eta) (Distance distance) =
+  cell_boundary mesh cell (Vector2 r_xi r_eta) =
       let Radius rmin = cellBound mesh cell Inward
           Radius rmax = cellBound mesh cell Outward
           (d, face) = if (r_eta < rmin) && (r_xi < 0)
-                      then
-                          (distComp rmin, Inward)
-                      else
-                          (distComp rmax, Outward)
-      in if (d < distance) then Just ((Distance d), face) else Nothing
+                      then (distComp rmin, Inward)
+                      else (distComp rmax, Outward)
+          neighbor = cell_neighbor mesh cell face
+      in (Distance d, neighbor)
       where distComp rad =
                 (negate r_xi) + sqrt (rad^(2::Integer) - r_eta^(2::Integer))
 
@@ -90,7 +112,7 @@ outer_radius mesh = right where ( _ :> right) = viewr $ radii mesh
 
 
 -- | Return the boundary of a cell in the given direction
-cellBound :: SphericalMesh -> SphCell -> SphericalDirection -> Radius
+cellBound :: SphericalMesh -> SphCell -> SphDir -> Radius
 cellBound mesh cell Inward
     | cell == 0 = Radius 0
     | otherwise = (radii mesh) `Seq.index` (cell - 1)

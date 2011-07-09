@@ -15,7 +15,7 @@ import Data.Array.IArray
 
 
 
-import Mesh.Classes
+import Mesh.Classes hiding (cell)
 import qualified Particle.Classes as P
 
 import Properties
@@ -23,14 +23,16 @@ import qualified MonteCarlo as MC
 
 import MiniApp.Particle
 import MiniApp.Events
-import MiniApp.Physics
-
 
 -- * Aliases for the MonteCarlo types.
 
 type Outcome m    = MC.Outcome    (Event m) (Particle m)
-type Contractor m = MC.Contractor (Model m) (Particle m) (Event m)
+type Contractor m = MC.Contractor (Model m) (Event m) (Particle m)
 
+-- | Properties of the material.
+data Data = Data { sig_abs   :: !Opacity
+                 , sig_scat  :: !Opacity
+                 }
 
 -- | The physical model. Consists of a mesh, space properties indexed
 -- by mesh cell and the end of time-step
@@ -70,7 +72,3 @@ materialContractor = undefined
 -- | A list of contractors that we hand to the step function.
 contractors :: (Mesh m) => [Contractor m]
 contractors = [timeStepContractor, meshContractor, materialContractor]
-
-
-
-

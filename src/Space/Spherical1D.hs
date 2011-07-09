@@ -54,6 +54,7 @@ instance Space Spherical1D where
       where fix_eta (Vector2 x y) = Vector2 x (abs y)
 
 
+
 sph1Dstream :: Spherical1D -> Distance -> Spherical1D
 sph1Dstream (Vector2 x y) (Distance d) = Vector2 (x+d) y
 

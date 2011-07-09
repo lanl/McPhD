@@ -6,7 +6,7 @@ import Data.Function
 import Control.Applicative
 import System.Random.Mersenne.Pure64
 
-import Mesh.Classes
+import Mesh.Classes hiding (cell)
 import Space.Classes
 import qualified Particle.Classes as P
 
