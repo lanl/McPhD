@@ -67,7 +67,7 @@ data Tally = Tally { counts  :: EventCount
 addEvent :: Tally -> OutcomeT -> Tally
 addEvent tally eAndP = tally <> outcomeToTally eAndP
 
--- | Convert an event into a mini-tally.
+-- | Convert an outcome into a tally contribution
 outcomeToTally :: OutcomeT -> Tally
 outcomeToTally (Outcome _ event Particle{cell=inCell}) =
   Tally (eventToCount event) (Map.singleton inCell $ eventToCellTally event )
@@ -85,7 +85,6 @@ eventToCellTally :: Event -> CellTally
 eventToCellTally Timeout         = mempty
 eventToCellTally BoundaryCross{} = mempty
 eventToCellTally (Collide _ momentumDep energyDep) = CellTally momentumDep energyDep
-
 
 
 -- * Monoid instance declarations

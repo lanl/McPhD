@@ -39,8 +39,8 @@ step model contractors particle
 
 
 -- | Stream a single particle:
-stream :: (p -> Outcome e p) -- ^ Function to produce each step. Comes from a model.
-          -> (e -> Bool)     -- ^ Check for terminal events to stop streaming
+stream :: (p -> Outcome e p) -- ^ Function to produce each step.
+          -> (e -> Bool)     -- ^ Check for events which stop streaming
           -> p               -- ^ Initial particle
           -> [Outcome e p]   -- ^ Resulting list of events and particle states.
 

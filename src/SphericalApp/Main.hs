@@ -30,13 +30,11 @@ import SphericalApp.Model
 sphMesh :: SphericalMesh
 sphMesh = SphericalMesh (Seq.fromList (fmap Radius [1..100])) Mesh.Vacuum
 
-
 -- Physical data
 cellData :: Material
 cellData  = Material { sig_abs  = Opacity 1.0
                      , sig_scat = Opacity 2.0
                      }
-
 
 -- Assemble the mesh, physics and final time into a model.
 model :: Model
@@ -46,8 +44,7 @@ model = Model { mesh    = sphMesh
               }
 
 
--- Define our Monte Carlo operators for streaming a particle and creating a tally.
-
+-- Define our functions for streaming a particle and creating a tally.
 streamParticle :: Particle -> [MC.Outcome Event Particle]
 streamParticle = MC.stream (MC.step model contractors) Events.isFinalEvent
 
@@ -70,7 +67,7 @@ testParticle :: Int -> Particle
 testParticle index = fromJust $ createParticle
                      sphMesh
                      (Space.make (location index) direction)
-                     (Time 10.0)
+                     (Time 0.0)
                      (Energy 1.0)
                      (EnergyWeight 1.0)
                      (Speed 1.0)
@@ -86,4 +83,4 @@ result = MC.simulate (tallyEvents . streamParticle) combineTally initialTally pa
 
 main :: IO ()
 main = do
-  print result
+  print $ counts result
