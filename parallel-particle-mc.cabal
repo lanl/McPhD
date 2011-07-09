@@ -80,17 +80,15 @@ executable MiniApp
                    , array == 0.3.*
                    , mersenne-random-pure64 == 0.2.*
 
--- executable SphericalApp
---   hs-source-dirs: ./src ./src/SphericalApp
---   ghc-options: -Wall -fwarn-tabs -fno-warn-name-shadowing -fno-warn-orphans
---   ghc-options: -rtsopts -threaded
---   main-is: SphericalApp/Main.hs
---   build-depends: base >=3 && <=6
---                    , random
---                    , hpc
---                    , AC-Vector == 2.*
---                    , containers
---                    , array == 0.3.*
---                    , mersenne-random-pure64 == 0.2.*
-
-
+executable SphericalApp
+  hs-source-dirs: ./src ./src/SphericalApp
+  ghc-options: -Wall -fwarn-tabs -fno-warn-name-shadowing -fno-warn-orphans
+  ghc-options: -rtsopts -threaded
+  main-is: SphericalApp/Main.hs
+  build-depends: base >=3 && <=6
+                   , random
+                   , hpc
+                   , AC-Vector == 2.*
+                   , containers
+                   , array == 0.3.*
+                   , mersenne-random-pure64 == 0.2.*
