@@ -43,12 +43,6 @@ result :: Outcome ev part -> (ev, part)
 result (Outcome _ event particle) = (event, particle)
 
 
--- ??? Just use Outcome instead of (event, particle) elsewhere?  This
--- doesn't seem any more restritive than requiring apps to use the
--- Contractor type and (e,p). The higher level functions can still be
--- written polymorphicaly over the tally, particle and outcome types.
-
-
 -- | Contractors are functions which take a model, a particle and
 -- return a candidate Outcome for stepping the particle.
 type Contractor model particle event
@@ -63,6 +57,12 @@ step model contractors particle
     = result (minimum (map (\f -> f model particle) contractors))
 
 
+
+
+-- ??? Just use Outcome instead of (event, particle) here?  This
+-- doesn't seem any more restritive than requiring apps to use the
+-- Contractor type and (e,p). The higher level functions can still be
+-- written polymorphicaly over the tally, particle and outcome types.
 
 -- | Stream a single particle:
 stream :: (p -> (e,p))   -- ^ Function to produce each step. Comes from a model.
@@ -80,7 +80,7 @@ monoidTally :: (Monoid t) => (d -> t) -> [d] -> t
 monoidTally toTally datums = mconcat (map toTally datums)
 
 
--- | This is the top-level structure of the MonteCarlo algorithm.
+-- | This is the top-level structure of the Monte Carlo algorithm.
 simulate :: (p->tc) -> (t->tc->t) -> t -> [p] -> t
 simulate makeTally foldTally initTally particles =
     foldl foldTally initTally (map makeTally particles)

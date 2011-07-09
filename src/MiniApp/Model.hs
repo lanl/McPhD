@@ -15,7 +15,7 @@ import Data.Array.IArray
 
 
 
-import Mesh.Classes
+import Mesh.Classes hiding (cell)
 import qualified Particle.Classes as P
 
 import Properties
@@ -70,7 +70,3 @@ materialContractor = undefined
 -- | A list of contractors that we hand to the step function.
 contractors :: (Mesh m) => [Contractor m]
 contractors = [timeStepContractor, meshContractor, materialContractor]
-
-
-
-

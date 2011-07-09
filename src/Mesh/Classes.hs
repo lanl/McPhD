@@ -6,9 +6,12 @@ Each mesh is designed for use on a specific space. It defines its own
 cell and face indexing schemes. -}
 
 module Mesh.Classes (Mesh (..)
-                    , Neighbor (..)
                     , BoundaryCondition (..)
-                    , boundary2neighbor) where
+                    , Crossing (..)
+                    , Neighbor (..)
+                    , NeighborT
+                    , boundaryToCrossing
+                    ) where
 
 import System.Random.Mersenne.Pure64
 import Data.Ix
@@ -17,18 +20,24 @@ import Numerics ()
 import Properties
 import Space.Classes
 
--- | A datatype representing the possible neighbors of a cell.
-data Neighbor c = Cell { neighbor_cell :: c }
-                | Void -- ^ Edge of the simulation
-                | Self -- ^ Cell is it's own neighbor. E.g. reflection
-                deriving Show
+-- | A data type for kinds of crossings between cells.
+-- These will be used in events which go into the tally.
+data Crossing = Face      -- ^ Entered another cell.
+              | Boundary  -- ^ Crossed the boundary of the mesh
+              | Self      -- ^ Remained in same cell. (E.g. reflection)
+                deriving (Show, Eq, Ord)
+data BoundaryCondition = Vacuum | Reflection deriving (Show, Eq, Ord)
 
-data BoundaryCondition = Vacuum | Reflection deriving Show
+-- | Look up the correct crossing kind for a boundary condition.
+boundaryToCrossing :: BoundaryCondition -> Crossing
+boundaryToCrossing Vacuum     = Boundary
+boundaryToCrossing Reflection = Self
 
--- | Map boundary conditions on to the correct Neighbor value
-boundary2neighbor :: BoundaryCondition -> Neighbor c
-boundary2neighbor Vacuum     = Void
-boundary2neighbor Reflection = Self
+-- | A type capturing information about a face crossing.
+data Neighbor c f = Neighbor { cell :: c, face :: f, crossing ::Crossing }
+                  deriving (Show, Eq)
+type NeighborT m = Neighbor (MeshCell m) (MeshFace m)
+
 
 -- | A class for describing operations on meshes.
 class (Space (MeshSpace m), Ix (MeshCell m)) => Mesh m where
@@ -42,20 +51,25 @@ class (Space (MeshSpace m), Ix (MeshCell m)) => Mesh m where
   -- | Range of cell indices
   cellRange :: m -> (MeshCell m, MeshCell m)
 
+  -- | Null cell value.
+  cellNull :: m -> MeshCell m
+
+  -- | Is the given cell index the null cell?
+  isNull :: m -> MeshCell m -> Bool
+  isNull mesh cell = (cellNull mesh == cell)
+
   -- | Potentially O(mesh_size) lookup
   cell_find :: m -> MeshSpace m -> Maybe (MeshCell m)
 
   -- | Neighbor across a given face
-  cell_neighbor :: m -> MeshCell m -> MeshFace m -> Neighbor (MeshCell m)
+  cell_neighbor :: m -> MeshCell m -> MeshFace m -> NeighborT m
 
-  -- | All neighbors, with faces
-  cell_neighbors :: m -> MeshCell m -> [(MeshFace m, Neighbor (MeshCell m))]
+  -- | All neighbors, indexed by face.
+  cell_neighbors :: m -> MeshCell m -> [NeighborT m]
 
   -- | Get the distance to exit a cell, and the face, if lower than
-  -- the given distance.
-  cell_boundary :: m -> MeshCell m -> MeshSpace m
-                   -> Distance
-                   -> Maybe (Distance, MeshFace m)
+  -- the given distance. Otherwize nothing.
+  cell_boundary :: m -> MeshCell m -> MeshSpace m -> (Distance, NeighborT m)
 
   -- | Is the location in the given cell of the mesh?
   is_in_cell :: m -> MeshCell m -> MeshSpace m -> Bool
@@ -72,4 +86,3 @@ class (Space (MeshSpace m), Ix (MeshCell m)) => Mesh m where
 
   -- | Sample a location unformly in the given cell.
   uniform_sample_cell :: m -> MeshCell m -> PureMT -> (MeshSpace m, PureMT)
-

@@ -12,6 +12,7 @@ import NormalizedValues
 import RandomSamples
 import Approx
 import Properties
+import Numerics
 
 type C1Cell = Int
 data C1Dir  = Negative | Positive deriving (Show, Eq)
@@ -22,6 +23,37 @@ data Cartesian1DMesh = Cartesian1DMesh
                        , low_bc  :: BoundaryCondition
                        , high_bc :: BoundaryCondition
                        } deriving Show
+type C1Neighbor = NeighborT Cartesian1DMesh
+
+
+-- | Expresses the impact of directions on a cell index.
+crossingToIndex :: Crossing -> C1Cell -> C1Dir-> C1Cell
+crossingToIndex Face     cell Negative = cell - 1
+crossingToIndex Face     cell Positive = cell + 1
+crossingToIndex Self     cell _        = cell
+crossingToIndex Boundary _ _           = -1
+
+
+-- | Convert boundary condition information and cell into the index of
+-- the neighboring cell.
+cellNeighbor :: Cartesian1DMesh -> C1Cell -> C1Dir -> C1Neighbor
+
+cellNeighbor mesh cell Negative =
+  let crossing = case cell of
+        0 -> boundaryToCrossing (low_bc mesh)
+        _ -> Face
+      nextCell = crossingToIndex crossing cell Negative
+  in Neighbor nextCell Negative crossing
+
+cellNeighbor mesh cell Positive =
+  let maxCell = (size mesh)-1
+      crossing = if (cell==maxCell)
+                 then boundaryToCrossing (high_bc mesh)
+                 else Face
+      nextCell = crossingToIndex crossing cell Positive
+  in Neighbor nextCell Positive crossing
+
+
 
 instance Mesh Cartesian1DMesh where
   type MeshCell Cartesian1DMesh  = C1Cell
@@ -36,15 +68,11 @@ instance Mesh Cartesian1DMesh where
         pairs        = Seq.zip bounds (boundsR)
     in Seq.findIndexL (cellBoundsTest (==) location) pairs
 
-  cell_neighbor mesh cell Negative
-    | cell == 0 = boundary2neighbor $ low_bc mesh
-    | otherwise = Cell (cell-1)
-  cell_neighbor mesh cell Positive
-    | cell == (size mesh)-1 = boundary2neighbor $ high_bc mesh
-    | otherwise = Cell (cell+1)
+  cell_neighbor = cellNeighbor
 
-  cell_neighbors mesh cell = [(Negative, cell_neighbor mesh cell Negative),
-                              (Positive, cell_neighbor mesh cell Positive)]
+  cell_neighbors mesh cell = [ cell_neighbor mesh cell Negative
+                             , cell_neighbor mesh cell Positive
+                             ]
 
   is_in_cell               = inCellTest (==)
   is_approx_in_cell        = inCellTest (~==)
@@ -62,15 +90,16 @@ instance Mesh Cartesian1DMesh where
           (direction, rand'') = sampleNormalVector2 rand'
       in (Cartesian1D position direction, rand'')
 
-  cell_boundary mesh cell location (Distance distance) =
+  cell_boundary mesh cell location =
       let bounds  = cellBounds mesh cell
           cos_dir = v2x $ normalized_value $ dir location
           (x_distance, face) = if cos_dir > 0
                                then (snd bounds - pos location, Positive)
                                else (fst bounds - pos location, Negative)
-      in if abs x_distance < distance * abs cos_dir
-         then Just ( Distance (x_distance / cos_dir), face)
-         else Nothing
+          neighbor = cell_neighbor mesh cell face
+      in if abs x_distance < huge * abs cos_dir
+         then (Distance (x_distance / cos_dir), neighbor)
+         else (Distance huge, neighbor)
 
 
 
