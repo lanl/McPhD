@@ -19,19 +19,6 @@ source-repository head
 
 library
   hs-source-dirs: src
-<<<<<<< local
-  exposed-modules: Cell, Constants, Event, Geometry, MC, Material, Mesh, Numerical, Opacity, PRNG, Particle, Physical, Search, Sigma_HBFC, SoftEquiv, Source, Sphere1D, Tally, TryNSave
-  ghc-options: -Wall -fno-warn-name-shadowing -fno-warn-orphans -fwarn-tabs 
---  ghc-options: -rtsopts -threaded -eventlog
-  ghc-options: -rtsopts -threaded 
-  build-depends: base >=4 && <=5,
-                 vector >= 0.7,
-                 random >= 1,
-                 mtl >= 1,
-                 deepseq >= 1,
-                 parallel >= 3.1,
-                 csv >= 0.1.2
-=======
   exposed-modules:   Cell
                      Constants
                      Collision
@@ -64,7 +51,6 @@ library
                      csv >= 0.1.2,
                      QuickCheck >= 2
   default-language:  Haskell2010
->>>>>>> other
 
 executable  basic
   hs-source-dirs:    src-main
