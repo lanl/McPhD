@@ -1,5 +1,11 @@
 {-# LANGUAGE TypeFamilies, MultiParamTypeClasses #-}
 module Tally 
+  ( Tally(..)
+  , CellTally(..)
+  , EventCount(..)
+  , tally
+  , merge
+  )
   where
 
 import Control.DeepSeq

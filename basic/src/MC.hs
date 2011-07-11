@@ -14,7 +14,7 @@ import Mesh as M
 import Particle as P
 import Physical
 import PRNG
-import Tally
+import Tally -- IM as Tally
 import Sigma_HBFC
 import Collision
 
