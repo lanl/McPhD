@@ -16,9 +16,9 @@ import Test.HUnit
 import Test.QuickCheck ()
 
 -- The libraries under test
-import Mesh.Classes
-import Mesh.Spherical
-import Mesh.Cartesian1D
+import Mesh.Classes as Mesh
+import Mesh.Spherical as Sph
+import Mesh.Cartesian1D as Cart1D
 
 -- Their dependencies
 import Data.Vector.V2
@@ -55,14 +55,15 @@ prop_FindIsInAgree mesh seed =
 -- * Functions for setting up assertions for multiple mesh types
 
 assertDist :: (Mesh m,
-               Show (MeshFace m), Eq (MeshFace m)) =>
-              m -> MeshCell m
+               Show (MeshFace m), Eq (MeshFace m),
+               Show (MeshCell m), Eq (MeshCell m)) =>
+              m
+              -> MeshCell m
               -> MeshSpace m
-              -> Distance
-              -> Maybe (Distance, MeshFace m)
+              -> (Distance, NeighborT m)
               -> Assertion
-assertDist mesh cell location max_distance result =
-  (cell_boundary mesh cell location max_distance) @?= result
+assertDist mesh cell location result =
+  (cell_boundary mesh cell location) @?= result
 
 
 -- | Property: distance is always > 0
@@ -91,8 +92,7 @@ sph1DTestRadius = outer_radius spherical_mesh @?= Radius 100.0
 -- | Function to create multiple distance assertions on spherical_mesh
 sph1D_dist :: MeshCell SphericalMesh
            -> MeshSpace SphericalMesh
-           -> Distance
-           -> Maybe (Distance, MeshFace SphericalMesh)
+           -> (Distance, NeighborT SphericalMesh)
            -> Assertion
 sph1D_dist = assertDist spherical_mesh
 
@@ -102,8 +102,11 @@ sph1D_dist = assertDist spherical_mesh
 -- * Cartesian1D mesh tests.
 
 cartesian1D_mesh :: Cartesian1DMesh
-cartesian1D_mesh = Cartesian1DMesh (Seq.fromList (fmap fromIntegral ([0..100]::[Integer])))
-                   Vacuum Reflection
+cartesian1D_mesh = Cartesian1DMesh {
+  coords    = (Seq.fromList (fmap fromIntegral ([0..100]::[Integer])))
+  , low_bc  = Vacuum
+  , high_bc = Reflection
+  }
 
 cart1DTestSize :: Assertion
 cart1DTestSize = (size cartesian1D_mesh) @?= 100
@@ -111,8 +114,7 @@ cart1DTestSize = (size cartesian1D_mesh) @?= 100
 -- | Function for multiple distance assertions on cartesian1D_mesh
 cart1D_distances :: MeshCell Cartesian1DMesh
                     -> MeshSpace Cartesian1DMesh
-                    -> Distance
-                    -> Maybe (Distance, MeshFace Cartesian1DMesh)
+                    -> (Distance, NeighborT Cartesian1DMesh)
                     -> Assertion
 cart1D_distances = assertDist cartesian1D_mesh
 
@@ -134,14 +136,13 @@ tests = [ testGroup "Spherical Mesh Tests"
 
           , testCase "Radius Equality" sph1DTestRadius
 
-          , testCase "Limit too small"
-            (sph1D_dist 0 (Vector2 0.5 0) (Distance 0.1) Nothing)
-
           , testCase "Radially outward to boundary"
-            (sph1D_dist 0 (Vector2 0.5 0) (Distance 1.0) $ Just ((Distance 0.5), Outward))
+            (sph1D_dist 0 (Vector2 0.5 0) $
+             (Distance 0.5, Neighbor 1 Outward Face))
 
           , testCase "Radially inward to boundary"
-            (sph1D_dist 1 (Vector2 (negate 1.5) 0) (Distance 1.0) $ Just ((Distance 0.5), Inward))
+            (sph1D_dist 1 (Vector2 (negate 1.5) 0) $
+             (Distance 0.5, Neighbor 0 Inward Face))
 
           , testProperty "Locations sampled in mesh, are in mesh"
             (prop_SampleInMesh spherical_mesh)
@@ -159,15 +160,13 @@ tests = [ testGroup "Spherical Mesh Tests"
           , testProperty "cell_find and is_in agree"
             (prop_FindIsInAgree cartesian1D_mesh)
 
-          , testCase "Limit too small"
-            (cart1D_distances 0 (cart1D 0.5 $ Vector2 1.0 0.0) (Distance 0.1) Nothing)
-
           , testCase "Outward, straight to boundary"
-            (cart1D_distances 0 (cart1D 0.5 $ Vector2 1.0 0.0) (Distance 1.0) $ Just ((Distance 0.5), Mesh.Cartesian1D.Positive))
+            (cart1D_distances 0 (cart1D 0.5 $ Vector2 1.0 0.0) $
+             (Distance 0.5, Neighbor 1 Cart1D.Positive Face))
 
           , testCase "Inward, straight to boundary"
-            (cart1D_distances 0 (cart1D 0.5 $ Vector2 (negate 1.0) 0.0) (Distance 1.0)
-            $ Just ((Distance 0.5), Mesh.Cartesian1D.Negative))
+            (cart1D_distances 0 (cart1D 0.5 $ Vector2 (negate 1.0) 0.0) $
+             (Distance 0.5, Neighbor (negate 1) Cart1D.Negative Boundary))
 
           ]
         ]

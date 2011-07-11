@@ -19,6 +19,3 @@ class Space s where
 infix 6 +->
 (+->) :: (Space s) => s -> Distance -> s
 (+->) = stream
-
-
-

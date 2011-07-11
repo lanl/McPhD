@@ -330,7 +330,7 @@
    completely generic with respect to the parameter, like
    std::vector. Roughly, we want a type-class when we want automatic
    overloading over many potential types. (Of course, C++ supports
-   overloading at the function level as well.) 
+   overloading at the function level as well.)
 
    The other use for templates in C++ is code generation, where we
    design templates for specialization over a known (but extensible)
@@ -349,7 +349,7 @@
    Consider the case of momentum (as implemented in the code at 13
    June 2011). Momentum is a property of the space, because it is a
    vector quantity. It isn't independent of the family member for
-   direction, however. 
+   direction, however.
 
    If we add it as another member of the type family, or in terms of
    another member such as a genereralized vector for the space,
@@ -383,7 +383,7 @@
       - InstanceA_arbitrary.hs
       - InstanceA_test.hs  -- Tests for each data type
       - InstanceB_test.hs
-        
+
 * Questions                                                        :QUESTION:
 ** What's the right functional description of scattering?               :TIM:
 
@@ -446,7 +446,7 @@
    - What about momentum? This is computed [[file:~/work/Projects/HaskellIMC/source/basic/src/MC.hs::dp%20%3D%20elasticScatterMomDep%20e%20omega][here]], using the energy of the particle.
    - Function [[file:~/work/Projects/HaskellIMC/source/basic/src/Collision.hs::sampleCollision%20::%20Cell%20->%20Energy%20->%20Direction%20->%20Sigma.Lepton%20-][sampleCollision]] return an Event.
 ** TODO [#A] Add isotropic scattering operation.
-** TODO [#A] MiniApp [1/6]
+** TODO [#A] SphericalApp [2/4]
 *** DONE Convert Motion/Limiter event model to treating motion as an event.
     CLOSED: [2011-05-31 Tue 10:22]
     :LOGBOOK:
@@ -455,6 +455,7 @@
 *** TODO [#A] Add outcome creators for [3/4]                           :NEXT:
     - [X] End of time step
     - [ ] Mesh/Cell crossing
+          This needs to include kind of boundary information and next cell.
     - [X] Scattering
     - [X] Absorption
 *** TODO [#A] Create a 'Model' containing data and contractor function :: Model -> Particle -> Candidate [1/3]
@@ -464,7 +465,8 @@
     - [ ] Candidate functions
     - [ ] Change to use general step function in MonteCarlo.
       Waiting on [[*%5B#A%5D%20Add%20outcome%20creators%20for%20%5B1/3%5D][Add outcome creators]]
-*** TODO [#A] Add a Tally Type
+*** DONE [#A] Add a Tally Type
+    CLOSED: [2011-07-05 Tue 11:57]
 ** TODO [#B] Property and unit tests for distance-to-face calculations
 ** TODO [#C] Add distance-to-face to Cartesian3D mesh.
 ** TODO [#B] Merge Properties and Model.Physics files.
