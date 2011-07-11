@@ -9,7 +9,7 @@ module TryNSave (writeTally
                 ,readMatStateP)
     where
 
-import Tally
+import Tally -- IM
 import Cell
 import Physical
 import Constants (k_B,pmg)
@@ -37,10 +37,11 @@ writeTally name = writeFile name . show
 summarizeTally :: Tally -> IO ()
 summarizeTally (Tally cntrs dep esc) = do
   -- summarize global events
-  let (Energy totEDep) = V.sum (V.map (\ct -> ctEnergy ct) dep)
-      (Momentum totMDep) = V.sum (V.map (\ct -> ctMom ct) dep)
+  -- let (Energy totEDep) = V.sum (V.map (\ct -> ctEnergy ct) dep)
+  --     (Momentum totMDep) = V.sum (V.map (\ct -> ctMom ct) dep)
   mapM_ putStrLn $ 
-          ("Total energy deposited: " ++ show totEDep) :
+          ("Total energy deposited: " ++ "FIX-ME") :
+--           ("Total energy deposited: " ++ show totEDep) :
           "Scatters:" :
            ("\tnucleon elastic: " ++ show (nNuclEl cntrs)) :
            ("\tnu_e--electron scatters: " ++ show (nEMinusInel cntrs)) :
