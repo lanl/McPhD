@@ -11,7 +11,6 @@ maintainer:          tkelley@lanl.gov
 homepage:            http://software.lanl.gov/McPhD
 build-type:          Simple
 stability:           experimental
--- extra-source-files:  README.txt
 
 source-repository head
   type: hg
@@ -19,19 +18,6 @@ source-repository head
 
 library
   hs-source-dirs: src
-<<<<<<< local
-  exposed-modules: Cell, Constants, Event, Geometry, MC, Material, Mesh, Numerical, Opacity, PRNG, Particle, Physical, Search, Sigma_HBFC, SoftEquiv, Source, Sphere1D, Tally, TryNSave
-  ghc-options: -Wall -fno-warn-name-shadowing -fno-warn-orphans -fwarn-tabs 
---  ghc-options: -rtsopts -threaded -eventlog
-  ghc-options: -rtsopts -threaded 
-  build-depends: base >=4 && <=5,
-                 vector >= 0.7,
-                 random >= 1,
-                 mtl >= 1,
-                 deepseq >= 1,
-                 parallel >= 3.1,
-                 csv >= 0.1.2
-=======
   exposed-modules:   Cell
                      Constants
                      Collision
@@ -51,10 +37,10 @@ library
                      Source
                      Sphere1D
                      Tally
+                     TallyIM
                      TryNSave
   ghc-options:       -Wall -fno-warn-name-shadowing -fno-warn-orphans -fwarn-tabs
---  ghc-options:       -rtsopts -threaded -eventlog
-  ghc-options:       -rtsopts -threaded
+  ghc-options:       -rtsopts
   build-depends:     base >=4 && <=5,
                      vector >= 0.7,
                      random >= 1,
@@ -62,36 +48,48 @@ library
                      deepseq >= 1,
                      parallel >= 3.1,
                      csv >= 0.1.2,
-                     QuickCheck >= 2
+                     QuickCheck >= 2,
+                     containers >= 0.4.0.0
   default-language:  Haskell2010
->>>>>>> other
 
-executable  basic
+executable  black-hole
   hs-source-dirs:    src-main
   ghc-options:       -Wall -fno-warn-name-shadowing -fno-warn-orphans -fwarn-tabs
-  ghc-options:       -rtsopts -threaded
-  main-is:           Main.hs
+  ghc-options:       -rtsopts 
+  main-is:           BH.hs
   build-depends:     base >=4 && <=5,
                      vector >= 0.7,
                      parallel >= 3.1,
+                     filepath >= 1.2.0, 
                      basic
   default-language:  Haskell2010
 
-executable basic-1000-cells
-  hs-source-dirs:    src-main
-  ghc-options:       -Wall -fno-warn-name-shadowing -fno-warn-orphans -fwarn-tabs
-  ghc-options:       -rtsopts -threaded
-  main-is:           Main-1000.hs
-  build-depends:     base >=4 && <=5,
-                     vector >= 0.7,
-                     parallel >= 3.1,
-                     basic
-  default-language:  Haskell2010
+-- executable  basic
+--   hs-source-dirs:    src-main
+--   ghc-options:       -Wall -fno-warn-name-shadowing -fno-warn-orphans -fwarn-tabs
+--   ghc-options:       -rtsopts -threaded 
+--   main-is:           Main.hs
+--   build-depends:     base >=4 && <=5,
+--                      vector >= 0.7,
+--                      parallel >= 3.1,
+--                      basic
+--   default-language:  Haskell2010
+
+-- executable basic-1000-cells
+--   hs-source-dirs:    src-main
+--   ghc-options:       -Wall -fno-warn-name-shadowing -fno-warn-orphans -fwarn-tabs
+--   ghc-options:       -rtsopts -threaded
+--   main-is:           Main-1000.hs
+--   build-depends:     base >=4 && <=5,
+--                      vector >= 0.7,
+--                      parallel >= 3.1,
+--                      basic
+--   default-language:  Haskell2010
 
 executable  basic-test
   hs-source-dirs:    tests
   ghc-options:       -Wall -fno-warn-name-shadowing -fno-warn-orphans -fwarn-tabs
-  ghc-options:       -rtsopts -threaded
+  ghc-options:       -rtsopts 
   main-is:           TestSuite.hs
   build-depends:     base >=4 && <=5,
                      vector >= 0.7,
