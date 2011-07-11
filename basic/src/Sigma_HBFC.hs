@@ -72,36 +72,20 @@ nuAElastic (Energy nrg) (NucleonNumber a) =
 -- --------------------------------------------
 -- | nu_e--e^- & nu_bar_e--e^+ scattering
 nuEEMinus :: Energy -> Energy -> CrossSection
-nuEEMinus  (Energy e_nu) (Energy e_e) = CrossSection $ 0.0
+nuEEMinus  (Energy e_nu) (Energy e_e) = CrossSection $ 9.2e-45 * e_nu * e_e
 
 -- | nu_bar_e--e^- & nu_e--e^+ scattering
 nuEEPlus :: Energy -> Energy -> CrossSection
-nuEEPlus (Energy e_nu) (Energy e_e) = CrossSection $ 0.0
+nuEEPlus (Energy e_nu) (Energy e_e) = CrossSection $ 3.9e-45 * e_nu * e_e
 
 
 -- | nu_x--e^- & nu_bar_x--e^+ scattering
 nuXEMinus :: Energy -> Energy -> CrossSection
-nuXEMinus  (Energy e_nu) (Energy e_e) = CrossSection $ 0.0
+nuXEMinus  (Energy e_nu) (Energy e_e) = CrossSection $ 1.8e-45 * e_nu * e_e
 
 -- | nu_bar_x--e^- & nu_x--e^+ scattering
 nuXEPlus :: Energy -> Energy -> CrossSection
-nuXEPlus (Energy e_nu) (Energy e_e) = CrossSection $ 0.0
-
--- nuEEMinus :: Energy -> Energy -> CrossSection
--- nuEEMinus  (Energy e_nu) (Energy e_e) = CrossSection $ 9.2e-45 * e_nu * e_e
-
--- -- | nu_bar_e--e^- & nu_e--e^+ scattering
--- nuEEPlus :: Energy -> Energy -> CrossSection
--- nuEEPlus (Energy e_nu) (Energy e_e) = CrossSection $ 3.9e-45 * e_nu * e_e
-
-
--- -- | nu_x--e^- & nu_bar_x--e^+ scattering
--- nuXEMinus :: Energy -> Energy -> CrossSection
--- nuXEMinus  (Energy e_nu) (Energy e_e) = CrossSection $ 1.8e-45 * e_nu * e_e
-
--- -- | nu_bar_x--e^- & nu_x--e^+ scattering
--- nuXEPlus :: Energy -> Energy -> CrossSection
--- nuXEPlus (Energy e_nu) (Energy e_e) = CrossSection $ 1.3e-45 * e_nu * e_e
+nuXEPlus (Energy e_nu) (Energy e_e) = CrossSection $ 1.3e-45 * e_nu * e_e
 
 
 
