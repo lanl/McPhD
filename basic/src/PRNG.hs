@@ -6,7 +6,7 @@ import Control.Monad.Identity
 import System.Random as R
 import Test.QuickCheck
 
-newtype RNG = RNG StdGen
+newtype RNG = RNG StdGen deriving Show
 
 mkRNG :: Int -> RNG
 mkRNG = RNG . mkStdGen

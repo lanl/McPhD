@@ -11,7 +11,7 @@ data Particle = Particle {
   , weight  :: !EnergyWeight
   , cellIdx    :: !CellIdx
   , rng     :: !RNG
-  }
+  } deriving Show
 
 -- may want to expand on NuX in the future
 data PType = NuE | NuEBar | NuX deriving Show
