@@ -13,15 +13,24 @@ import SoftEquiv
 
 data Sphere1D = Sphere1D (Vector Cell) deriving Show
 
--- form mesh from sublist of cells and user limits. Also returns the number of
+-- | form mesh from sublist of cells and user limits. Also returns the number of
 -- cells not used from the start of the list.
 mkMesh :: [Cell] -> FP -> FP -> (Sphere1D, Int)
 mkMesh clls llim ulim = (Sphere1D $ V.fromList cellsInBounds,ndropped) 
-  where cellsInBounds = fst (L.span leUL $ snd (L.break geLL clls))
+  where cellsInBounds = rebound . fst . L.span leUL $ snd (L.break geLL clls)
         geLL, leUL :: Cell -> Bool
         geLL (Cell {highB = Position hir}) = hir >= llim
         leUL (Cell {lowB  = Position lor}) = lor <= ulim
         ndropped = L.length $ fst (L.break geLL clls)
+
+-- | impose boundary conditions on a list of cells: reflective at lowermost, 
+-- vacuum at uppermost. Seems really clumsy...
+rebound :: [Cell] -> [Cell]
+rebound [] = []
+rebound [c] = [c {lowBC = Refl, highBC = Vac}]
+rebound (c:cs) = lbc' : (L.init cs) L.++ [ubc']
+  where lbc' = c {lowBC = Refl}
+        ubc' = (L.last cs) {highBC = Vac}
 
 instance Mesh Sphere1D where
 
@@ -89,7 +98,11 @@ instance Mesh Sphere1D where
 
   cells (Sphere1D msh) = msh
 
-  cell (Sphere1D msh) cidx = msh ! (idx cidx)
+  cell (Sphere1D msh) cidx = 
+    case msh !? (idx cidx) of 
+      Nothing -> error $ "Sphere1D::cell failed on cidx " L.++ show cidx
+                 L.++ "\n mesh dump: " L.++ show msh
+      Just c -> c
 
   cellAcross _ cidx Lo = cidx - 1
   cellAcross _ cidx Hi = cidx + 1
