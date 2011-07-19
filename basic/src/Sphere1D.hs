@@ -16,7 +16,7 @@ data Sphere1D = Sphere1D (Vector Cell) deriving Show
 -- | form mesh from sublist of cells and user limits. Also returns the number of
 -- cells not used from the start of the list.
 mkMesh :: [Cell] -> FP -> FP -> (Sphere1D, Int)
-mkMesh clls llim ulim = (Sphere1D $ V.fromList cellsInBounds,ndropped)
+mkMesh clls llim ulim = (Sphere1D $ V.fromList cellsInBounds, ndropped)
   where cellsInBounds = rebound . fst . L.span leUL $ snd (L.break geLL clls)
         geLL, leUL :: Cell -> Bool
         geLL (Cell {highB = Position hir}) = hir >= llim
@@ -26,8 +26,8 @@ mkMesh clls llim ulim = (Sphere1D $ V.fromList cellsInBounds,ndropped)
 -- | impose boundary conditions on a list of cells: reflective at lowermost,
 -- vacuum at uppermost. Seems really clumsy...
 rebound :: [Cell] -> [Cell]
-rebound [] = []
-rebound [c] = [c {lowBC = Refl, highBC = Vac}]
+rebound []     = []
+rebound [c]    = [c {lowBC = Refl, highBC = Vac}]
 rebound (c:cs) = lbc' : (L.init cs) L.++ [ubc']
   where lbc' = c {lowBC = Refl}
         ubc' = (L.last cs) {highBC = Vac}
@@ -38,10 +38,10 @@ instance Mesh Sphere1D where
 
   samplePositionInCell _ cll = do
     xi <- random
-    let ri3 = ri * ri * ri
-        ro3 = ro * ro * ro
-        (ri,ro) = (pos . lowB $ cll, pos . highB $ cll)
-        psn = Position ( (ri3 + (ro3 - ri3) * xi) ** (1.0/3.0) )
+    let ri3      = ri * ri * ri
+        ro3      = ro * ro * ro
+        (ri, ro) = (pos . lowB $ cll, pos . highB $ cll)
+        psn      = Position ( (ri3 + (ro3 - ri3) * xi) ** (1/3) )
     return psn
 
   samplePosition msh = do
@@ -74,7 +74,7 @@ instance Mesh Sphere1D where
                  | otherwise      = (xhim, yhim)
 
       -- These are independent of the sphere radius
-      xterm1 = r * tsq * oneOverOnePTSq
+      xterm1 =          r *     tsq * oneOverOnePTSq
       yterm1 = -r * t + r * t * tsq * oneOverOnePTSq
 
       -- Intersection with the inner sphere: just use the
