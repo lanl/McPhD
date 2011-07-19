@@ -41,7 +41,6 @@ runSim opts@(CLOpts { inputF = infile
   let outfs = map (outfile ++ ) ["_nuE","_nuEbar","_nuX"]
   putStrLn "writing tallies"
   zipWithM_ writeTally outfs tallies
-  return ()
 
 -- | run one neutrino species:
 --     1. derive its source statistics (where to put particles)
@@ -174,28 +173,30 @@ checkOptsArgsM opts =
   checkNPs opts >>= checkInput >>= checkOutput >>= checkLimits
              >>= checkChunk >>= checkTime >>= checkAlpha
 
+ensure :: (MonadPlus m) => (a -> Bool) -> a -> m a
+ensure p x = guard (p x) >> return x
+
 checkNPs, checkInput, checkOutput, checkLimits :: CLOpts -> Maybe CLOpts
 checkChunk, checkTime, checkAlpha :: CLOpts -> Maybe CLOpts
-checkNPs os@(CLOpts {nps = n}) = if n > 0 then Just os else Nothing
+
+checkNPs    = ensure ((> 0) . nps)
 
 -- To do: for files, need better check--this forces us into IO.
 -- | Input file is valid if it exists and user can access it
-checkInput os@(CLOpts {inputF = f}) = if isValid f then Just os else Nothing
+checkInput  = ensure (isValid . inputF)
 
 -- | output file is valid if directory exists and user can write & execute it
-checkOutput os@(CLOpts {outputF = f}) = if isValid f then Just os else Nothing
+checkOutput = ensure (isValid . outputF)
 
-checkLimits os@(CLOpts {llimit = ll, ulimit = ul}) =
-  if ll < ul && ll >= 0.0
-  then Just os
-  else Nothing
+checkLimits = ensure (\ CLOpts {llimit = ll, ulimit = ul} -> ll < ul && ll >= 0)
 
-checkTime os@(CLOpts {simTime = Time dt}) = if dt > 0.0 then Just os else Nothing
+checkTime   = ensure (\ CLOpts {simTime = Time dt} -> dt > 0)
 
-checkAlpha os@(CLOpts {alpha = a}) = if a > 0.0 then Just os else Nothing
+checkAlpha  = ensure ((> 0) . alpha)
 
+-- | Initialize chunk size to the whole stream unless explicitly given.
 checkChunk os@(CLOpts {nps = n, chunkSz = sz}) =
-  if sz > 0 then Just os else Just os{chunkSz = n}
+  return (if sz > 0 then os else os {chunkSz = n})
 
 -- version
 -- $Id$
