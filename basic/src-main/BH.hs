@@ -23,17 +23,17 @@ import PRNG
 import Sigma_HBFC
 
 runSim :: CLOpts -> IO ()
-runSim opts@(CLOpts { inputF = infile
-               , outputF = outfile
-               , llimit = ll
-               , ulimit = ul
-               }
+runSim opts@(CLOpts { inputF  = infile
+                    , outputF = outfile
+                    , llimit  = ll
+                    , ulimit  = ul
+                    }
        ) = do
   -- read input, process into mesh, select corresponding luminosities
   (clls, lnuer, lnuebarr, lnuxr) <- readMatStateP infile
   putStrLn "read material state file"
-  let (msh,ndropped) = mkMesh clls ll ul
-      mshsz          = ncells msh
+  let (msh,ndropped)      = mkMesh clls ll ul
+      mshsz               = ncells msh
       [lnue,lnuebar,lnux] = map (trim ndropped mshsz) [lnuer,lnuebarr,lnuxr]
   -- run each species
   tallies <- mapM (runOneSpecies msh opts) [(lnue,NuE),(lnuebar,NuEBar),(lnux,NuX)]
