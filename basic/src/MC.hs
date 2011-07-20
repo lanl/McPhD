@@ -7,7 +7,6 @@ module MC
   )
   where
 
-
 import Cell
 import Event
 import Mesh as M
@@ -51,22 +50,18 @@ stream msh
                    })
        event omega' =
   case event of
-    Collision {}                 -> p' { P.dir =  omega'   }
-    Boundary  {bType = Reflect}  -> p' { P.dir = -omega    }
-    Boundary  {bType = Transmit} -> p' { cellIdx  = newCell f }
-    Boundary  {bType = Escape}   -> p' { cellIdx  = 0         }
-    Timeout   {}                 -> p' { time  = 0         }
+    Collision {}                 -> p' { P.dir   =  omega'  }
+    Boundary  {bType = Reflect } -> p' { P.dir   = -omega   }
+    Boundary  {bType = Transmit} -> p' { cellIdx =  newCell }
+    Boundary  {bType = Escape  } -> p' { cellIdx =  0       }
+    Timeout   {}                 -> p' { time    =  0       }
   where
-    p' :: Particle
-    p' = p { P.pos = x', time = t' }
-    d  :: Distance
-    d  = dist event
-    x' :: Position
-    x' = Position $ x +  (Physical.dir omega) * Physical.distance d
-    t' = tm - Time (Physical.distance d / c)
-    f = face event
-    newCell :: Face -> CellIdx
-    newCell = cellAcross msh cidx
+    p'      = p { P.pos = x', time = t' }
+    d       = dist event
+    x'      = Position $ x + Physical.dir omega * Physical.distance d
+    t'      = tm - Time (Physical.distance d / c)
+    f       = face event
+    newCell = cellAcross msh cidx f
 
 -- | Wrap a random computation based on a particle. Extracts the
 -- random number generator from the particle in the beginning, and
@@ -94,13 +89,12 @@ pickEvent sig msh
       dCen        = Distance $ c * tcen
       mcell       = M.cell msh cidx
   (collEvent,omega') <- sampleCollision msh mcell en omega sig dCol wt
-  let events      = [
-          collEvent
-        , boundaryEvent msh cidx dBdy fce en wt
-        , Timeout dCen
-        ]
+  let events      = [ collEvent
+                    , boundaryEvent msh cidx dBdy fce en wt
+                    , Timeout dCen
+                    ]
 
-  return ((closestEvent events),omega')
+  return (closestEvent events, omega')
 
 -- the end
 
