@@ -1,5 +1,6 @@
 module Sphere1D where
 
+import Control.Arrow
 import Control.Monad
 import Data.List as L
 import Data.Vector as V
@@ -17,11 +18,12 @@ data Sphere1D = Sphere1D (Vector Cell) deriving Show
 -- cells not used from the start of the list.
 mkMesh :: [Cell] -> FP -> FP -> (Sphere1D, Int)
 mkMesh clls llim ulim = (Sphere1D $ V.fromList cellsInBounds, ndropped)
-  where cellsInBounds = rebound . fst . L.span leUL $ snd (L.break geLL clls)
+  where cellsInBounds = rebound kept
+        (pre, (kept, post)) = id *** L.span leUL $ L.break geLL clls
         geLL, leUL :: Cell -> Bool
         geLL (Cell {highB = Position hir}) = hir >= llim
         leUL (Cell {lowB  = Position lor}) = lor <= ulim
-        ndropped = L.length $ fst (L.break geLL clls)
+        ndropped = L.length pre
 
 -- | impose boundary conditions on a list of cells: reflective at lowermost,
 -- vacuum at uppermost. Seems really clumsy...
@@ -100,8 +102,8 @@ instance Mesh Sphere1D where
 
   cell (Sphere1D msh) cidx =
     case msh !? (idx cidx) of
-      Nothing -> error $ "Sphere1D::cell failed on cidx " L.++ show cidx
-                 L.++ "\n mesh dump: " L.++ show msh
+      Nothing -> error $ "Sphere1D.cell: failed on cidx " L.++ show cidx
+                 L.++ "\n  mesh dump: " L.++ show msh
       Just c -> c
 
   cellAcross _ cidx Lo = cidx - 1
@@ -132,8 +134,7 @@ findCell (Sphere1D msh) r = exMaybe (binarySearchBy cmp r msh)
       | otherwise = EQ
 
     exMaybe :: Maybe Int -> CellIdx
-    exMaybe Nothing  = error "Sphere1D.findCell: malformed mesh"
-    exMaybe (Just n) = CellIdx n
+    exMaybe = maybe (error "Sphere1D.findCell: malformed mesh") CellIdx
 
 rmax :: Sphere1D -> FP
 rmax (Sphere1D msh) = pos . highB . V.last $ msh
