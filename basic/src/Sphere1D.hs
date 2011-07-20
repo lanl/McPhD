@@ -19,7 +19,7 @@ data Sphere1D = Sphere1D (Vector Cell) deriving Show
 mkMesh :: [Cell] -> FP -> FP -> (Sphere1D, Int)
 mkMesh clls llim ulim = (Sphere1D $ V.fromList cellsInBounds, ndropped)
   where cellsInBounds = rebound kept
-        (pre, (kept, post)) = id *** L.span leUL $ L.break geLL clls
+        (pre, (kept, post)) = second (L.span leUL) $ L.break geLL clls
         geLL, leUL :: Cell -> Bool
         geLL (Cell {highB = Position hir}) = hir >= llim
         leUL (Cell {lowB  = Position lor}) = lor <= ulim
@@ -30,7 +30,7 @@ mkMesh clls llim ulim = (Sphere1D $ V.fromList cellsInBounds, ndropped)
 rebound :: [Cell] -> [Cell]
 rebound []     = []
 rebound [c]    = [c {lowBC = Refl, highBC = Vac}]
-rebound (c:cs) = lbc' : (L.init cs) L.++ [ubc']
+rebound (c:cs) = lbc' : L.init cs L.++ [ubc']
   where lbc' = c {lowBC = Refl}
         ubc' = (L.last cs) {highBC = Vac}
 
@@ -101,7 +101,7 @@ instance Mesh Sphere1D where
   cells (Sphere1D msh) = msh
 
   cell (Sphere1D msh) cidx =
-    case msh !? (idx cidx) of
+    case msh !? idx cidx of
       Nothing -> error $ "Sphere1D.cell: failed on cidx " L.++ show cidx
                  L.++ "\n  mesh dump: " L.++ show msh
       Just c -> c
