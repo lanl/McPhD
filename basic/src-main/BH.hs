@@ -14,7 +14,7 @@ import Control.Monad
 import Numerical
 import TryNSave
 import MC
-import Physical 
+import Physical
 import Sphere1D
 import Mesh
 import Data.List as L
@@ -23,17 +23,17 @@ import PRNG
 import Sigma_HBFC
 
 runSim :: CLOpts -> IO ()
-runSim opts@(CLOpts { inputF = infile
-               , outputF = outfile
-               , llimit = ll
-               , ulimit = ul
-               }
+runSim opts@(CLOpts { inputF  = infile
+                    , outputF = outfile
+                    , llimit  = ll
+                    , ulimit  = ul
+                    }
        ) = do
   -- read input, process into mesh, select corresponding luminosities
   (clls, lnuer, lnuebarr, lnuxr) <- readMatStateP infile
   putStrLn "read material state file"
-  let (msh,ndropped) = mkMesh clls ll ul
-      mshsz          = ncells msh
+  let (msh,ndropped)      = mkMesh clls ll ul
+      mshsz               = ncells msh
       [lnue,lnuebar,lnux] = map (trim ndropped mshsz) [lnuer,lnuebarr,lnuxr]
   -- run each species
   tallies <- mapM (runOneSpecies msh opts) [(lnue,NuE),(lnuebar,NuEBar),(lnux,NuX)]
@@ -41,25 +41,24 @@ runSim opts@(CLOpts { inputF = infile
   let outfs = map (outfile ++ ) ["_nuE","_nuEbar","_nuX"]
   putStrLn "writing tallies"
   zipWithM_ writeTally outfs tallies
-  return ()
 
--- | run one neutrino species: 
---     1. derive its source statistics (where to put particles) 
---     2. print source statistics to stdout 
+-- | run one neutrino species:
+--     1. derive its source statistics (where to put particles)
+--     2. print source statistics to stdout
 --     3. run particles to get a tally
 --     4. print summary of tally
 -- TO DO: would be nice to put summarize___ in a writer monad: purify this
-runOneSpecies :: Mesh m => 
-                 m -> 
+runOneSpecies :: Mesh m =>
+                 m ->
                  CLOpts ->
-                 ([Luminosity],PType) -> 
+                 ([Luminosity],PType) ->
                  IO Tally
 runOneSpecies msh
               (CLOpts { nps     = n
                       , chunkSz = chunkSize
                       , simTime = dt
                       , alpha   = a})
-              (lnu,nuType) = do 
+              (lnu,nuType) = do
   let statsNu = calcSrcStats lnu dt n
   summarizeStats statsNu nuType
   let tllyNu = runManyParticles statsNu chunkSize msh a
@@ -68,11 +67,11 @@ runOneSpecies msh
 
 -- | Perform the simulation for several (at least one) particles
 -- in a given mesh.
-runManyParticles :: Mesh m => 
+runManyParticles :: Mesh m =>
                     [SrcStat] ->
                     Int ->   -- ^ chunkSize
-                    m -> 
-                    FP ->    -- ^ alpha 
+                    m ->
+                    FP ->    -- ^ alpha
                     Tally
 runManyParticles stats !chnkSz msh alph =
   let
@@ -107,7 +106,7 @@ main = do
   runSim opts
 
 
--- Command line processing 
+-- Command line processing
 
 data CLOpts = CLOpts {
     nps     :: Int
@@ -124,78 +123,79 @@ defaultOpts :: CLOpts
 defaultOpts = CLOpts 0 "" "tally" 0 1e12 (-1) (Time 1e-7) 2.0
 
 options :: [OptDescr (CLOpts -> CLOpts)]
-options = 
-  [Option ['n']  ["number-particles"] 
-            (ReqArg (\f opts -> opts { nps = read f}) "i")
+options =
+  [Option ['n']  ["number-particles"]
+            (ReqArg (\f opts -> opts { nps = read f }) "i")
             "number of particles to run, each species (required)"
-  ,Option ['i']  ["input"] 
-            (ReqArg (\f opts -> opts {inputF = f}) "FILE")
+  ,Option ['i']  ["input"]
+            (ReqArg (\f opts -> opts {inputF = f }) "FILE")
             "input FILE (required)"
-  ,Option ['o']  ["output"] 
-            (ReqArg (\f opts -> opts {outputF = f}) "FILE") 
+  ,Option ['o']  ["output"]
+            (ReqArg (\f opts -> opts {outputF = f }) "FILE")
             "output FILE (default \"tally\")"
-  ,Option ['l']  ["lower-limit"] 
-            (ReqArg (\f opts -> opts { llimit = read f}) "ll") 
+  ,Option ['l']  ["lower-limit"]
+            (ReqArg (\f opts -> opts { llimit = read f }) "ll")
             "lower limit in cm"
-  ,Option ['u']  ["upper-limit"] 
-            (ReqArg (\f opts -> opts { ulimit = read f}) "ul") 
+  ,Option ['u']  ["upper-limit"]
+            (ReqArg (\f opts -> opts { ulimit = read f }) "ul")
             "upper limit in cm"
-  ,Option ['s']  ["chunk-size"] 
-            (ReqArg (\f opts -> opts { chunkSz = read f}) "sz") 
+  ,Option ['s']  ["chunk-size"]
+            (ReqArg (\f opts -> opts { chunkSz = read f }) "sz")
             "chunk size (defaults to nps)"
-  ,Option ['d']  ["dt"] 
-            (ReqArg (\f opts -> opts { simTime = Time (read f)}) "t") 
+  ,Option ['d']  ["dt"]
+            (ReqArg (\f opts -> opts { simTime = Time (read f) }) "t")
             "sim time in sec"
-  ,Option ['a']  ["alpha"] 
-            (ReqArg (\f opts -> opts { alpha =  (read f)}) "a") 
+  ,Option ['a']  ["alpha"]
+            (ReqArg (\f opts -> opts { alpha = read f }) "a")
             "alpha"
           ]
 
-
 getOpts :: [String] -> IO (CLOpts,[String])
-getOpts argv = 
+getOpts argv =
   case getOpt Permute options argv of
     (o,n,[]) -> return (foldl (flip id) defaultOpts o, n)
     (_,_,es) -> ioError (userError (concat es ++ usageInfo header options))
- 
+
 header :: String
 header = "Usage: BH [OPTION...] N_Particles Input_File"
 
 checkOpts :: CLOpts -> IO CLOpts
-checkOpts os = case checkOptsArgsM os of 
+checkOpts os = case checkOptsArgsM os of
                  Just opts -> return opts
                  Nothing -> error ("invalid arguments: " ++ show os
                                    ++ "\nexpected:\n" ++ usageInfo header options)
 
 -- To do: instead of checking CL options in Maybe, use a
--- Writer monad that accumulates particular objections. 
+-- Writer monad that accumulates particular objections.
 checkOptsArgsM :: CLOpts -> Maybe CLOpts
-checkOptsArgsM opts = 
-  checkNPs opts >>= checkInput >>= checkOutput >>= checkLimits 
+checkOptsArgsM opts =
+  checkNPs opts >>= checkInput >>= checkOutput >>= checkLimits
              >>= checkChunk >>= checkTime >>= checkAlpha
+
+ensure :: (MonadPlus m) => (a -> Bool) -> a -> m a
+ensure p x = guard (p x) >> return x
 
 checkNPs, checkInput, checkOutput, checkLimits :: CLOpts -> Maybe CLOpts
 checkChunk, checkTime, checkAlpha :: CLOpts -> Maybe CLOpts
-checkNPs os@(CLOpts {nps = n}) = if n > 0 then Just os else Nothing
 
--- To do: for files, need better check--this forces us into IO. 
+checkNPs    = ensure ((> 0) . nps)
+
+-- To do: for files, need better check--this forces us into IO.
 -- | Input file is valid if it exists and user can access it
-checkInput os@(CLOpts {inputF = f}) = if isValid f then Just os else Nothing
+checkInput  = ensure (isValid . inputF)
 
 -- | output file is valid if directory exists and user can write & execute it
-checkOutput os@(CLOpts {outputF = f}) = if isValid f then Just os else Nothing
+checkOutput = ensure (isValid . outputF)
 
-checkLimits os@(CLOpts {llimit = ll, ulimit = ul}) = 
-  if ll < ul && ll >= 0.0
-  then Just os
-  else Nothing
+checkLimits = ensure (\ CLOpts {llimit = ll, ulimit = ul} -> ll < ul && ll >= 0)
 
-checkTime os@(CLOpts {simTime = Time dt}) = if dt > 0.0 then Just os else Nothing
+checkTime   = ensure (\ CLOpts {simTime = Time dt} -> dt > 0)
 
-checkAlpha os@(CLOpts {alpha = a}) = if a > 0.0 then Just os else Nothing
+checkAlpha  = ensure ((> 0) . alpha)
 
-checkChunk os@(CLOpts {nps = n, chunkSz = sz}) = 
-  if sz > 0 then Just os else Just os{chunkSz = n}
+-- | Initialize chunk size to the whole stream unless explicitly given.
+checkChunk os@(CLOpts {nps = n, chunkSz = sz}) =
+  return (if sz > 0 then os else os {chunkSz = n})
 
 -- version
 -- $Id$

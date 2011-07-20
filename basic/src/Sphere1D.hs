@@ -1,5 +1,6 @@
 module Sphere1D where
 
+import Control.Arrow
 import Control.Monad
 import Data.List as L
 import Data.Vector as V
@@ -16,19 +17,20 @@ data Sphere1D = Sphere1D (Vector Cell) deriving Show
 -- | form mesh from sublist of cells and user limits. Also returns the number of
 -- cells not used from the start of the list.
 mkMesh :: [Cell] -> FP -> FP -> (Sphere1D, Int)
-mkMesh clls llim ulim = (Sphere1D $ V.fromList cellsInBounds,ndropped) 
-  where cellsInBounds = rebound . fst . L.span leUL $ snd (L.break geLL clls)
+mkMesh clls llim ulim = (Sphere1D $ V.fromList cellsInBounds, ndropped)
+  where cellsInBounds = rebound kept
+        (pre, (kept, post)) = second (L.span leUL) $ L.break geLL clls
         geLL, leUL :: Cell -> Bool
         geLL (Cell {highB = Position hir}) = hir >= llim
         leUL (Cell {lowB  = Position lor}) = lor <= ulim
-        ndropped = L.length $ fst (L.break geLL clls)
+        ndropped = L.length pre
 
--- | impose boundary conditions on a list of cells: reflective at lowermost, 
+-- | impose boundary conditions on a list of cells: reflective at lowermost,
 -- vacuum at uppermost. Seems really clumsy...
 rebound :: [Cell] -> [Cell]
-rebound [] = []
-rebound [c] = [c {lowBC = Refl, highBC = Vac}]
-rebound (c:cs) = lbc' : (L.init cs) L.++ [ubc']
+rebound []     = []
+rebound [c]    = [c {lowBC = Refl, highBC = Vac}]
+rebound (c:cs) = lbc' : L.init cs L.++ [ubc']
   where lbc' = c {lowBC = Refl}
         ubc' = (L.last cs) {highBC = Vac}
 
@@ -36,12 +38,12 @@ instance Mesh Sphere1D where
 
   sampleDirectionIso _ = liftM (\ x -> Direction (2 * x - 1)) random
 
-  samplePositionInCell _ cll = do 
+  samplePositionInCell _ cll = do
     xi <- random
-    let ri3 = ri * ri * ri
-        ro3 = ro * ro * ro
-        (ri,ro) = (pos . lowB $ cll, pos . highB $ cll)
-        psn = Position ( (ri3 + (ro3 - ri3) * xi) ** (1.0/3.0) )
+    let ri3      = ri * ri * ri
+        ro3      = ro * ro * ro
+        (ri, ro) = (pos . lowB $ cll, pos . highB $ cll)
+        psn      = Position ( (ri3 + (ro3 - ri3) * xi) ** (1/3) )
     return psn
 
   samplePosition msh = do
@@ -74,7 +76,7 @@ instance Mesh Sphere1D where
                  | otherwise      = (xhim, yhim)
 
       -- These are independent of the sphere radius
-      xterm1 = r * tsq * oneOverOnePTSq
+      xterm1 =          r *     tsq * oneOverOnePTSq
       yterm1 = -r * t + r * t * tsq * oneOverOnePTSq
 
       -- Intersection with the inner sphere: just use the
@@ -98,10 +100,10 @@ instance Mesh Sphere1D where
 
   cells (Sphere1D msh) = msh
 
-  cell (Sphere1D msh) cidx = 
-    case msh !? (idx cidx) of 
-      Nothing -> error $ "Sphere1D::cell failed on cidx " L.++ show cidx
-                 L.++ "\n mesh dump: " L.++ show msh
+  cell (Sphere1D msh) cidx =
+    case msh !? idx cidx of
+      Nothing -> error $ "Sphere1D.cell: failed on cidx " L.++ show cidx
+                 L.++ "\n  mesh dump: " L.++ show msh
       Just c -> c
 
   cellAcross _ cidx Lo = cidx - 1
@@ -132,8 +134,7 @@ findCell (Sphere1D msh) r = exMaybe (binarySearchBy cmp r msh)
       | otherwise = EQ
 
     exMaybe :: Maybe Int -> CellIdx
-    exMaybe Nothing  = error "Sphere1D.findCell: malformed mesh"
-    exMaybe (Just n) = CellIdx n
+    exMaybe = maybe (error "Sphere1D.findCell: malformed mesh") CellIdx
 
 rmax :: Sphere1D -> FP
 rmax (Sphere1D msh) = pos . highB . V.last $ msh
