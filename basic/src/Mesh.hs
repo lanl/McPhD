@@ -1,4 +1,4 @@
-module Mesh 
+module Mesh
   ( module Mesh
   , module Cell)
  where
