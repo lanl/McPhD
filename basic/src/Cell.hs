@@ -3,7 +3,7 @@ module Cell where
 import Physical
 import Material
 
-data BoundaryCondition = Vac | Refl | Transp 
+data BoundaryCondition = Vac | Refl | Transp
   deriving (Show,Eq)
 
 data Cell = Cell {
@@ -11,9 +11,9 @@ data Cell = Cell {
   , highB  :: Position
   , lowBC  :: BoundaryCondition
   , highBC :: BoundaryCondition
-  , mat    :: Material 
+  , mat    :: Material
   }
   deriving (Show, Eq)
 
-data Face = Lo | Hi 
+data Face = Lo | Hi
   deriving (Eq, Show)
