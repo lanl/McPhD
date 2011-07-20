@@ -13,7 +13,7 @@ import Mesh as M
 import Particle as P
 import Physical
 import PRNG
-import Tally -- IM as Tally
+import TallyIM as Tally
 import Sigma_HBFC
 import Collision
 

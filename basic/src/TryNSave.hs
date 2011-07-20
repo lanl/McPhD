@@ -9,7 +9,7 @@ module TryNSave (writeTally
                 ,readMatStateP)
     where
 
-import Tally -- IM
+import TallyIM
 import Cell
 import Physical
 import Constants (k_B,pmg)
