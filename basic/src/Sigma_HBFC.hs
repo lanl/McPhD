@@ -5,7 +5,7 @@
  - Cross sections are in cm^2, energies in MeV
  -}
 
-module Sigma_HBFC 
+module Sigma_HBFC
   where
 
 import Material (tempE)
@@ -15,30 +15,30 @@ import PRNG
 import Control.Monad
 
 
--- * interactions 
+-- * interactions
 type PState  = (Energy,Direction)
 type Scatter = Energy -> Direction -> Rnd PState
 
 newStateNAbs :: Scatter
-newStateNAbs _ _ = return (Energy 0.0, Direction 0.0)
+newStateNAbs _ _ = return (Energy 0, Direction 0)
 
 newStateNElastic :: Mesh m => m -> Scatter
 newStateNElastic m ei _ = liftM (ei, ) (sampleDirectionIso m)
 
 newStateEMinusInel :: Mesh m => m -> Cell -> Scatter
-newStateEMinusInel m cll ei _ = 
+newStateEMinusInel m cll ei _ =
   liftM (leptonEnergy cll ei, ) (sampleDirectionIso m)
 
 newStateEPlusInel  :: Mesh m => m -> Cell -> Scatter
-newStateEPlusInel m cll ei _  = 
+newStateEPlusInel m cll ei _  =
   liftM (leptonEnergy cll ei, ) (sampleDirectionIso m)
 
--- | compute final neutrino energy using generic 
+-- | compute final neutrino energy using generic
 -- material temperature (in energy units) as lepton energy
 leptonEnergy :: Cell -> Energy -> Energy
-leptonEnergy cll (Energy ei) = Energy ef 
-  where ef   = 1.0/4.0 * (ei - elep)
-        elep = temp . tempE . mat $ cll  
+leptonEnergy cll (Energy ei) = Energy ef
+  where ef   = 1/4 * (ei - elep)
+        elep = temp . tempE . mat $ cll
 
 -- * neutrino--baryon cross sections
 -- ---------------------------------
@@ -49,7 +49,7 @@ nuNAbs (Energy nrg) = CrossSection $ 9e-44 * nrg * nrg
 
 -- | nu--nucleon elastic scattering
 nuNElastic :: Energy -> CrossSection
-nuNElastic (Energy nrg) = CrossSection $ 1.7e-44* nrg * nrg
+nuNElastic (Energy nrg) = CrossSection $ 1.7e-44 * nrg * nrg
 
 -- -- | nu-nucleus elastic scatter: attempts to account
 -- -- | for coherent scattering from bound nucleons
@@ -59,8 +59,8 @@ nuNElastic (Energy nrg) = CrossSection $ 1.7e-44* nrg * nrg
 
 -- | if not too concerned about the balance between n's & p's:
 nuAElastic :: Energy -> NucleonNumber -> CrossSection
-nuAElastic (Energy nrg) (NucleonNumber a) = 
-  CrossSection $ 1.7e-44*a*a/6.0*nrg*nrg
+nuAElastic (Energy nrg) (NucleonNumber a) =
+  CrossSection $ 1.7e-44*a*a/6*nrg*nrg
 
 
 -- NOTE: the lepton cross sections are complicated by dependence on
@@ -103,7 +103,7 @@ nuXEPlus (Energy e_nu) (Energy e_e) = CrossSection $ 1.3e-45 * e_nu * e_e
 data Lepton = Lepton {
     e_minus :: Energy -> Energy -> CrossSection
   , e_plus  :: Energy -> Energy -> CrossSection
-} 
+}
 
 nuE :: Lepton
 nuE = Lepton {
