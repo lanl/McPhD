@@ -125,31 +125,30 @@ defaultOpts = CLOpts 0 "" "tally" 0 1e12 (-1) (Time 1e-7) 2.0
 options :: [OptDescr (CLOpts -> CLOpts)]
 options =
   [Option ['n']  ["number-particles"]
-            (ReqArg (\f opts -> opts { nps = read f}) "i")
+            (ReqArg (\f opts -> opts { nps = read f }) "i")
             "number of particles to run, each species (required)"
   ,Option ['i']  ["input"]
-            (ReqArg (\f opts -> opts {inputF = f}) "FILE")
+            (ReqArg (\f opts -> opts {inputF = f }) "FILE")
             "input FILE (required)"
   ,Option ['o']  ["output"]
-            (ReqArg (\f opts -> opts {outputF = f}) "FILE")
+            (ReqArg (\f opts -> opts {outputF = f }) "FILE")
             "output FILE (default \"tally\")"
   ,Option ['l']  ["lower-limit"]
-            (ReqArg (\f opts -> opts { llimit = read f}) "ll")
+            (ReqArg (\f opts -> opts { llimit = read f }) "ll")
             "lower limit in cm"
   ,Option ['u']  ["upper-limit"]
-            (ReqArg (\f opts -> opts { ulimit = read f}) "ul")
+            (ReqArg (\f opts -> opts { ulimit = read f }) "ul")
             "upper limit in cm"
   ,Option ['s']  ["chunk-size"]
-            (ReqArg (\f opts -> opts { chunkSz = read f}) "sz")
+            (ReqArg (\f opts -> opts { chunkSz = read f }) "sz")
             "chunk size (defaults to nps)"
   ,Option ['d']  ["dt"]
-            (ReqArg (\f opts -> opts { simTime = Time (read f)}) "t")
+            (ReqArg (\f opts -> opts { simTime = Time (read f) }) "t")
             "sim time in sec"
   ,Option ['a']  ["alpha"]
-            (ReqArg (\f opts -> opts { alpha =  (read f)}) "a")
+            (ReqArg (\f opts -> opts { alpha = read f }) "a")
             "alpha"
           ]
-
 
 getOpts :: [String] -> IO (CLOpts,[String])
 getOpts argv =
