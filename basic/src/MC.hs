@@ -1,10 +1,10 @@
-module MC 
-  (module MC
+module MC
+  ( module MC
   , module Cell
   , module Event
   , module P
   , module Tally
-  )         
+  )
   where
 
 
@@ -36,7 +36,7 @@ steps sig msh = go
 step :: Mesh m => Lepton-> m -> Particle -> (Event, Particle)
 step sig msh p =
   withRandomParticle p $ do
-    (evt,omega') <- pickEvent sig msh p 
+    (evt,omega') <- pickEvent sig msh p
     let p'       =  stream msh p evt omega'
     return (evt, p')
 
@@ -54,7 +54,7 @@ stream msh
     Collision {}                 -> p' { P.dir =  omega'   }
     Boundary  {bType = Reflect}  -> p' { P.dir = -omega    }
     Boundary  {bType = Transmit} -> p' { cellIdx  = newCell f }
-    Boundary  {bType = Escape}   -> p' { cellIdx  = 0         } 
+    Boundary  {bType = Escape}   -> p' { cellIdx  = 0         }
     Timeout   {}                 -> p' { time  = 0         }
   where
     p' :: Particle
@@ -92,7 +92,7 @@ pickEvent sig msh
   let (dBdy, fce) = distanceToBoundary msh mcell x omega
       dCol        = dCollide mcell en omega sig (URD sel_dc)
       dCen        = Distance $ c * tcen
-      mcell       = M.cell msh cidx 
+      mcell       = M.cell msh cidx
   (collEvent,omega') <- sampleCollision msh mcell en omega sig dCol wt
   let events      = [
           collEvent
