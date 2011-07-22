@@ -35,6 +35,7 @@ runSim opts@(CLOpts { inputF  = infile
   let (msh,ndropped)      = mkMesh clls ll ul
       mshsz               = ncells msh
       [lnue,lnuebar,lnux] = map (trim ndropped mshsz) [lnuer,lnuebarr,lnuxr]
+  putStrLn $ "ndropped: " ++ show ndropped ++ ", mesh size: " ++ show mshsz
   -- run each species
   tallies <- mapM (runOneSpecies msh opts) [(lnue,NuE),(lnuebar,NuEBar),(lnux,NuX)]
   -- write out tallies
@@ -117,6 +118,7 @@ data CLOpts = CLOpts {
   , chunkSz :: Int
   , simTime :: Time
   , alpha   :: FP
+  , seed    :: Int
   } deriving (Show,Eq)
 
 defaultOpts :: CLOpts
@@ -139,8 +141,8 @@ options =
   ,Option ['u']  ["upper-limit"]
             (ReqArg (\f opts -> opts { ulimit = read f }) "ul")
             "upper limit in cm"
-  ,Option ['s']  ["chunk-size"]
-            (ReqArg (\f opts -> opts { chunkSz = read f }) "sz")
+  ,Option ['c']  ["chunk-size"] 
+            (ReqArg (\f opts -> opts { chunkSz = read f}) "sz") 
             "chunk size (defaults to nps)"
   ,Option ['d']  ["dt"]
             (ReqArg (\f opts -> opts { simTime = Time (read f) }) "t")
@@ -148,6 +150,9 @@ options =
   ,Option ['a']  ["alpha"]
             (ReqArg (\f opts -> opts { alpha = read f }) "a")
             "alpha"
+  ,Option ['s']  ["rng--seed"] 
+            (ReqArg (\f opts -> opts { seed =  (read f)}) "s") 
+            "seed"
           ]
 
 getOpts :: [String] -> IO (CLOpts,[String])
