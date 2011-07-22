@@ -139,5 +139,5 @@ countEvent (Boundary  {bType = Transmit})   ctr = ctr { nTransmit  = 1 + nTransm
 countEvent (Timeout   {})                   ctr = ctr { nTimeout   = 1 + nTimeout   ctr}
 
 totalDep :: Tally -> CellTally
-totalDep t = Map.fold (<>) mempty (deposition t)
+totalDep t = GV.foldl1' (<>)  (deposition t)
 
