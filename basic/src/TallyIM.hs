@@ -10,6 +10,7 @@ module TallyIM ( Tally(..)
                , CellTally(..)
                , tally
                , merge
+               , totalDep
                )
   where
 
@@ -99,6 +100,10 @@ emptyTally = Tally mempty Map.empty mempty
 merge :: Tally -> Tally -> Tally
 merge (Tally ec1 dep1 esc1) (Tally ec2 dep2 esc2) =
   Tally (ec1 <> ec2) (Map.unionWith (<>) dep1 dep2) (esc1 ++ esc2)
+
+totalDep :: Tally -> CellTally
+totalDep t = Map.fold (<>) mempty (deposition t)
+
 
 -- version
 -- $Id$
