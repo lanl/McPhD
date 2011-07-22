@@ -27,17 +27,23 @@ runSim opts@(CLOpts { inputF  = infile
                     , outputF = outfile
                     , llimit  = ll
                     , ulimit  = ul
+                    , seed    = sd
                     }
        ) = do
-  -- read input, process into mesh, select corresponding luminosities
+  -- read input, process into mesh, select corresponding luminosities,
+  -- initialize rngs
   (clls, lnuer, lnuebarr, lnuxr) <- readMatStateP infile
   putStrLn "read material state file"
   let (msh,ndropped)      = mkMesh clls ll ul
       mshsz               = ncells msh
       [lnue,lnuebar,lnux] = map (trim ndropped mshsz) [lnuer,lnuebarr,lnuxr]
+      rng                 = mkRNG sd
+      (g4,g3)             = split rng
+      (g1,g2)             = split g4
   putStrLn $ "ndropped: " ++ show ndropped ++ ", mesh size: " ++ show mshsz
   -- run each species
-  tallies <- mapM (runOneSpecies msh opts) [(lnue,NuE),(lnuebar,NuEBar),(lnux,NuX)]
+  let runs = [(lnue,NuE,g1),(lnuebar,NuEBar,g2),(lnux,NuX,g3)]
+  tallies <- mapM (runOneSpecies msh opts) runs
   -- write out tallies
   let outfs = map (outfile ++ ) ["_nuE","_nuEbar","_nuX"]
   putStrLn "writing tallies"
@@ -52,17 +58,17 @@ runSim opts@(CLOpts { inputF  = infile
 runOneSpecies :: Mesh m =>
                  m ->
                  CLOpts ->
-                 ([Luminosity],PType) ->
+                 ([Luminosity],PType,RNG) ->
                  IO Tally
 runOneSpecies msh
               (CLOpts { nps     = n
                       , chunkSz = chunkSize
                       , simTime = dt
                       , alpha   = a})
-              (lnu,nuType) = do
+              (lnu,nuType,gen) = do
   let statsNu = calcSrcStats lnu dt n
   summarizeStats statsNu nuType
-  let tllyNu = runManyParticles statsNu chunkSize msh a
+  let tllyNu = runManyParticles statsNu chunkSize msh gen a
   summarizeTally tllyNu
   return tllyNu
 
@@ -72,11 +78,12 @@ runManyParticles :: Mesh m =>
                     [SrcStat] ->
                     Int ->   -- ^ chunkSize
                     m ->
+                    RNG ->
                     FP ->    -- ^ alpha
                     Tally
-runManyParticles stats !chnkSz msh alph =
+runManyParticles stats !chnkSz msh gen alph =
   let
-    particles = genParticlesInCells msh testRNG stats alph
+    particles = genParticlesInCells msh gen stats alph
     tallies   = L.map (runParticle nuE msh) particles
     chunked   = chunk chnkSz tallies
     res       = L.map (L.foldl1' merge) chunked
@@ -122,7 +129,7 @@ data CLOpts = CLOpts {
   } deriving (Show,Eq)
 
 defaultOpts :: CLOpts
-defaultOpts = CLOpts 0 "" "tally" 0 1e12 (-1) (Time 1e-7) 2.0
+defaultOpts = CLOpts 0 "" "tally" 0 1e12 (-1) (Time 1e-7) 2.0 42
 
 options :: [OptDescr (CLOpts -> CLOpts)]
 options =
