@@ -37,10 +37,12 @@ library
                      Source
                      Sphere1D
                      Tally
+                     TallyV
                      TallyIM
                      TryNSave
   ghc-options:       -Wall -fno-warn-name-shadowing -fno-warn-orphans -fwarn-tabs
-  ghc-options:       -rtsopts
+  ghc-options:       -rtsopts 
+  extensions:        CPP
   build-depends:     base >=4 && <=5,
                      vector >= 0.7,
                      random >= 1,
@@ -55,7 +57,7 @@ library
 executable  black-hole
   hs-source-dirs:    src-main
   ghc-options:       -Wall -fno-warn-name-shadowing -fno-warn-orphans -fwarn-tabs
-  ghc-options:       -rtsopts 
+  ghc-options:       -rtsopts
   main-is:           BH.hs
   build-depends:     base >=4 && <=5,
                      vector >= 0.7,
