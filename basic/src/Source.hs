@@ -16,14 +16,14 @@ import Cell
 
 -- | generate a given number of particles in each cell
 genParticlesInCells :: Mesh m => m -> RNG -> [SrcStat] -> 
-                       FP ->  -- ^ alpha (power law parameters)
+                       FP ->  -- ^ alpha (power law parameter)
                       [Particle]
 genParticlesInCells msh gen nPerCell a = 
   nPerCell >>= (genParticlesInCell msh gen a)
 
 -- | generate a given number of particles in one cell
 genParticlesInCell :: Mesh m => m -> RNG ->
-                      FP ->  -- ^ alpha (power law parameters) 
+                      FP ->  -- ^ alpha (power law parameter) 
                      SrcStat ->
                      [Particle]
 genParticlesInCell msh g a (cidx,n,ewt,_) =
@@ -34,7 +34,7 @@ genParticlesInCell msh g a (cidx,n,ewt,_) =
 genCellParticle :: Mesh m => m -> 
                    CellIdx -> 
                    EnergyWeight ->
-                   FP ->  -- ^ alpha  (power law parameters)
+                   FP ->  -- ^ alpha  (power law parameter)
                    RNG -> 
                    Particle
 genCellParticle msh cidx ewt a g =
