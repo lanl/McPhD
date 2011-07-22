@@ -48,9 +48,6 @@ class (Mag v, Scale v) => Normable v where
     normalize :: v -> Normalized v 
     normalize v = Normalized $ scale v (1.0 / magnitude v)
     
-    denormalize :: Normalized v -> v
-    denormalize (Normalized v) = v
-
 -- Note that we cannot call normalize on Normalized v, because
 -- Normalized v is not an instance of Scale.
 
