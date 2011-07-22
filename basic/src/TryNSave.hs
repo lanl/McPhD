@@ -24,38 +24,38 @@ import qualified Data.Vector.Unboxed as V
 
 summarizeStats :: [SrcStat] -> PType -> IO ()
 summarizeStats stats typ = do
-  let ntot   = sum (map (\(_,b,_,_) -> b) stats)
+  let sz     = length stats
+      ntot   = sum (map (\(_,b,_,_) -> b) stats)
       meanEW = sum (map (\(_,_,c,_) -> c) stats)
       etot   = sum (map (\(_,_,_,d) -> d) stats)
       fmtstr = "For %s:\n\t%i particles\n\t%e total energy\n\t%e mean energy weight"
-      outstr = printf fmtstr (show typ) ntot (e etot) (ew meanEW)
+      outstr = printf fmtstr (show typ) ntot (e etot) ((ew meanEW) / fromIntegral sz)
   putStrLn outstr
 
 writeTally :: String -> Tally -> IO ()
 writeTally name = writeFile name . show
 
 summarizeTally :: Tally -> IO ()
-summarizeTally (Tally cntrs dep esc) =
+summarizeTally tlly@(Tally cntrs dep esc) = do
   -- summarize global events
   -- let (Energy totEDep) = V.sum (V.map (\ct -> ctEnergy ct) dep)
   --     (Momentum totMDep) = V.sum (V.map (\ct -> ctMom ct) dep)
+  let CellTally{ctMom = momTot,ctEnergy = eTot} = totalDep tlly
   mapM_ putStrLn $
-           ("Total energy deposited: " ++ "FIX-ME") :
---           ("Total energy deposited: " ++ show totEDep) :
+           ("Total energy deposited: "        ++ show eTot) :
+           ("Net radial momentum deposited: " ++ show momTot) :
           "Scatters:" :
-           ("\tnucleon elastic: " ++ show (nNuclEl cntrs)) :
-           ("\tnu_e--electron scatters: " ++ show (nEMinusInel cntrs)) :
-           ("\tnu_e_bar--positron scatters: " ++ show (nEPlusInel cntrs)) :
-          "\tnu_x--electron scatters: FIX ME!"  :
-          "\tnu_x_bar--positron scatters: FIX ME!"  :
+           ("\tnucleon elastic: "             ++ show (nNuclEl cntrs)) :
+           ("\telectron scatters: "           ++ show (nEMinusInel cntrs)) :
+           ("\tpositron scatters: "           ++ show (nEPlusInel cntrs)) :
           "Absorptions:" :
-           ("\tnu_i nucleon absorptions: " ++ show (nNuclAbs cntrs)) :
+           ("\tnu_i nucleon absorptions: "    ++ show (nNuclAbs cntrs)) :
           "Mesh:" :
-           ("\tcell boundary crossings: " ++ show (nTransmit cntrs)) :
-           ("\treflections: " ++ show (nReflect cntrs)) :
-           ("\tescapes: " ++ show (nEscape cntrs)) :
+           ("\tcell boundary crossings: "     ++ show (nTransmit cntrs)) :
+           ("\treflections: "                 ++ show (nReflect cntrs)) :
+           ("\tescapes: "                     ++ show (nEscape cntrs)) :
           "Timeouts:" :
-           ("\ttimeouts: " ++ show (nTimeout cntrs)) :
+           ("\ttimeouts: "                    ++ show (nTimeout cntrs)) :
           "==================================================" : []
 
 type CellGeom = (Position,Position,BoundaryCondition,BoundaryCondition)
