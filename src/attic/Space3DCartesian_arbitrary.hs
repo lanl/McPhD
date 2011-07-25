@@ -25,7 +25,7 @@ instance Arbitrary Cell where
 
 instance Arbitrary Direction where
     arbitrary = direction
-                <$> normalized_value
+                <$> getValue
                 <$> (generateNormalVector3 <$> arbitrary <*> arbitrary)
 
 instance Arbitrary Position where

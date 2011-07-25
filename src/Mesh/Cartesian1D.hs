@@ -92,7 +92,7 @@ instance Mesh Cartesian1DMesh where
 
   cell_boundary mesh cell location =
       let bounds  = cellBounds mesh cell
-          cos_dir = v2x $ normalized_value $ dir location
+          cos_dir = v2x $ getValue $ dir location
           (x_distance, face) = if cos_dir > 0
                                then (snd bounds - pos location, Positive)
                                else (fst bounds - pos location, Negative)
@@ -129,7 +129,7 @@ cellBoundsTest :: (Double -> Double -> Bool)
                   -> Bool
 cellBoundsTest comp location (xMin, xMax) =
   let x       = pos location
-      cos_dir = v2x . normalized_value $ dir location
+      cos_dir = v2x . getValue $ dir location
   in ((x > xMin) || ( (x `comp` xMin) && cos_dir >= 0)) &&
      ((x < xMax) || ( (x `comp` xMax) && cos_dir < 0))
 

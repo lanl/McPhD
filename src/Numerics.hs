@@ -1,4 +1,4 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving, StandaloneDeriving  #-}
 {-| A module for various numeric definitions useful in building
 domain-specific numeric types
 
@@ -27,6 +27,9 @@ module Numerics ( huge
                 , ZenithAngle(..),  makeZenithAngle,  sampleZenithAngle
                 , Radius(..),       makeRadius,       sampleRadius
                 ) where
+
+import NumericClasses
+
 
 -- | Upper limit for event selection.
 huge :: Double
@@ -75,7 +78,7 @@ sampleZenithAngle (UnitInterval a) = ZenithAngle (pi*a)
 
 
 -- | A type for Radii. Limited to 0 < r.
-newtype Radius = Radius {get_radius :: Double } deriving (Show, Eq, Ord)
+newtype Radius = Radius {get_radius :: Double } deriving (Show, Eq, Ord, Num, Mag, Scale)
 
 makeRadius :: Double -> Maybe Radius
 makeRadius x

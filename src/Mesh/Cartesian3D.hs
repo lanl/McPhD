@@ -42,7 +42,7 @@ data Cartesian3DMesh = Cartesian3DMesh {
 instance Mesh Cartesian3DMesh where
   type MeshCell Cartesian3DMesh  = Cartesian3DCell
   type MeshFace Cartesian3DMesh  = Cartesian3DDirection
-  type MeshSpace Cartesian3DMesh = Cartesian Vector3
+  type MeshSpace Cartesian3DMesh = Cartesian3D
 
   size m = let Dimensions x y z = c3Ddimensions m in x*y*z
 

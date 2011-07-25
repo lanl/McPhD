@@ -61,7 +61,6 @@ instance Mag (Normalized n) where
 instance Mag Double      where magnitude = abs; magnitude2 = (^2)
 instance Scale Double    where scale = (*)
 instance Normable Double where
-    
   
 instance Mag Vector2      where magnitude = vmag; magnitude2 x = vdot x x
 instance Scale Vector2    where scale = (|*)

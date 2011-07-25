@@ -5,8 +5,9 @@ module Properties where
 
 import Test.QuickCheck
 
+import NumericClasses
 import Approx
-import NormalizedValues
+
 
 -- * Material Properties
 

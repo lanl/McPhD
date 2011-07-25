@@ -123,7 +123,7 @@ randomDirection g = let
   (a, g')   = sampleVar g
   (b, g'')  = sampleVar g'
   v = generateNormalVector3 a b
-  in (direction $ normalized_value v , g'')
+  in (direction $ getValue v , g'')
 
 -- | Sample an exponential Distance from a PureMT
 randomExponential :: Double -> PureMT -> (Distance, PureMT)

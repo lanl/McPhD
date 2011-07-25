@@ -15,6 +15,7 @@ import Space.Cartesian1D
 import Space.Spherical1D
 
 -- Its dependencies
+import NumericClasses
 import Space.Classes
 import Approx
 import NormalizedValues
@@ -69,11 +70,8 @@ tests =
       "Zero distance -> Same location in 1D"
       (prop_ZeroDistance :: Cartesian1D -> Bool)
     , testProperty
-      "Zero distance -> Same location in 2D"
-      (prop_ZeroDistance :: Cartesian Vector2 -> Bool)
-    , testProperty
       "Zero distance -> Same location in 3D"
-      (prop_ZeroDistance :: Cartesian Vector3 -> Bool)
+      (prop_ZeroDistance :: Cartesian3D -> Bool)
     , testProperty
       "Zero distance -> Same location in 1DSpherical"
       (prop_ZeroDistance :: Spherical1D -> Bool)
@@ -82,13 +80,10 @@ tests =
     [
       testProperty
       "Triangle inequality Cartesian 1D"
-      (prop_TriangleInequality :: Cartesian Vector1 -> Distance -> Bool)
-    , testProperty
-      "Triangle inequality in Cartesian 2D"
-      (prop_TriangleInequality :: Cartesian Vector2 -> Distance  -> Bool)
+      (prop_TriangleInequality :: Cartesian1D -> Distance -> Bool)
     , testProperty
       "Triangle inequality in Cartesian 3D"
-      (prop_TriangleInequality :: Cartesian Vector3 -> Distance -> Bool)
+      (prop_TriangleInequality :: Cartesian3D -> Distance -> Bool)
     , testProperty
       "Triangle inequality in Spherical 1D"
       (prop_TriangleInequality :: Spherical1D -> Distance -> Bool)
