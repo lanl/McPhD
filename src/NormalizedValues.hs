@@ -17,9 +17,10 @@ module NormalizedValues (Mag(..)
                         , generateNormalVector3
                         ) where
 
+import NumericClasses
+
 import Vectors
 import Numerics
-import Approx
 
 import Data.Vector.Class
 import Data.Vector.V3
@@ -27,28 +28,8 @@ import Data.Vector.V2
 import Data.Vector.V1
 
 
--- ANS: I've taken out the Mag instance for Normalized
--- quantities. There wasn't really a use case, as Andres pointed
--- out. Calling normalize on a value which is statically known to be
--- normalized would be a sign something is amiss.
-
--- | A Num-like class for quantities that need to remain
--- normalized. E.g. certain vectors.  Provides normalize and magnitude
--- functions
-class Mag a where
-  magnitude  :: a -> Double
-  magnitude2 :: a -> Double  -- ^ Square of the magnitude. Often faster.
-  magnitude2 x = (magnitude x) ^ (2 ::Integer)
-
 class Mag a => Norm a where
   normalize  :: a -> Normalized a
-  split      :: a -> Quot a
-  split x = Quot (magnitude x) (normalize x)
-  join       :: Quot a -> a
-  join (Quot s v) = scale s v
-  scale      :: Double -> Normalized a -> a
-  elacs      :: Normalized a -> Double -> a
-  elacs = flip scale
 
 instance Mag a => Mag (Normalized a) where
   magnitude  = const 1.0
@@ -117,7 +98,7 @@ generateNormalVector3 x y = Normalized $
 
 -- A data type with hidden constructor to enforce normalization
 newtype Normalized a = Normalized { normalized_value :: a }
-  deriving (Eq, Show, Approx)
+  deriving (Eq, Show)
 
 unsafe_makeNormal :: (Mag a) => a -> Normalized a
 unsafe_makeNormal = Normalized

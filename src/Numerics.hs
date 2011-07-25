@@ -12,17 +12,21 @@ For each new type, there are various functions defined:
 
 TODO: Add functions which create valid Foo's even with out-of range input:
 
-  createFoo :: Double -> Foo
+  mapToFoo :: Double -> Foo
 
   These will typically take the modulus of the argument over the valid
   domain.
 
-TODO: Add configurable assertion checking to the unsafe_makeFoo functions.
+TODO: Add configurable assertion checking to the unsafe_makeFoo
+functions: Error versus continue silently.
 
 --}
-module Numerics where
-
-import Approx
+module Numerics ( huge
+                , UnitInterval(..), makeUnitary,      unsafe_makeUnitary, Var
+                , AzimuthAngle(..), makeAzimuthAngle, sampleAzimuthAngle
+                , ZenithAngle(..),  makeZenithAngle,  sampleZenithAngle
+                , Radius(..),       makeRadius,       sampleRadius
+                ) where
 
 -- | Upper limit for event selection.
 huge :: Double
@@ -71,7 +75,7 @@ sampleZenithAngle (UnitInterval a) = ZenithAngle (pi*a)
 
 
 -- | A type for Radii. Limited to 0 < r.
-newtype Radius = Radius {get_radius :: Double } deriving (Show, Eq, Ord, Approx)
+newtype Radius = Radius {get_radius :: Double } deriving (Show, Eq, Ord)
 
 makeRadius :: Double -> Maybe Radius
 makeRadius x

@@ -70,6 +70,15 @@ instance Approx Particle where
                              && exact cell
       where close f = ((within_eps epsilon) `on` f) a b
             exact f = f a == f b
+    within_eps_rel epsilon a b = close time
+                             && close energy
+                             && close location
+                             && close weight
+                             && close speed
+                             && exact cell
+      where close f = ((within_eps_rel epsilon) `on` f) a b
+            exact f = f a == f b
+
 
 createParticle :: SphericalMesh
                   -> Spherical1D

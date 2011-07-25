@@ -37,7 +37,6 @@ class Mag v where
 class Scale v where
     scale :: v -> Double -> v
 
-
 -- Newtype wrapper for normalized values
 newtype Normalized v = Normalized { getValue :: v } deriving Show
 
