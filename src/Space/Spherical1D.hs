@@ -54,6 +54,10 @@ instance Space Spherical1D where
       where fix_eta (Vector2 x y) = Vector2 x (abs y)
 
 
+-- Stand-alone functions for these operations. I'm considering trying
+-- to provide these as arguments to functions which need them; instead
+-- of programming to the Space typeclass. I didn't define the instance
+-- in terms of these because they might dissapear at any moment.
 
 sph1Dstream :: Spherical1D -> Distance -> Spherical1D
 sph1Dstream (Vector2 x y) (Distance d) = Vector2 (x+d) y

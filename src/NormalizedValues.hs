@@ -27,8 +27,8 @@ import Data.Vector.V1
 newtype Normalized a = Normalized { getValue :: a } deriving (Eq, Show)
 
 -- Normable is close to being a Hilbert Space over |R.  I think all
--- it's missing is for v to be an abelan group, plus the vector space
--- rules.
+-- it's missing is for v to be an ableian group with a dot product
+-- operator, plus the vector space rules. 
 class (Mag a, Scale a) => Normable a where
     normalize  :: a -> Normalized a
     normalize v = Normalized $ scale v (1.0 / magnitude v)

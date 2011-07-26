@@ -25,7 +25,7 @@ data (Mesh mesh) => MeshParticle mesh = MeshParticle
     , pimEnergy       :: !Energy           -- ^ Particle energy
     , pimEnergyWeight :: !EnergyWeight     -- ^ Particle's weighted energy
     , pimSpeed        :: !Speed            -- ^ Speed of motion.
-    , pimRand         :: !PureMT           -- ^ Source of Particle's random behavior
+    , pimRand         :: !RNG              -- ^ Source of Particle's random behavior
     }
 
 -- | Move the particle the given distance. Assume cell and other
@@ -63,7 +63,7 @@ createMeshParticle mesh location time energy energyWeight speed seed =
   <*^> energy
   <*^> energyWeight
   <*^> speed
-  <*^> (makePureMT seed)
+  <*^> (makeRNG seed)
   where cell = cell_find mesh location
 
 instance (Approx (MeshSpace mesh), Mesh mesh) => Approx (MeshParticle mesh) where
