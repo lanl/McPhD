@@ -13,7 +13,7 @@ module Mesh.Classes (Mesh (..)
                     , boundaryToCrossing
                     ) where
 
-import System.Random.Mersenne.Pure64
+import RandomNumbers
 import Data.Ix
 
 import Numerics ()
@@ -86,7 +86,7 @@ class (Space (MeshSpace m), Ix (MeshCell m)) => Mesh m where
   is_approx_in_cell :: m -> MeshCell m -> MeshSpace m -> Bool
 
   -- | Sample a location uniformly thoughout the mesh
-  uniform_sample :: m -> PureMT -> (MeshSpace m, PureMT)
+  uniform_sample :: m -> RNG -> (MeshSpace m, RNG)
 
   -- | Sample a location unformly in the given cell.
-  uniform_sample_cell :: m -> MeshCell m -> PureMT -> (MeshSpace m, PureMT)
+  uniform_sample_cell :: m -> MeshCell m -> RNG -> (MeshSpace m, RNG)

@@ -37,13 +37,13 @@ import Test.RandomNumbers_arbitrary ()
 
 prop_SampleInMesh :: Mesh m => m -> Seed -> Bool
 prop_SampleInMesh mesh seed =
-    let (location, _) = uniform_sample mesh (makePureMT seed)
+    let (location, _) = uniform_sample mesh (makeRNG seed)
     in is_in_mesh mesh location
 
 
 prop_FindIsInAgree :: Mesh m => m -> Seed -> Bool
 prop_FindIsInAgree mesh seed =
-  let rng = makePureMT seed
+  let rng = makeRNG seed
       (location, _) = uniform_sample mesh rng
       found_cell    = cell_find mesh location
   in case (is_in_cell mesh) <$> found_cell <*> Just location of

@@ -4,7 +4,6 @@ module Particle.MeshedParticle where
 
 import Data.Function
 import Control.Applicative
-import System.Random.Mersenne.Pure64
 
 import Mesh.Classes
 import Space.Classes

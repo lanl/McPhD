@@ -37,7 +37,8 @@ Library
       base > 3 && <= 6
       , AC-Vector >= 2
       , QuickCheck >= 2
-   exposed-modules: Approx, NormalizedValues, Numerics, Properties, Vectors
+      , mtl
+   exposed-modules: Approx, NumericClasses, NormalizedValues, Numerics, Properties, Vectors
    exposed-modules: Generators, RandomNumbers, RandomSamples
    exposed-modules: Space.Classes, Space.Cartesian1D, Space.Cartesian, Space.Spherical1D
    exposed-modules: Mesh.Classes, Mesh.Cartesian1D, Mesh.Cartesian3D, Mesh.Spherical
