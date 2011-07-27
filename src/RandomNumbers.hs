@@ -8,8 +8,9 @@ module RandomNumbers ( RNG() -- An abstract type for the random number generator
                      , randomDouble
                      , random
                      , randoms
+                     , split
+                     , runRnd
                      , sampleN
-                     , samples
                        )where
 
 import Control.Monad.State.Strict
@@ -18,8 +19,6 @@ import Control.Monad.Identity
 import qualified System.Random as R
 import qualified System.Random.Mersenne.Pure64 as Pure
 import Data.List
-
-import Numerics
 
 -- * Defining an abstract random number generator: RNG
 -- XXX: Why not make RNG an instance of RandomGen?                                  
@@ -54,9 +53,9 @@ randoms :: R.Random a => Int -> Rnd [a]
 randoms n = replicateM n random
 
 -- Deconstruct Rnd and pass it on to runState. The argument order is reversed wrt runState.
-runRnd :: RNG      -- ^ An initial random state
-       -> Rnd a    -- ^ A computation RNG -> (a,RNG) to execute.
-       -> (a,RNG)  -- ^ Result of the computation and the new random state.
+runRnd :: RNG       -- ^ An initial random state
+       -> Rnd a     -- ^ A computation RNG -> (a,RNG) to execute.
+       -> (a, RNG)  -- ^ Result of the computation and the new random state.
 runRnd g (Rnd m) = runState m g
 
 
