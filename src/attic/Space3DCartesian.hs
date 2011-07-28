@@ -1,7 +1,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 -- Data types for Three-dimensonal space in Cartesian coordinates
 
-module Coordinate.Space3DCartesian(
+module Space.Space3DCartesian(
   Distance (..)
   , Position (..)
   , Momentum (..)
@@ -123,7 +123,7 @@ randomDirection g = let
   (a, g')   = sampleVar g
   (b, g'')  = sampleVar g'
   v = generateNormalVector3 a b
-  in (direction $ getValue v , g'')
+  in (direction $ normalized_value v , g'')
 
 -- | Sample an exponential Distance from a PureMT
 randomExponential :: Double -> PureMT -> (Distance, PureMT)

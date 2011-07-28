@@ -7,7 +7,7 @@ import Data.Vector.V2
 
 import Mesh.Classes
 
-import Coordinate.Cartesian1D
+import Space.Cartesian1D
 import NormalizedValues
 import RandomSamples
 import Approx
@@ -58,7 +58,7 @@ cellNeighbor mesh cell Positive =
 instance Mesh Cartesian1DMesh where
   type MeshCell Cartesian1DMesh  = C1Cell
   type MeshFace Cartesian1DMesh  = C1Dir
-  type MeshCoord Cartesian1DMesh = Cartesian1D
+  type MeshSpace Cartesian1DMesh = Cartesian1D
 
   size mesh = (Seq.length $ coords mesh) - 1
 
@@ -92,7 +92,7 @@ instance Mesh Cartesian1DMesh where
 
   cell_boundary mesh cell location =
       let bounds  = cellBounds mesh cell
-          cos_dir = v2x $ getValue $ dir location
+          cos_dir = v2x $ normalized_value $ dir location
           (x_distance, face) = if cos_dir > 0
                                then (snd bounds - pos location, Positive)
                                else (fst bounds - pos location, Negative)
@@ -129,7 +129,7 @@ cellBoundsTest :: (Double -> Double -> Bool)
                   -> Bool
 cellBoundsTest comp location (xMin, xMax) =
   let x       = pos location
-      cos_dir = v2x . getValue $ dir location
+      cos_dir = v2x . normalized_value $ dir location
   in ((x > xMin) || ( (x `comp` xMin) && cos_dir >= 0)) &&
      ((x < xMax) || ( (x `comp` xMax) && cos_dir < 0))
 

@@ -5,7 +5,7 @@ module Main where
 import Data.Sequence as Seq
 import Data.Array
 
-import Coordinate.Spherical1D
+import Space.Spherical1D
 
 import Mesh.Classes
 import Mesh.Spherical

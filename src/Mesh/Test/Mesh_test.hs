@@ -27,8 +27,8 @@ import Numerics
 import Properties
 import RandomNumbers
 import NormalizedValues
-import Coordinate.Cartesian1D
-import Coordinate.Classes ()
+import Space.Cartesian1D
+import Space.Classes ()
 
 import Test.RandomNumbers_arbitrary ()
 
@@ -37,13 +37,13 @@ import Test.RandomNumbers_arbitrary ()
 
 prop_SampleInMesh :: Mesh m => m -> Seed -> Bool
 prop_SampleInMesh mesh seed =
-    let (location, _) = uniform_sample mesh (makeRNG seed)
+    let (location, _) = uniform_sample mesh (makePureMT seed)
     in is_in_mesh mesh location
 
 
 prop_FindIsInAgree :: Mesh m => m -> Seed -> Bool
 prop_FindIsInAgree mesh seed =
-  let rng = makeRNG seed
+  let rng = makePureMT seed
       (location, _) = uniform_sample mesh rng
       found_cell    = cell_find mesh location
   in case (is_in_cell mesh) <$> found_cell <*> Just location of
@@ -59,7 +59,7 @@ assertDist :: (Mesh m,
                Show (MeshCell m), Eq (MeshCell m)) =>
               m
               -> MeshCell m
-              -> MeshCoord m
+              -> MeshSpace m
               -> (Distance, NeighborT m)
               -> Assertion
 assertDist mesh cell location result =
@@ -91,7 +91,7 @@ sph1DTestRadius = outer_radius spherical_mesh @?= Radius 100.0
 
 -- | Function to create multiple distance assertions on spherical_mesh
 sph1D_dist :: MeshCell SphericalMesh
-           -> MeshCoord SphericalMesh
+           -> MeshSpace SphericalMesh
            -> (Distance, NeighborT SphericalMesh)
            -> Assertion
 sph1D_dist = assertDist spherical_mesh
@@ -113,7 +113,7 @@ cart1DTestSize = (size cartesian1D_mesh) @?= 100
 
 -- | Function for multiple distance assertions on cartesian1D_mesh
 cart1D_distances :: MeshCell Cartesian1DMesh
-                    -> MeshCoord Cartesian1DMesh
+                    -> MeshSpace Cartesian1DMesh
                     -> (Distance, NeighborT Cartesian1DMesh)
                     -> Assertion
 cart1D_distances = assertDist cartesian1D_mesh

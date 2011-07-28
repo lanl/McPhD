@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleInstances, FlexibleContexts #-}
 
-module Coordinate.Test.Coordinate_test where
+module Space.Test.Space_test where
 
 -- Testing libraries
 import Test.Framework (testGroup)
@@ -10,13 +10,12 @@ import Test.HUnit
 import Test.QuickCheck()
 
 -- The libraries under test
-import Coordinate.Cartesian
-import Coordinate.Cartesian1D
-import Coordinate.Spherical1D
+import Space.Cartesian
+import Space.Cartesian1D
+import Space.Spherical1D
 
 -- Its dependencies
-import NumericClasses
-import Coordinate.Classes
+import Space.Classes
 import Approx
 import NormalizedValues
 import Properties
@@ -26,15 +25,15 @@ import Data.Vector.V2
 import Data.Vector.V3
 
 -- Arbitrary instances
-import Coordinate.Test.Arbitrary()
+import Space.Test.Space_arbitrary()
 
 -- Property: Moving no distance leaves location unchanged.
-prop_ZeroDistance :: (Coordinate s, Approx s) => s -> Bool
+prop_ZeroDistance :: (Space s, Approx s) => s -> Bool
 prop_ZeroDistance location = (location ~== stream location (Distance 0))
 
 -- Property: Any side of the triangle is less than the sum of the
 -- other sides.
-prop_TriangleInequality :: (Mag (Position s), Coordinate s, Approx s) => s -> Distance -> Bool
+prop_TriangleInequality :: (Mag (Position s), Space s, Approx s) => s -> Distance -> Bool
 prop_TriangleInequality location distance = let
     location' = location +-> distance
     mag_location  = magnitude $ position location
@@ -70,8 +69,11 @@ tests =
       "Zero distance -> Same location in 1D"
       (prop_ZeroDistance :: Cartesian1D -> Bool)
     , testProperty
+      "Zero distance -> Same location in 2D"
+      (prop_ZeroDistance :: Cartesian Vector2 -> Bool)
+    , testProperty
       "Zero distance -> Same location in 3D"
-      (prop_ZeroDistance :: Cartesian3D -> Bool)
+      (prop_ZeroDistance :: Cartesian Vector3 -> Bool)
     , testProperty
       "Zero distance -> Same location in 1DSpherical"
       (prop_ZeroDistance :: Spherical1D -> Bool)
@@ -80,10 +82,13 @@ tests =
     [
       testProperty
       "Triangle inequality Cartesian 1D"
-      (prop_TriangleInequality :: Cartesian1D -> Distance -> Bool)
+      (prop_TriangleInequality :: Cartesian Vector1 -> Distance -> Bool)
+    , testProperty
+      "Triangle inequality in Cartesian 2D"
+      (prop_TriangleInequality :: Cartesian Vector2 -> Distance  -> Bool)
     , testProperty
       "Triangle inequality in Cartesian 3D"
-      (prop_TriangleInequality :: Cartesian3D -> Distance -> Bool)
+      (prop_TriangleInequality :: Cartesian Vector3 -> Distance -> Bool)
     , testProperty
       "Triangle inequality in Spherical 1D"
       (prop_TriangleInequality :: Spherical1D -> Distance -> Bool)

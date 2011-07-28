@@ -4,12 +4,13 @@ module SphericalApp.Particle where
 
 import Data.Function
 import Control.Applicative
+import System.Random.Mersenne.Pure64
 
 import qualified Mesh.Classes as Mesh
 import Mesh.Spherical
 
-import Coordinate.Classes
-import Coordinate.Spherical1D
+import Space.Classes
+import Space.Spherical1D
 import qualified Particle.Classes as P
 
 import RandomSamples
@@ -32,7 +33,7 @@ data Particle = Particle
     , energy       :: !Energy           -- ^ Particle energy
     , weight       :: !EnergyWeight     -- ^ Particle's energy weight
     , speed        :: !Speed            -- ^ Speed of motion.
-    , rand         :: !RNG              -- ^ Source of Particle's random behavior
+    , rand         :: !PureMT           -- ^ Source of Particle's random behavior
     } deriving (Show)
 
 
@@ -69,15 +70,6 @@ instance Approx Particle where
                              && exact cell
       where close f = ((within_eps epsilon) `on` f) a b
             exact f = f a == f b
-    within_eps_rel epsilon a b = close time
-                             && close energy
-                             && close location
-                             && close weight
-                             && close speed
-                             && exact cell
-      where close f = ((within_eps_rel epsilon) `on` f) a b
-            exact f = f a == f b
-
 
 createParticle :: SphericalMesh
                   -> Spherical1D
@@ -94,5 +86,5 @@ createParticle mesh location time energy weight speed seed =
   <*^> energy
   <*^> weight
   <*^> speed
-  <*^> (makeRNG seed)
+  <*^> (makePureMT seed)
   where cell = Mesh.cell_find mesh location

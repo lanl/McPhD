@@ -1,15 +1,15 @@
-module Particle.Test.Arbitrary where
+module Particle.Test.Particles_arbitrary where
 
 import Control.Applicative
 import Test.QuickCheck
 
 
-import Coordinate.Classes
+import Space.Classes
 import Particle.SpaceParticle
 
 import Test.RandomNumbers_arbitrary ()
 
-instance (Coordinate s, Arbitrary s) => Arbitrary (SpaceParticle s) where
+instance (Space s, Arbitrary s) => Arbitrary (SpaceParticle s) where
   arbitrary = createSpaceParticle
               <$> arbitrary
               <*> arbitrary

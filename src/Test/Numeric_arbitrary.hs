@@ -49,7 +49,8 @@ instance Arbitrary Radius where
 
 -- Default for Normalized Arbitrary instances uses normalize function
 -- from class Mag and requires a NonZero argument
-instance (Arbitrary n, Normable n, Ord n, Num n) => Arbitrary (Normalized n) where
+instance (Arbitrary n, Ord n, Num n, Norm n) =>
+     Arbitrary (Normalized n) where
          arbitrary = (\ (NonZero a) -> normalize a) <$> arbitrary
 
 

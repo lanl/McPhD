@@ -64,7 +64,7 @@ localPhysics model particle = (physics model) ! (cell particle)
 -- Functions which compute outcomes that result from interaction with
 -- the mesh, the timestep and the medium.
 
--- | Contractor for reaching the timestep end.
+-- | Compute an Outcome for reaching the timestep end.
 timeStepContractor :: Contractor
 timeStepContractor model particle =
     let time_left = t_final model - time particle
@@ -82,10 +82,9 @@ meshContractor model particle =
         crossing = Mesh.cell_boundary m c l
     in makeOutcome crossing
         where makeOutcome (distance, neighbor) =
-                  let event      = convertNeighbor neighbor
-                      particle'  = Particle.move particle distance
-                      particle'' = particle'{cell = Mesh.cell neighbor}
-                  in MC.Outcome distance event particle''
+                  let event     = convertNeighbor neighbor
+                      particle' = Particle.move particle distance
+                  in MC.Outcome distance event particle'
 
 
 -- | Contractor for scattering event
@@ -134,7 +133,7 @@ absorptionContractor model particle =
 -- Spherical coordaintes and still being in cell 0. Although, this
 -- could be considered a kind of reflection.
 --
--- It appears that Events are different than the mesh's neighbor
+-- It it appears that Events are different than the mesh's neighbor
 -- relationships, but in this model, they look very much alike.
 
 -- You can argue that the tally should record _exactly_ the events

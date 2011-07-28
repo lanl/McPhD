@@ -12,7 +12,7 @@ import Data.Maybe
 import qualified Mesh.Classes as Mesh
 import Mesh.Spherical
 
-import qualified Coordinate.Classes as Coordinate
+import qualified Space.Classes as Space
 
 import Properties
 import Numerics
@@ -66,7 +66,7 @@ particles = map testParticle [0..99]
 testParticle :: Int -> Particle
 testParticle index = fromJust $ createParticle
                      sphMesh
-                     (Coordinate.make (location index) direction)
+                     (Space.make (location index) direction)
                      (Time 0.0)
                      (Energy 1.0)
                      (EnergyWeight 1.0)

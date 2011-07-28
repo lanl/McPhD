@@ -4,7 +4,7 @@
 -}
 module Particle.Classes where
 
-import qualified Coordinate.Space3DCartesian as Space
+import qualified Space.Space3DCartesian as Space
 
 -- * Particles
 
@@ -28,15 +28,15 @@ class Particle p where
 -- | An InSpace particle also has methods for extracting it's space
 -- related attributes and moving the particle.
 class (Particle p) => InSpace p where
-  position  :: p -> Coordinate.Position
-  direction :: p -> Coordinate.Direction
-  move      :: p -> Coordinate.Distance -> p
+  position  :: p -> Space.Position
+  direction :: p -> Space.Direction
+  move      :: p -> Space.Distance -> p
 
 -- | An InTime particle has an internal clock and a method for
 -- advancing it.
 class (Particle p) => InTime p where
-  time :: p -> Coordinate.Time
-  tick :: p -> Coordinate.Time -> p
+  time :: p -> Space.Time
+  tick :: p -> Space.Time -> p
 
 
 -- | InSpace particles have a speed, and can be advanced by
@@ -44,15 +44,15 @@ class (Particle p) => InTime p where
 -- have default values which use the appropiate methods from InSpace
 -- and InTime.
 class (InSpace p, InTime p) => InSpaceTime p where
-  speed :: p -> Coordinate.Speed
+  speed :: p -> Space.Speed
 
-  advanceTime :: p -> Coordinate.Time -> p
+  advanceTime :: p -> Space.Time -> p
   advanceTime p t = tick (move p d) t where
-      d = Coordinate.distanceToTime t (speed p)
+      d = Space.distanceToTime t (speed p)
 
-  advanceDistance :: p -> Coordinate.Distance -> p
+  advanceDistance :: p -> Space.Distance -> p
   advanceDistance p d = tick (move p d) t where
-      t = Coordinate.timeToDistance d (speed p)
+      t = Space.timeToDistance d (speed p)
 
 -- | A RandomParticle has a random state associated with it. It can
 -- return this state or generate a random sample and updated particle

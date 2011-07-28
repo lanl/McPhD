@@ -1,11 +1,11 @@
 {-# LANGUAGE TypeFamilies, FlexibleContexts, StandaloneDeriving, UndecidableInstances #-}
 
-module Coordinate.Classes where
+module Space.Classes where
 
 import Properties
 import Approx ()
 
-class Coordinate s where
+class Space s where
   type Position  s :: *
   type Direction s :: *
   type Velocity  s :: *
@@ -17,5 +17,5 @@ class Coordinate s where
 
 -- | Infix operator for streaming.
 infix 6 +->
-(+->) :: (Coordinate s) => s -> Distance -> s
+(+->) :: (Space s) => s -> Distance -> s
 (+->) = stream

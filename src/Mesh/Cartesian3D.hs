@@ -5,7 +5,7 @@ import Data.Vector.V3
 import Data.Sequence
 import Data.Ix
 
-import Coordinate.Cartesian
+import Space.Cartesian
 import Mesh.Classes
 
 data Cartesian3DCell = Cartesian3DCell Int Int Int
@@ -42,7 +42,7 @@ data Cartesian3DMesh = Cartesian3DMesh {
 instance Mesh Cartesian3DMesh where
   type MeshCell Cartesian3DMesh  = Cartesian3DCell
   type MeshFace Cartesian3DMesh  = Cartesian3DDirection
-  type MeshCoord Cartesian3DMesh = Cartesian3D
+  type MeshSpace Cartesian3DMesh = Cartesian Vector3
 
   size m = let Dimensions x y z = c3Ddimensions m in x*y*z
 
@@ -55,7 +55,7 @@ instance Mesh Cartesian3DMesh where
   cell_neighbors = undefined
 
   cell_boundary = undefined
-
+  
   is_in_cell = undefined
 
   is_in_mesh = undefined

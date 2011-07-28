@@ -1,6 +1,6 @@
 module SphericalApp.Physics where
 
-import Coordinate.Classes
+import Space.Classes
 
 import NormalizedValues
 import Properties

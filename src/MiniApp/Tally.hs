@@ -10,7 +10,7 @@ import qualified Data.Map as Map
 
 import Utils.Combinators
 import Mesh.Classes
-import qualified Coordinate.Classes as S
+import qualified Space.Classes as S
 
 import Properties
 import MiniApp.Physics

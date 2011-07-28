@@ -10,7 +10,7 @@ import Mesh
 import PRNG
 import Physical
 import Search
-import Approx
+import SoftEquiv
 
 data Sphere1D = Sphere1D (Vector Cell) deriving Show
 
