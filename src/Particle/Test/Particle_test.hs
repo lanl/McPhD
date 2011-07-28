@@ -14,7 +14,7 @@ import Particle.IndexedParticle
 import Particle.MeshedParticle
 
 -- It's dependencies
-import Particle.Test.Particles_arbitrary
+import Particle.Test.Arbitrary
 import Approx
 import Coordinate.Classes
 import Coordinate.Spherical1D

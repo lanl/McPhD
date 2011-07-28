@@ -1,4 +1,4 @@
-module Particle.Test.Particles_arbitrary where
+module Particle.Test.Arbitrary where
 
 import Control.Applicative
 import Test.QuickCheck

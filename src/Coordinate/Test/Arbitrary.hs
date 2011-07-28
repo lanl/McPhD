@@ -1,5 +1,5 @@
 {-# LANGUAGE FlexibleInstances, UndecidableInstances #-}
-module Coordinate.Test.Space_arbitrary where
+module Coordinate.Test.Arbitrary where
 
 import Test.QuickCheck
 import Control.Applicative

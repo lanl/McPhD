@@ -11,7 +11,7 @@ import Coordinate.Classes
 import Properties
 import Approx
 
-import Coordinate.Test.Space_arbitrary ()
+import Coordinate.Test.Arbitrary ()
 
 
 -- | Data type for particles with an index and a space.  This reduces

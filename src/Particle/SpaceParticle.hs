@@ -8,7 +8,7 @@ import RandomNumbers
 import Properties
 import Approx
 
-import Coordinate.Test.Space_arbitrary ()
+import Coordinate.Test.Arbitrary ()
 
 -- | Data type for a particle moving through space. No mesh or mesh index.
 data SpaceParticle space = SpaceParticle

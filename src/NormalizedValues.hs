@@ -28,9 +28,9 @@ newtype Normalized a = Normalized { getValue :: a } deriving (Eq, Show)
 
 -- Normable is close to being a Hilbert Space over |R.  I think all
 -- it's missing is for v to be an ableian group with a dot product
--- operator, plus the vector space rules. 
+-- operator, plus it must satisify the vector space axioms
 class (Mag a, Scale a) => Normable a where
-    normalize  :: a -> Normalized a
+    normalize :: a -> Normalized a
     normalize v = Normalized $ scale v (1.0 / magnitude v)
 
 
@@ -41,25 +41,17 @@ instance Mag (Normalized a) where
   magnitude  = const 1.0
   magnitude2 = const 1.0
 
-instance Normable Double where
-  normalize d = Normalized $ if d < 0 then -1 else 1  -- Right biased.
-
--- The default is good enough.
-deriving instance Normable Radius
-
-
--- See notes.org:Problematic instance declarations for thoughts on
--- unifying these instance declarations
-
--- The default instances are good enough.
-instance Normable Vector1 where
-instance Normable Vector2 where
-instance Normable Vector3 where
+-- The default instances are often good enough.
+instance Normable Double
+instance Normable Radius
+instance Normable Vector1
+instance Normable Vector2
+instance Normable Vector3
 
 
 -- Since we're hiding the Normalized constructor, we need to provide
 -- ways of creating various normalized data types.
-  
+
 normalVector1 :: Double -> Normalized Vector1
 normalVector1 x = let Normalized n = normalize x in Normalized $ Vector1 n
 
@@ -82,7 +74,6 @@ generateNormalVector3 x y = Normalized $
                             (sampleZenithAngle y)
 
 
+
 unsafe_makeNormal :: (Mag a) => a -> Normalized a
 unsafe_makeNormal = Normalized
-
-

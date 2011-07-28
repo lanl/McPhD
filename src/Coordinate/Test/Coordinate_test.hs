@@ -26,7 +26,7 @@ import Data.Vector.V2
 import Data.Vector.V3
 
 -- Arbitrary instances
-import Coordinate.Test.Space_arbitrary()
+import Coordinate.Test.Arbitrary()
 
 -- Property: Moving no distance leaves location unchanged.
 prop_ZeroDistance :: (Coordinate s, Approx s) => s -> Bool
