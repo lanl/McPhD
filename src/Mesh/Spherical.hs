@@ -7,8 +7,8 @@ import Data.Vector.Class
 import Data.Vector.V2
 
 import Mesh.Classes
-import Space.Classes
-import Space.Spherical1D
+import Coordinate.Classes
+import Coordinate.Spherical1D
 import Properties
 import Numerics
 import Approx
@@ -58,7 +58,7 @@ cellNeighbor mesh cell Outward =
 instance Mesh SphericalMesh where
   type MeshCell  SphericalMesh = SphCell
   type MeshFace  SphericalMesh = SphDir
-  type MeshSpace SphericalMesh = Spherical1D
+  type MeshCoord SphericalMesh = Spherical1D
 
   -- | # cells = # stored radii
   size = Seq.length . radii
@@ -86,14 +86,14 @@ instance Mesh SphericalMesh where
   uniform_sample mesh rand =
     let (Radius radius, rand') = sample_ball1D (outer_radius mesh) rand
         (direction, rand'') = sampleNormalVector2 rand'
-    in (radius *| normalized_value direction, rand'')
+    in (radius *| getValue direction, rand'')
 
   uniform_sample_cell mesh cell rand =
     let rmin = cellBound mesh cell Inward
         rmax = cellBound mesh cell Outward
         (Radius radius, rand') = sample_annulus1D rmin rmax rand
         (direction, rand'') = sampleNormalVector2 rand'
-    in (radius *| normalized_value direction, rand'')
+    in (radius *| getValue direction, rand'')
 
   cell_boundary mesh cell (Vector2 r_xi r_eta) =
       let Radius rmin = cellBound mesh cell Inward
@@ -126,7 +126,7 @@ cellBoundsTest :: (Radius -> Radius -> Bool)
                     -> Bool
 cellBoundsTest comp location (rmin, rmax) =
   let r       = position location
-      cos_dis = (v2x . normalized_value . direction) location
+      cos_dis = (v2x . getValue . direction) location
   in ( (r > rmin) || ( (r `comp` rmin) && cos_dis >= 0) )  &&
      ( (r < rmax) || ( (r `comp` rmax) && cos_dis <  0) )
 

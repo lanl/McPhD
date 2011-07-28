@@ -4,7 +4,7 @@ module Particle.Test.Space3DCartesian_arbitrary where
 import Test.QuickCheck
 
 import Mesh.SimpleCartesian
-import Space.Space3DCartesian
+import CoordinateSpace3DCartesian
 import NormalizedValues
 import RandomNumbers
 import Data.Vector.V3
@@ -25,7 +25,7 @@ instance Arbitrary Cell where
 
 instance Arbitrary Direction where
     arbitrary = direction
-                <$> normalized_value
+                <$> getValue
                 <$> (generateNormalVector3 <$> arbitrary <*> arbitrary)
 
 instance Arbitrary Position where

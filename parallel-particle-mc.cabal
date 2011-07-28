@@ -35,11 +35,12 @@ Library
       src
    build-depends:
       base > 3 && <= 6
-      , AC-Vector == 2.3.1
-      , QuickCheck
-   exposed-modules: Approx, NormalizedValues, Numerics, Properties, Vectors
+      , AC-Vector >= 2
+      , QuickCheck >= 2
+      , mtl
+   exposed-modules: Approx, NumericClasses, NormalizedValues, Numerics, Properties, Vectors
    exposed-modules: Generators, RandomNumbers, RandomSamples
-   exposed-modules: Space.Classes, Space.Cartesian1D, Space.Cartesian, Space.Spherical1D
+   exposed-modules: Coordinate.Classes, Coordinate.Cartesian1D, Coordinate.Cartesian, Coordinate.Spherical1D
    exposed-modules: Mesh.Classes, Mesh.Cartesian1D, Mesh.Cartesian3D, Mesh.Spherical
    exposed-modules: Particle.MeshedParticle, Particle.SpaceParticle
    other-modules:
@@ -56,14 +57,14 @@ executable TestSuite
                    , random
                    , hpc
                    , AC-Vector == 2.*
-                   , containers
+                   , containers >= 0.4.0.0
                    , array == 0.3.*
                    , mersenne-random-pure64 == 0.2.*
                    , HUnit == 1.2.*
                    , test-framework-hunit
                    , test-framework-quickcheck2
                    , test-framework
-                   , QuickCheck
+                   , QuickCheck >= 2
   else
     buildable: False
 

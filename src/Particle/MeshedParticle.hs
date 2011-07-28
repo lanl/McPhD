@@ -4,10 +4,9 @@ module Particle.MeshedParticle where
 
 import Data.Function
 import Control.Applicative
-import System.Random.Mersenne.Pure64
 
 import Mesh.Classes
-import Space.Classes
+import Coordinate.Classes
 import Utils.Combinators
 import RandomNumbers
 import Properties
@@ -20,12 +19,12 @@ import Approx
 data (Mesh mesh) => MeshParticle mesh = MeshParticle
     {
       pimCell         :: !(MeshCell mesh)  -- ^ Current cell in mesh.
-    , pimLocation     :: !(MeshSpace mesh) -- ^ Location in mesh's space.
+    , pimLocation     :: !(MeshCoord mesh) -- ^ Location in mesh's space.
     , pimTime         :: !Time             -- ^ Elapsed Time
     , pimEnergy       :: !Energy           -- ^ Particle energy
     , pimEnergyWeight :: !EnergyWeight     -- ^ Particle's weighted energy
     , pimSpeed        :: !Speed            -- ^ Speed of motion.
-    , pimRand         :: !PureMT           -- ^ Source of Particle's random behavior
+    , pimRand         :: !RNG              -- ^ Source of Particle's random behavior
     }
 
 -- | Move the particle the given distance. Assume cell and other
@@ -44,12 +43,12 @@ pimWeightedEnergy :: (Mesh m) => MeshParticle m -> Energy
 pimWeightedEnergy particle = applyWeight (pimEnergyWeight particle) (pimEnergy particle)
 
 deriving instance ( Mesh mesh
-                  , Show (MeshSpace mesh)
+                  , Show (MeshCoord mesh)
                   , Show (MeshCell mesh)) => Show (MeshParticle mesh)
 
 
 createMeshParticle :: (Mesh m) => m
-                      -> (MeshSpace m)
+                      -> (MeshCoord m)
                       -> Time
                       -> Energy
                       -> EnergyWeight
@@ -63,10 +62,10 @@ createMeshParticle mesh location time energy energyWeight speed seed =
   <*^> energy
   <*^> energyWeight
   <*^> speed
-  <*^> (makePureMT seed)
+  <*^> (makeRNG seed)
   where cell = cell_find mesh location
 
-instance (Approx (MeshSpace mesh), Mesh mesh) => Approx (MeshParticle mesh) where
+instance (Approx (MeshCoord mesh), Mesh mesh) => Approx (MeshParticle mesh) where
     within_eps epsilon a b = close pimTime
                              && close pimEnergy
                              && close pimEnergyWeight

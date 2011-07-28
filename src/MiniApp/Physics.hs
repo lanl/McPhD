@@ -1,6 +1,6 @@
 module MiniApp.Physics where
 
-import Space.Classes
+import Coordinate.Classes
 
 import NormalizedValues
 import Properties
@@ -21,5 +21,3 @@ newtype (Space s) => Momentum s = Momentum { momValue :: Scaled (Direction s) }
 -- it as well.
 isotropicScatter :: Particle m -> Particle m
 isotropicScatter = undefined
-
-
