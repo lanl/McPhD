@@ -15,16 +15,19 @@ import Cell
 -- * particle generation
 
 -- | generate a given number of particles in each cell
-genParticlesInCells :: Mesh m => m -> RNG -> [SrcStat] -> 
+genParticlesInCells :: Mesh m => m -> 
+                       RNG -> 
+                      [SrcStat] -> 
                        FP ->  -- ^ alpha (power law parameter)
                       [Particle]
 genParticlesInCells msh gen nPerCell a = 
   nPerCell >>= (genParticlesInCell msh gen a)
 
 -- | generate a given number of particles in one cell
-genParticlesInCell :: Mesh m => m -> RNG ->
+genParticlesInCell :: Mesh m => m -> 
+                      RNG ->
                       FP ->  -- ^ alpha (power law parameter) 
-                     SrcStat ->
+                      SrcStat ->
                      [Particle]
 genParticlesInCell msh g a (cidx,n,ewt,_) =
   let gs = take n (unfoldr (Just . split) g)

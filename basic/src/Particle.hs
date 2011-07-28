@@ -9,7 +9,7 @@ data Particle = Particle {
   , time    :: !Time
   , energy  :: !Energy
   , weight  :: !EnergyWeight
-  , cellIdx    :: !CellIdx
+  , cellIdx :: !CellIdx
   , rng     :: !RNG
   } deriving Show
 

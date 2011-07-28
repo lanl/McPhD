@@ -38,8 +38,6 @@ writeTally name = writeFile name . show
 summarizeTally :: Tally -> IO ()
 summarizeTally tlly@(Tally cntrs dep esc) = do
   -- summarize global events
-  -- let (Energy totEDep) = V.sum (V.map (\ct -> ctEnergy ct) dep)
-  --     (Momentum totMDep) = V.sum (V.map (\ct -> ctMom ct) dep)
   let CellTally{ctMom = momTot,ctEnergy = eTot} = totalDep tlly
   mapM_ putStrLn $
            ("Total energy deposited: "        ++ show eTot) :
