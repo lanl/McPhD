@@ -71,7 +71,8 @@ sampleCollisionComoving m cll en oci sig = do
   (ecf,ocf) <- getNewState evt m cll en oci
   return (evt, ecf, ocf)
 
-getNewState :: Mesh m => E.CollType -> m -> Cell -> Energy -> Direction -> Rnd (Energy,Direction)
+getNewState :: Mesh m => E.CollType -> m -> Cell -> Energy -> Direction ->
+               Rnd (Energy,Direction)
 getNewState E.NuclAbs    _ _ e o = Sigma.newStateNAbs e o
 getNewState E.NuclEl     m _ e o = Sigma.newStateNElastic m e o
 getNewState E.EMinusInel m c e o = Sigma.newStateEMinusInel m c e o
