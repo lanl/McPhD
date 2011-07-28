@@ -1,10 +1,10 @@
 {-# LANGUAGE TypeFamilies, GeneralizedNewtypeDeriving #-}
 
-module Space.Cartesian1D where
+module Coordinate.Cartesian1D where
 
 import Data.Vector.V2
 
-import Space.Classes
+import Coordinate.Classes
 import Approx
 import Properties
 import NormalizedValues
@@ -17,7 +17,7 @@ data Cartesian1D = Cartesian1D { pos :: Double
                                , dir :: Normalized Vector2 }
                    deriving (Eq, Show)
 
-instance Space Cartesian1D where
+instance Coordinate Cartesian1D where
   type Position  Cartesian1D = Double
   type Direction Cartesian1D = Normalized Vector2
   type Velocity  Cartesian1D = Vector2

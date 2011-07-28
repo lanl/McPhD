@@ -1,5 +1,5 @@
 {-# LANGUAGE FlexibleInstances, TypeFamilies #-}
-module Space.Cartesian where
+module Coordinate.Cartesian where
 
 import Data.Vector.Class
 import Data.Vector.V3
@@ -7,18 +7,18 @@ import Data.Vector.V3
 import Approx
 import Properties
 import NormalizedValues
-import Space.Classes
+import Coordinate.Classes
 
 -- A data type for Cartesian spaces over a vector type
 data Cartesian3D  = Cartesian3D { cart_position  :: Vector3
                                 , cart_direction :: Normalized Vector3 }
                     deriving (Eq, Show)
 
-instance Space Cartesian3D where
+instance Coordinate Cartesian3D where
     type Position Cartesian3D  = Vector3
     type Direction Cartesian3D = Normalized Vector3
     type Velocity Cartesian3D  = Vector3
-    stream (Cartesian3D pos dir) (Distance d) = 
+    stream (Cartesian3D pos dir) (Distance d) =
         Cartesian3D (pos + (getValue dir) |* d) dir
     position = cart_position
     direction = cart_direction

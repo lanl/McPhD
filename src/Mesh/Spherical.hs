@@ -7,8 +7,8 @@ import Data.Vector.Class
 import Data.Vector.V2
 
 import Mesh.Classes
-import Space.Classes
-import Space.Spherical1D
+import Coordinate.Classes
+import Coordinate.Spherical1D
 import Properties
 import Numerics
 import Approx
@@ -58,7 +58,7 @@ cellNeighbor mesh cell Outward =
 instance Mesh SphericalMesh where
   type MeshCell  SphericalMesh = SphCell
   type MeshFace  SphericalMesh = SphDir
-  type MeshSpace SphericalMesh = Spherical1D
+  type MeshCoord SphericalMesh = Spherical1D
 
   -- | # cells = # stored radii
   size = Seq.length . radii

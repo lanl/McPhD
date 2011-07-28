@@ -28,8 +28,8 @@ import Utils.Combinators
 import qualified Mesh.Classes as Mesh
 import Mesh.Spherical
 
-import Space.Classes as Space
-import Space.Spherical1D
+import Coordinate.Classes as Coordinate
+import Coordinate.Spherical1D
 
 import Properties
 import MonteCarlo
@@ -38,7 +38,7 @@ import SphericalApp.Events
 import SphericalApp.Particle
 
 -- * Aliases
-type Momentum = Space.Velocity Spherical1D
+type Momentum = Coordinate.Velocity Spherical1D
 type Cell     = Mesh.MeshCell SphericalMesh
 type OutcomeT = Outcome Event Particle
 

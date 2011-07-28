@@ -4,7 +4,7 @@ module Particle.Classes where
 
 import Data.Ix
 import Properties
-import Space.Classes
+import Coordinate.Classes
 
 class Particle p where
   move :: p -> Distance -> p

@@ -40,7 +40,7 @@ Library
       , mtl
    exposed-modules: Approx, NumericClasses, NormalizedValues, Numerics, Properties, Vectors
    exposed-modules: Generators, RandomNumbers, RandomSamples
-   exposed-modules: Space.Classes, Space.Cartesian1D, Space.Cartesian, Space.Spherical1D
+   exposed-modules: Coordinate.Classes, Coordinate.Cartesian1D, Coordinate.Cartesian, Coordinate.Spherical1D
    exposed-modules: Mesh.Classes, Mesh.Cartesian1D, Mesh.Cartesian3D, Mesh.Spherical
    exposed-modules: Particle.MeshedParticle, Particle.SpaceParticle
    other-modules:

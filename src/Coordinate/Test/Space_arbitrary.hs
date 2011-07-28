@@ -1,12 +1,12 @@
 {-# LANGUAGE FlexibleInstances, UndecidableInstances #-}
-module Space.Test.Space_arbitrary where
+module Coordinate.Test.Space_arbitrary where
 
 import Test.QuickCheck
 import Control.Applicative
 
 
-import Space.Cartesian
-import Space.Cartesian1D
+import Coordinate.Cartesian
+import Coordinate.Cartesian1D
 
 import Test.Numeric_arbitrary ()
 

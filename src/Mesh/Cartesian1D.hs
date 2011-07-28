@@ -7,7 +7,7 @@ import Data.Vector.V2
 
 import Mesh.Classes
 
-import Space.Cartesian1D
+import Coordinate.Cartesian1D
 import NormalizedValues
 import RandomSamples
 import Approx
@@ -58,7 +58,7 @@ cellNeighbor mesh cell Positive =
 instance Mesh Cartesian1DMesh where
   type MeshCell Cartesian1DMesh  = C1Cell
   type MeshFace Cartesian1DMesh  = C1Dir
-  type MeshSpace Cartesian1DMesh = Cartesian1D
+  type MeshCoord Cartesian1DMesh = Cartesian1D
 
   size mesh = (Seq.length $ coords mesh) - 1
 

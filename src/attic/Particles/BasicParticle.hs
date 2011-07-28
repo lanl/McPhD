@@ -5,7 +5,7 @@ module Particle.BasicParticle where
 
 import Particle.Classes
 
-import qualified Space.Space3DCartesian as Space
+import qualified Coordinate.Space3DCartesian as Space
 import Data.Vector.V3
 import RandomNumbers
 import Approx
@@ -18,10 +18,10 @@ import System.Random.Mersenne.Pure64
 -- | BasicParticle is a particle with random state moving in space and time.
 data BasicParticle = BasicParticle
                      {
-                       bpPos    :: Space.Position   -- ^ Position in space
-                     , bpDir    :: Space.Direction  -- ^ Direction of travel
-                     , bpSpeed  :: Space.Speed      -- ^ Magnitude of velocity
-                     , bpTime   :: Space.Time       -- ^ Time in flight
+                       bpPos    :: Coordinate.Position   -- ^ Position in space
+                     , bpDir    :: Coordinate.Direction  -- ^ Direction of travel
+                     , bpSpeed  :: Coordinate.Speed      -- ^ Magnitude of velocity
+                     , bpTime   :: Coordinate.Time       -- ^ Time in flight
                      , bpRand   :: PureMT           -- ^ Random number generator
                      } deriving Show
 
@@ -39,7 +39,7 @@ instance InSpace BasicParticle where
   position  = bpPos
   direction = bpDir
   move p d = p { bpPos = newPos }
-      where newPos = Space.translate (position p) (direction p) d
+      where newPos = Coordinate.translate (position p) (direction p) d
 
 instance InTime BasicParticle where
   time = bpTime
@@ -57,9 +57,9 @@ instance RandomParticle BasicParticle where
             p' = p { bpRand = newRandom }
 
 instance Particle BasicParticle where
-  type ContextT BasicParticle     = Space.Time
-  type EnvironmentT BasicParticle = Space.Time
-  type EventT BasicParticle       = Space.Position
+  type ContextT BasicParticle     = Coordinate.Time
+  type EnvironmentT BasicParticle = Coordinate.Time
+  type EventT BasicParticle       = Coordinate.Position
 
   environment t _ = t
 
@@ -72,23 +72,23 @@ instance Particle BasicParticle where
 
 -- | Reaching the end of the time step is the only event. Record the
 -- position.
-type BasicEvent = Space.Position
+type BasicEvent = Coordinate.Position
 
 instance Event BasicEvent where
   -- | The information we tally from each event is the (final) position.
-  type EventTally BasicEvent = Space.Position
+  type EventTally BasicEvent = Coordinate.Position
   contribute event = event
   is_final _ = True  -- ^ Only event is final.
 
 
 -- | Compute the distance to and result of the event:
-toBasicEvent :: Space.Time
+toBasicEvent :: Coordinate.Time
                 -> BasicParticle
-                -> (Space.Distance, (Space.Position, BasicParticle) )
+                -> (Coordinate.Distance, (Coordinate.Position, BasicParticle) )
 toBasicEvent envtime particle = (distance, (event, particle'))
   where time_left = envtime - time particle
         particle' = advanceTime particle time_left
-        distance  = Space.distanceToTime time_left ( speed particle )
+        distance  = Coordinate.distanceToTime time_left ( speed particle )
         event     = position particle'
 
 
@@ -99,15 +99,15 @@ toBasicEvent envtime particle = (distance, (event, particle'))
 data GPTally = GPTally
                {
                  -- | Sum of final positions
-                 positionSum :: Space.Position,
+                 positionSum :: Coordinate.Position,
 
                  -- | Total number of particles
                  count :: Int
                }
 
 instance Tally GPTally where
-    type TallyEvent GPTally = Space.Position
-    empty = GPTally{positionSum=Space.Position(Vector3 0 0 0), count=0}
+    type TallyEvent GPTally = Coordinate.Position
+    empty = GPTally{positionSum=Coordinate.Position(Vector3 0 0 0), count=0}
     combine pos gp = GPTally sum' count'
         where sum'   = positionSum gp + pos
               count' = count gp + 1
@@ -119,10 +119,10 @@ instance Tally GPTally where
 -- * Miscellaneous functions
 
 -- | Create a particle with given position, direction, distance and random seed.
-createParticle :: Space.Position
-               -> Space.Direction
-               -> Space.Speed
-               -> Space.Time
+createParticle :: Coordinate.Position
+               -> Coordinate.Direction
+               -> Coordinate.Speed
+               -> Coordinate.Time
                -> Seed
                -> BasicParticle
 
@@ -132,10 +132,10 @@ createParticle pos dir speed time seed =
 -- | Create a particle with given position, time, distance remaining
 -- and cell. Sample an isotropic initial direction.
 sampleIsoParticle :: PureMT
-                     -> Space.Position
-                     -> Space.Speed
-                     -> Space.Time
+                     -> Coordinate.Position
+                     -> Coordinate.Speed
+                     -> Coordinate.Time
                      -> BasicParticle
 sampleIsoParticle rand position speed time =
-  let (direction, rand') = Space.randomDirection rand
+  let (direction, rand') = Coordinate.randomDirection rand
   in BasicParticle position direction speed time rand'

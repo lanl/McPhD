@@ -3,7 +3,7 @@
 -}
 module Mesh.SimpleCartesian where
 
-import Space.Space3DCartesian
+import CoordinateSpace3DCartesian
 
 import Data.Vector.V3
 import Data.Vector.Class

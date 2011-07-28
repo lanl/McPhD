@@ -18,7 +18,7 @@ import Data.Ix
 
 import Numerics ()
 import Properties
-import Space.Classes
+import Coordinate.Classes
 
 -- | A data type for kinds of crossings between cells.
 -- These will be used in events which go into the tally.
@@ -44,8 +44,8 @@ type NeighborT m = Neighbor (MeshCell m) (MeshFace m)
 
 
 -- | A class for describing operations on meshes.
-class (Space (MeshSpace m), Ix (MeshCell m)) => Mesh m where
-  type MeshSpace m :: *
+class (Coordinate (MeshCoord m), Ix (MeshCell m)) => Mesh m where
+  type MeshCoord m :: *
   type MeshCell  m :: *
   type MeshFace  m :: *
 
@@ -63,7 +63,7 @@ class (Space (MeshSpace m), Ix (MeshCell m)) => Mesh m where
   isNull mesh cell = (cellNull mesh == cell)
 
   -- | Potentially O(mesh_size) lookup
-  cell_find :: m -> MeshSpace m -> Maybe (MeshCell m)
+  cell_find :: m -> MeshCoord m -> Maybe (MeshCell m)
 
   -- | Neighbor across a given face
   cell_neighbor :: m -> MeshCell m -> MeshFace m -> NeighborT m
@@ -73,20 +73,20 @@ class (Space (MeshSpace m), Ix (MeshCell m)) => Mesh m where
 
   -- | Get the distance to exit a cell, and the face, if lower than
   -- the given distance. Otherwize nothing.
-  cell_boundary :: m -> MeshCell m -> MeshSpace m -> (Distance, NeighborT m)
+  cell_boundary :: m -> MeshCell m -> MeshCoord m -> (Distance, NeighborT m)
 
   -- | Is the location in the given cell of the mesh?
-  is_in_cell :: m -> MeshCell m -> MeshSpace m -> Bool
+  is_in_cell :: m -> MeshCell m -> MeshCoord m -> Bool
 
   -- | Is the location contained in this mesh?
-  is_in_mesh :: m -> MeshSpace m -> Bool
+  is_in_mesh :: m -> MeshCoord m -> Bool
 
   -- | Allow position to be within epsilon of in, as long as direction
   -- is pointing inward.
-  is_approx_in_cell :: m -> MeshCell m -> MeshSpace m -> Bool
+  is_approx_in_cell :: m -> MeshCell m -> MeshCoord m -> Bool
 
   -- | Sample a location uniformly thoughout the mesh
-  uniform_sample :: m -> RNG -> (MeshSpace m, RNG)
+  uniform_sample :: m -> RNG -> (MeshCoord m, RNG)
 
   -- | Sample a location unformly in the given cell.
-  uniform_sample_cell :: m -> MeshCell m -> RNG -> (MeshSpace m, RNG)
+  uniform_sample_cell :: m -> MeshCell m -> RNG -> (MeshCoord m, RNG)

@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleInstances, FlexibleContexts #-}
 
-module Space.Test.Space_test where
+module Coordinate.Test.Coordinate_test where
 
 -- Testing libraries
 import Test.Framework (testGroup)
@@ -10,13 +10,13 @@ import Test.HUnit
 import Test.QuickCheck()
 
 -- The libraries under test
-import Space.Cartesian
-import Space.Cartesian1D
-import Space.Spherical1D
+import Coordinate.Cartesian
+import Coordinate.Cartesian1D
+import Coordinate.Spherical1D
 
 -- Its dependencies
 import NumericClasses
-import Space.Classes
+import Coordinate.Classes
 import Approx
 import NormalizedValues
 import Properties
@@ -26,15 +26,15 @@ import Data.Vector.V2
 import Data.Vector.V3
 
 -- Arbitrary instances
-import Space.Test.Space_arbitrary()
+import Coordinate.Test.Space_arbitrary()
 
 -- Property: Moving no distance leaves location unchanged.
-prop_ZeroDistance :: (Space s, Approx s) => s -> Bool
+prop_ZeroDistance :: (Coordinate s, Approx s) => s -> Bool
 prop_ZeroDistance location = (location ~== stream location (Distance 0))
 
 -- Property: Any side of the triangle is less than the sum of the
 -- other sides.
-prop_TriangleInequality :: (Mag (Position s), Space s, Approx s) => s -> Distance -> Bool
+prop_TriangleInequality :: (Mag (Position s), Coordinate s, Approx s) => s -> Distance -> Bool
 prop_TriangleInequality location distance = let
     location' = location +-> distance
     mag_location  = magnitude $ position location

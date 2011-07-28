@@ -8,8 +8,8 @@ import Control.Applicative
 import qualified Mesh.Classes as Mesh
 import Mesh.Spherical
 
-import Space.Classes
-import Space.Spherical1D
+import Coordinate.Classes
+import Coordinate.Spherical1D
 import qualified Particle.Classes as P
 
 import RandomSamples

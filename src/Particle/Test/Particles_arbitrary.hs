@@ -4,12 +4,12 @@ import Control.Applicative
 import Test.QuickCheck
 
 
-import Space.Classes
+import Coordinate.Classes
 import Particle.SpaceParticle
 
 import Test.RandomNumbers_arbitrary ()
 
-instance (Space s, Arbitrary s) => Arbitrary (SpaceParticle s) where
+instance (Coordinate s, Arbitrary s) => Arbitrary (SpaceParticle s) where
   arbitrary = createSpaceParticle
               <$> arbitrary
               <*> arbitrary

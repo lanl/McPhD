@@ -12,8 +12,8 @@ Events of particle motion fall into categories:
 -}
 module SphericalApp.Events where
 
-import qualified Space.Classes as Space
-import Space.Spherical1D
+import qualified Coordinate.Classes as Coordinate
+import Coordinate.Spherical1D
 
 import qualified Mesh.Classes as Mesh
 import Mesh.Spherical
@@ -35,7 +35,7 @@ finalBoundary Reflect = False
 
 -- | Combining the event types into a single data type with tally information.
 data Event = Collide       { collideType :: CollideType
-                           , momentumDep :: Space.Velocity Spherical1D
+                           , momentumDep :: Coordinate.Velocity Spherical1D
                            , energyDep   :: Energy
                            }
            | BoundaryCross { boundaryType :: BoundaryType

@@ -4,7 +4,7 @@ module Particle.Test.Space3DCartesian_arbitrary where
 import Test.QuickCheck
 
 import Mesh.SimpleCartesian
-import Space.Space3DCartesian
+import CoordinateSpace3DCartesian
 import NormalizedValues
 import RandomNumbers
 import Data.Vector.V3

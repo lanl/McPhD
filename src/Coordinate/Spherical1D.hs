@@ -32,12 +32,12 @@ and just store <r\xi, r\eta> as a regular Vector2.
 
 -}
 
-module Space.Spherical1D where
+module Coordinate.Spherical1D where
 
 import Data.Vector.Class
 import Data.Vector.V2
 
-import Space.Classes
+import Coordinate.Classes
 import Numerics
 import Properties
 import NormalizedValues
@@ -45,7 +45,7 @@ import NormalizedValues
 
 type Spherical1D = Vector2
 
-instance Space Spherical1D where
+instance Coordinate Spherical1D where
     type Position  Spherical1D = Radius
     type Direction Spherical1D = Normalized Vector2
     type Velocity  Spherical1D = Vector2

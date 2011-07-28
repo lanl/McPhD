@@ -16,11 +16,11 @@ import Particle.MeshedParticle
 -- It's dependencies
 import Particle.Test.Particles_arbitrary
 import Approx
-import Space.Classes
-import Space.Spherical1D
+import Coordinate.Classes
+import Coordinate.Spherical1D
 
 -- | Property: Every particle is approximately equal to itself.
-prop_Approx :: (Space s, Approx s) => SpaceParticle s -> Bool
+prop_Approx :: (Coordinate s, Approx s) => SpaceParticle s -> Bool
 prop_Approx p = p ~== p
 
 tests =

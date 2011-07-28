@@ -27,8 +27,8 @@ import Numerics
 import Properties
 import RandomNumbers
 import NormalizedValues
-import Space.Cartesian1D
-import Space.Classes ()
+import Coordinate.Cartesian1D
+import Coordinate.Classes ()
 
 import Test.RandomNumbers_arbitrary ()
 
@@ -59,7 +59,7 @@ assertDist :: (Mesh m,
                Show (MeshCell m), Eq (MeshCell m)) =>
               m
               -> MeshCell m
-              -> MeshSpace m
+              -> MeshCoord m
               -> (Distance, NeighborT m)
               -> Assertion
 assertDist mesh cell location result =
@@ -91,7 +91,7 @@ sph1DTestRadius = outer_radius spherical_mesh @?= Radius 100.0
 
 -- | Function to create multiple distance assertions on spherical_mesh
 sph1D_dist :: MeshCell SphericalMesh
-           -> MeshSpace SphericalMesh
+           -> MeshCoord SphericalMesh
            -> (Distance, NeighborT SphericalMesh)
            -> Assertion
 sph1D_dist = assertDist spherical_mesh
@@ -113,7 +113,7 @@ cart1DTestSize = (size cartesian1D_mesh) @?= 100
 
 -- | Function for multiple distance assertions on cartesian1D_mesh
 cart1D_distances :: MeshCell Cartesian1DMesh
-                    -> MeshSpace Cartesian1DMesh
+                    -> MeshCoord Cartesian1DMesh
                     -> (Distance, NeighborT Cartesian1DMesh)
                     -> Assertion
 cart1D_distances = assertDist cartesian1D_mesh

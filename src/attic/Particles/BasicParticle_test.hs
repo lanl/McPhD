@@ -15,7 +15,7 @@ import Particle.BasicParticle
 import Particle.Test.Space3DCartesian_arbitrary
 import Particle.Test.Particles_arbitrary
 import Particle.Classes
-import Space.Space3DCartesian as Space
+import Coordinate.Space3DCartesian as Space
 import Approx
 
 import Data.Vector.V3
