@@ -1,0 +1,43 @@
+name:                basic-benchmarks
+version:             0.1
+cabal-version:       >= 1.10
+synopsis:            Benchmarks for Toy, 1D, spherical, MC transport code
+description:         Tool for sketching out MC functionality
+license:             BSD3
+license-file:        COPYRIGHT
+copyright:           (c) 2011 LANS, LLC
+author:              T. M. Kelley
+maintainer:          tkelley@lanl.gov
+homepage:            http://software.lanl.gov/McPhD
+build-type:          Simple
+stability:           experimental
+
+source-repository head
+  type: hg
+  location: https://software.lanl.gov/McPhD/hg/source/basic
+
+executable  bench-hist
+  hs-source-dirs:    .
+  ghc-options:       -Wall -fno-warn-name-shadowing -fno-warn-orphans -fwarn-tabs
+  ghc-options:       -rtsopts -O2
+  main-is:           bench-hist.hs
+  build-depends:     base >=4 && <=5,
+                     vector >= 0.7,
+                     parallel >= 3.1,
+                     filepath >= 1.2.0, 
+                     basic,
+                     criterion
+  default-language:  Haskell2010
+
+executable  bench-lfg
+  hs-source-dirs:    .
+  ghc-options:       -Wall -fno-warn-name-shadowing -fno-warn-orphans -fwarn-tabs
+  ghc-options:       -rtsopts -O2
+  main-is:           bench-lfg.hs
+  build-depends:     base >=4 && <=5,
+                     vector >= 0.7,
+                     parallel >= 3.1,
+                     filepath >= 1.2.0, 
+                     basic,
+                     criterion
+  default-language:  Haskell2010
