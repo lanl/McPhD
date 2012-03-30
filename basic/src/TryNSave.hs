@@ -4,79 +4,158 @@
 -- (c) Copyright 2011 LANSLLC, all rights reserved
 
 module TryNSave (writeTally
+                ,summarizeTally
+                ,summarizeTallyIO
+                ,summarizeStats
                 ,readMatStateP)
     where
 
 import Tally
 import Cell
-import Text.CSV
 import Physical
-import Data.List (zip4)
-import Constants (k_B,pmg)
 import Material
 import Particle
--- import Control.Monad
+import Source
+
+import Text.CSV
+import Text.Printf
+import Data.List as L
+
+import qualified Data.HashMap.Strict as Map
+import qualified Data.ByteString.Char8 as C
+type CBS = C.ByteString
+
+summarizeStats :: [SrcStat] -> PType -> IO ()
+summarizeStats stats typ = do
+  let sz     = length stats
+      ntot   = sum (map (\(_,b,_,_) -> b) stats)
+      meanEW = sum (map (\(_,_,c,_) -> c) stats)
+      etot   = sum (map (\(_,_,_,d) -> d) stats)
+      fmtstr = "For %s:\n\t%i particles\n\t%e total energy\n\t%e mean energy weight"
+      outstr = printf fmtstr (show typ) ntot (e etot) (ew meanEW / fromIntegral sz)
+  putStrLn outstr
 
 writeTally :: String -> Tally -> IO ()
-writeTally name = writeFile name . show 
+writeTally name t = let header     = summarizeTally t 
+                        deposition = writeDeposition t
+                    in C.writeFile name (header `C.append` deposition)
 
-type CellGeom = (Position,Position,BoundaryCondition,BoundaryCondition)
+appCellTally :: CBS -> (Int,CellTally) -> CBS
+appCellTally s (cidx,CellTally (Momentum m) (Energy e)) = s `C.append` line
+  where line   = C.pack $ printf fmtStr cidx m e
+        fmtStr = "%04i: %15e, %15e\n"
+
+writeDeposition :: Tally -> CBS
+writeDeposition (Tally _ dep _) = depHeader `C.append` lines
+  where lines = L.foldl' appCellTally C.empty cells
+        depHeader = C.pack "\nCell        Momentum                Energy    \n"
+        cells = sortBy (\(k1,_) (k2,_) -> compare k1 k2) $ Map.toList dep
+
+summarizeTally :: Tally -> CBS
+summarizeTally tlly@(Tally cntrs _dep {- esc -} (Distance pl)) = 
+  let CellTally{ctMom = Momentum momTot,ctEnergy = Energy eTot} = totalDep tlly
+  in C.intercalate (C.pack "\n") . map (C.pack) $
+           ("Total energy deposited: "        ++ show eTot) :
+           ("Net radial momentum deposited: " ++ show momTot) :
+           ("Total path length: "             ++ show pl) :
+          "Scatters:" :
+           ("\tnucleon elastic: "             ++ show (nNuclEl cntrs)) :
+           ("\telectron scatters: "           ++ show (nEMinusInel cntrs)) :
+           ("\tpositron scatters: "           ++ show (nEPlusInel cntrs)) :
+          "Absorptions:" :
+           ("\tnu_i nucleon absorptions: "    ++ show (nNuclAbs cntrs)) :
+          "Mesh:" :
+           ("\tcell boundary crossings: "     ++ show (nTransmit cntrs)) :
+           ("\treflections: "                 ++ show (nReflect cntrs)) :
+           ("\tescapes: "                     ++ show (nEscape cntrs)) :
+          "Timeouts:" :
+           ("\ttimeouts: "                    ++ show (nTimeout cntrs)) :
+           ("Total number of MC steps: "      ++ show (totalMCSteps cntrs)) :
+          "==================================================" : []
+
+
+summarizeTallyIO :: Tally -> IO ()
+summarizeTallyIO tlly@(Tally cntrs _dep {- esc -} pl) = do
+  -- summarize global events
+  let CellTally{ctMom = momTot,ctEnergy = eTot} = totalDep tlly
+  mapM_ putStrLn $
+           ("Total energy deposited: "        ++ show eTot) :
+           ("Net radial momentum deposited: " ++ show momTot) :
+           ("Total path length: "             ++ show pl) :
+          "Scatters:" :
+           ("\tnucleon elastic: "             ++ show (nNuclEl cntrs)) :
+           ("\telectron scatters: "           ++ show (nEMinusInel cntrs)) :
+           ("\tpositron scatters: "           ++ show (nEPlusInel cntrs)) :
+          "Absorptions:" :
+           ("\tnu_i nucleon absorptions: "    ++ show (nNuclAbs cntrs)) :
+          "Mesh:" :
+           ("\tcell boundary crossings: "     ++ show (nTransmit cntrs)) :
+           ("\treflections: "                 ++ show (nReflect cntrs)) :
+           ("\tescapes: "                     ++ show (nEscape cntrs)) :
+          "Timeouts:" :
+           ("\ttimeouts: "                    ++ show (nTimeout cntrs)) :
+           ("Total number of MC steps: "      ++ show (totalMCSteps cntrs)) :
+          "==================================================" : []
+
+type CllGeom = (Position,Position,BoundaryCondition,BoundaryCondition)
 
 -- | Read a material state file. Cell coordinates get special treatment,
--- everything else is read out, possibly with a scalar conversion. This 
+-- everything else is read out, possibly with a scalar conversion. This
 -- is specialized to one particular format.
 readMatStateP :: FilePath -> IO ([Cell],[Luminosity],[Luminosity],[Luminosity])
 readMatStateP f = do
   elines <- parseCSVFromFile f
-  case elines of 
+  case elines of
     Left  _  -> return ([],[],[],[])
     Right ls -> do
       let recs = init ls
-          bs = cellBoundsP recs
-      return $ (getCellsP recs bs, getLumsP recs NuE, getLumsP recs NuEBar, 
-                getLumsP recs NuX) 
+          bs   = cellBoundsP recs
+      return ( getCellsP recs bs
+             , getLumsP  recs NuE
+             , getLumsP  recs NuEBar
+             , getLumsP  recs NuX
+             )
 
 
 getLumsP :: [Record] -> PType -> [Luminosity]
 getLumsP rs NuE    = map f rs
-  where f = (\r->Luminosity $ 1e51 * (read (r!!10) + read (r!!14)))
+  where f r = Luminosity $ 1e51 * (read (r!!10) + read (r!!14))
 getLumsP rs NuEBar = map f rs
-  where f = (\r->Luminosity $ 1e51 * (read (r!!12) + read (r!!16) ))
+  where f r = Luminosity $ 1e51 * (read (r!!12) + read (r!!16))
 getLumsP rs NuX = map f rs
-  where f = (\r->Luminosity $ 1e51 * (read (r!!18) ))
+  where f r = Luminosity $ 1e51 * (read (r!!18) )
 
-getCellsP :: [Record] -> [CellGeom] -> [Cell]
+getCellsP :: [Record] -> [CllGeom] -> [Cell]
 getCellsP recs gs = map getCellP (zip recs gs)
-        
-getCellP :: (Record,CellGeom) -> Cell
+
+getCellP :: (Record,CllGeom) -> Cell
 getCellP (rcd,(lox,hix,lobc,hibc)) = Cell lox hix lobc hibc mtl
-  where mtl = Material op0 op0 velo tmp rhoN rhoEM rhoEP
-        op0 = Opacity 0.0
-        velo = Velocity $ read (rcd!!4)
-        tmp = Temperature . (k_B*1e9*) $ read (rcd!!7)
-        rhoN = Density $ read (rcd!!3)
+  where mtl   = Material velo tmp rhoN rhoEM rhoEP
+        velo  = Velocity $ read (rcd!!4)
+        tmp   = Temperature . (k_B*1e9*) $ read (rcd!!7)
+        rhoN  = Density $ read (rcd!!3)
         rhoEM = NDensity $ (rho rhoN) / pmg * read (rcd!!5)
-        rhoEP = NDensity 0.0 -- no positrons in the file.
+        rhoEP = NDensity 0 -- no positrons in the file.
 
 -- | Process cell centers given in data file into pairs of (lower,upper)
--- bounds. Assume that the bound of a cell is halfway between successive 
+-- bounds. Assume that the bound of a cell is halfway between successive
 -- centers. For lower bound of first cell, take difference between cell
 -- 0 and cell 1, and similarly for last cell.
-cellBoundsP :: [Record] -> 
-               [CellGeom]
+cellBoundsP :: [Record] ->
+               [CllGeom]
 cellBoundsP rs = bounds
-  where bounds = zip4 lowerBounds upperBounds lowerBCs upperBCs
+  where bounds = L.zip4 lowerBounds upperBounds lowerBCs upperBCs
         lowerBounds = map Position $ zipWith (-) centers (init ds)
         upperBounds = map Position $ zipWith (+) centers (tail ds)
         lowerBCs = init bcs
         upperBCs = tail bcs
-        ds      = d0 : (map (0.5*) diffs) ++ [dN]
-        diffs   = zipWith (-) (tail centers) (init centers)
-        centers = map (read.(!!2)) rs :: [Double]
-        d0      = (centers !! 1 - centers !! 0) / 2.0
-        dN      = (centers !! (n-1) - centers !! (n-2)) / 2.0
-        bcs     = Refl : [Transp | _ <- [1..(n-1)]] ++ [Vac]
-        n       = length centers
+        ds       = d0 : (map (0.5*) diffs) ++ [dN]
+        diffs    = zipWith (-) (tail centers) (init centers)
+        centers  = map (read . (!!2)) rs :: [Double]
+        d0       = (centers !!    1  - centers !! 0    ) / 2
+        dN       = (centers !! (n-1) - centers !! (n-2)) / 2
+        bcs      = Refl : replicate (n - 1) Transp ++ [Vac]
+        n        = length centers
 
 -- -- handy utility for testing
 -- csr cs = case cs of
@@ -84,8 +163,8 @@ cellBoundsP rs = bounds
 --            Right rs -> rs
 
 -- -- how to do this using bind?
--- rsr f = do 
---   cs <- parseCSVFromFile f 
+-- rsr f = do
+--   cs <- parseCSVFromFile f
 --   return $ csr cs
 
 -- version

@@ -13,7 +13,7 @@ module TallyV
 
 import Control.DeepSeq
 import Data.List as L
-import Data.Monoid
+import Data.Monoid (Monoid, mempty, mappend, (<>) )
 import qualified Data.Vector.Generic as GV
 {-
 import qualified Data.Vector.Generic.Mutable as GMV
@@ -25,11 +25,6 @@ import Event
 import Mesh
 import Particle 
 import Physical
-
--- | Should and will be in Data.Monoid soon.
-(<>) :: Monoid a => a -> a -> a
-(<>) = mappend
-{-# INLINE (<>) #-}
 
 data Tally = Tally {
     globalEvts :: !EventCount

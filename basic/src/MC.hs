@@ -1,106 +1,134 @@
-module MC 
-  (module MC
+module MC
+  ( module MC
   , module Cell
   , module Event
   , module P
   , module Tally
-  )         
+  , module Material
+  )
   where
 
-
+import Control.Applicative
 import Cell
 import Event
 import Mesh as M
 import Particle as P
 import Physical
-import PRNG
+import Philo2
 import Tally
 import Sigma_HBFC
 import Collision
+import Material
+
+-- import Debug.Trace
 
 -- | Run an individual particle in a mesh. Returns the tally containing
 -- information about all the generated events.
-runParticle :: Mesh m => Lepton -> m -> Particle -> Tally
-runParticle sig msh p = tally msh (steps sig msh p)
+runParticle :: Mesh m => Lepton -> m -> Particle -> RNG -> Tally
+runParticle sig msh p g0 = tally msh $ steps sig msh p g0
 
 -- | Compute the trace of a particle as long as events that allow continuing
 -- are produced. Returns the entire list.
-steps :: Mesh m => Lepton -> m -> Particle -> [(Event, Particle)]
+stepsPs :: Mesh m => Lepton -> m -> [Particle] -> [RNG] -> [(Event, Particle)]
+-- stepsPs sig msh ps g0 = trace (repChunk evts g0) evts
+stepsPs sig msh ps gs = evts
+  where
+    evts = concat $ zipWith go gs ps
+    go g0 p = let (evt, p') = step sig msh p g0
+                  g1 = 
+                       incrRNG . incrRNG $ g0
+              in -- trace ("Event: " ++ show evt ++ "\ninit particle: " ++
+                 --        show p ++ "\ngen: " ++ show g0) $
+                   ((evt, p') :) $ if isContinuing evt then go g1 p' else []
+
+-- | Compute the trace of a particle as long as events that allow continuing
+-- are produced. Returns the entire list.
+steps :: Mesh m => Lepton -> m -> Particle -> RNG -> [(Event, Particle)]
 steps sig msh = go
   where
-    go p = case step sig msh p of
-             (evt, p') -> (evt, p') : if isContinuing evt then go p' else []
+    go p g0 =
+      let (evt, p') = step sig msh p g0
+          g1 = incrRNG . incrRNG $ g0
+      in ((evt, p') :) $ if isContinuing evt then go p' g1 else []
 
 -- | Compute the next event for a given particle in a given mesh. Also
--- returns the new state of the particle.
-step :: Mesh m => Lepton-> m -> Particle -> (Event, Particle)
-step sig msh p =
-  withRandomParticle p $ do
-    (evt,omega') <- pickEvent sig msh p 
-    let p'       =  stream msh p evt omega'
-    return (evt, p')
+-- returns the new state of the particle. The flow is as follows:
+--   pickEvent:    selects one candidate event
+--   stream:       updates the particle to the event location
+--   processEvent: generates the final particle state and the event record.
+step :: Mesh m => Lepton-> m -> Particle -> RNG -> (Event, Particle)
+step sig msh p g0 = let
+  (sel_d_coll,_) = random2 g0
+  g1 = incrRNG g0
+  (sel_coll,sel_newState) = random2 g1
+  
+  evtCand = pickEvent sig msh p sel_d_coll
+  pInit   = stream msh p evtCand
+  in processEvent evtCand msh sig pInit sel_coll sel_newState
 
--- | Computes a new particle from a particle, a direction and
--- an event.
-stream :: Mesh m => m -> Particle -> Event -> Direction -> Particle
+-- | Turn an event candidate and an input particle into an event and an 
+-- output particle. 
+processEvent :: Mesh m => EventCandidate -> m -> Lepton -> Particle ->
+                URD -> URD ->
+                (Event,Particle)
+processEvent (TimeoutCand td) _ _ p _ _ = (Timeout td, p{time = Time 0})
+processEvent (BoundaryCand dBdy fce) msh _ p@(Particle { P.dir   = o
+                                                       , energy  = nrg
+                                                       , weight  = wt
+                                                       , cellIdx = cidx
+                                                       }) _ _ = 
+  case boundaryEvent msh cidx dBdy fce nrg wt of
+    b@(Boundary {bType = Reflect})  -> (b, p{P.dir = -o})
+    b@(Boundary {bType = Escape})   -> (b, p{P.cellIdx = -1})
+    b@(Boundary {bType = Transmit}) ->
+         let newCIdx = cellAcross msh cidx fce
+         in  (b, p{P.cellIdx = newCIdx})
+processEvent (CollisionCand dCol) msh sig p@(Particle { P.dir   = o
+                                                      , energy  = nrg
+                                                      , weight  = wt
+                                                      , cellIdx = cidx
+                                                      }) xi1 xi2 =
+  let evt = sampleCollision msh (M.cell msh cidx) nrg o sig dCol wt xi1 xi2
+      o'  = oFinal evt
+      e'  = eFinal evt
+  in (evt, p{ P.dir = o', energy = e'})
+
+-- | Computes a new particle that represents the input Particle
+-- moved to the Event location. Nothing else about the particle
+-- is updated--cell index, for example, is unchanged.
+stream :: Mesh m => m -> Particle -> EventCandidate -> Particle
 stream msh
        p@(Particle { P.dir = omega
-                   , P.pos = (Position x)
+                   , P.pos = r
                    , time  = tm
-                   , cellIdx  = cidx
                    })
-       event omega' =
-  case event of
-    Collision {}                 -> p' { P.dir =  omega'   }
-    Boundary  {bType = Reflect}  -> p' { P.dir = -omega    }
-    Boundary  {bType = Transmit} -> p' { cellIdx  = newCell f }
-    Boundary  {bType = Escape}   -> p' { cellIdx  = 0         } 
-    Timeout   {}                 -> p' { time  = 0         }
-  where
-    p' :: Particle
-    p' = p { P.pos = x', time = t' }
-    d  :: Distance
-    d  = dist event
-    x' :: Position
-    x' = Position $ x +  (Physical.dir omega) * Physical.distance d
-    t' = tm - Time (Physical.distance d / c)
-    f = face event
-    newCell :: Face -> CellIdx
-    newCell = cellAcross msh cidx
-
--- | Wrap a random computation based on a particle. Extracts the
--- random number generator from the particle in the beginning, and
--- put it back in at the end of the computation.
-withRandomParticle :: Particle -> Rnd (a, Particle) -> (a, Particle)
-withRandomParticle (Particle { rng = g }) m =
-  case runRnd g m of
-    ((x, p), g') -> (x, p { rng = g' })
+       cand = p {P.pos = r',P.dir=o',time=t'}
+         where (r',o') = newCoord msh r omega d
+               t'      = tm - Time (Physical.distance d / c)
+               d       = candDist cand
 
 -- | Determine the next event that occurs for a particle, and
 -- a new state for the particle.
-pickEvent :: Mesh m => Lepton -> m -> Particle -> Rnd (Event,Direction)
-pickEvent sig msh
+pickEvent :: Mesh m => Lepton -> m -> Particle -> URD -> EventCandidate
+pickEvent sig msh 
           Particle { P.dir     = omega
-                   , P.pos     = x
+                   , P.pos     = r
                    , cellIdx   = cidx
-                   , weight    = wt
                    , time      = Time tcen
-                   , energy    = en
+                   , energy    = nrg
                    }
-          = do
-  sel_dc <- random
-  let (dBdy, fce) = distanceToBoundary msh mcell x omega
-      dCol        = dCollide mcell en omega sig (URD sel_dc)
+          sel_dc
+          =
+  let (dBdy, fce) = distanceToBoundary msh mcell r omega
+      dCol        = dCollide mcell nrg omega sig sel_dc
       dCen        = Distance $ c * tcen
-      mcell       = M.cell msh cidx 
-  (collEvent,omega') <- sampleCollision msh mcell en omega sig dCol wt
-  let events      = [
-          collEvent
-        , boundaryEvent msh cidx dBdy fce en wt
-        , Timeout dCen
-        ]
+      mcell       = M.cell msh cidx
+      eventCands  = [ CollisionCand dCol
+                    , BoundaryCand  dBdy fce
+                    , TimeoutCand   dCen
+                    ]
 
-  return ((closestEvent events),omega')
+  in closestEvent eventCands
 
 -- the end
 

@@ -61,7 +61,8 @@ pETest1 =
                                0.92436920169905545, 
                                0.21932404923057958]
     p = Particle (Position 0.5) (Direction 1) (Time 1) (Energy 5) (EnergyWeight 1) (CellIdx 0)
-    event = runRnd rng (pickEvent nuE msh p)
+    event = pickEvent nuE msh p (URD 0.30897681610609407)
+    -- event = runRnd rng (pickEvent nuE msh p)
     eventExp = BoundaryCand (Distance 0.5) Hi
     -- eventExp = Boundary Transmit (Distance 0.5) Hi (Energy 5) (EnergyWeight 1)
   in assertBool ("chosen event, " ++ show event ++
@@ -83,9 +84,10 @@ pETest2 =
     pf p@(Particle {P.pos = Position x,cellIdx = CellIdx cidx}) = Just $
       (p, p{ P.pos        = Position (x + d), cellIdx = CellIdx  (cidx + 1)})
       where (Distance d)  = candDist evt
-            evt           = runRnd rng (pickEvent nuE msh p)
+            evt           = pickEvent nuE msh p (URD 0)
     p10 = last ps
-    event = runRnd rng (pickEvent nuE msh p10)
+    event = pickEvent nuE msh p10 (URD 0)
+    -- event = runRnd rng (pickEvent nuE msh p10)
     eventExp = BoundaryCand (Distance 1.0) Hi
     -- eventExp = Boundary Escape (Distance 1.0) Hi (Energy 5) (EnergyWeight 1)
   in assertBool ("chosen event, " ++ show event ++
@@ -107,7 +109,8 @@ pETest3 =
                              -- 0.92436920169905545, -- not used in Haskell
                                 0.21932404923057958]
     p = Particle (Position 0.5) (Direction 1) (Time 100) (Energy 5) (EnergyWeight 1) (CellIdx 0)
-    event = runRnd rng (pickEvent nuE msh p)
+    event = pickEvent nuE msh p (URD 0.30897681610609407)
+    -- event = runRnd rng (pickEvent nuE msh p)
     dExp  = 7343.827
     -- mExp  = 5/c
     -- eExp  = 5
@@ -140,7 +143,8 @@ pETest4 =
                              -- 0.20867489035315723, 
                                 0.91525579001682567]
     p = Particle (Position 0.5) (Direction 1) (Time 100) (Energy 5) (EnergyWeight 1) (CellIdx 0)
-    event = runRnd rng (pickEvent nuE msh p)
+    event = pickEvent nuE msh p (URD 0.21932404923057958)
+    -- event = runRnd rng (pickEvent nuE msh p)
     dExp  = 9486.756524
     -- mExp  = 5/c
     -- eExp  = 0
@@ -173,7 +177,9 @@ pETest5 =
                              -- 0.9, 
                                 0.1]
     p = Particle (Position 0.5) (Direction 1) (Time 100) (Energy 5) (EnergyWeight 1) (CellIdx 0)
-    event = runRnd rng (pickEvent nuE msh p)
+    xi = URD 0.9
+    event = pickEvent nuE msh p xi
+    -- event = runRnd rng (pickEvent nuE msh p xi)
     dExp  = 38310.45776
     -- mExp  = 1/c
     -- eExp  = 1

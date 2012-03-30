@@ -19,6 +19,6 @@ stdTol = 1e-11
 
 {-# INLINE (~==~) #-}
 (~==~) :: FP -> FP -> Bool
-(~==~) = softEquiv stdTol
+(~==~) val ref = softEquiv val ref stdTol
 
 infix 4 ~==~

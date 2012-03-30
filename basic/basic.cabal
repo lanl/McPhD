@@ -1,13 +1,13 @@
 name:                basic
 version:             0.1
 cabal-version:       >= 1.10
-synopsis:            Toy, 1D, spherical, MC transport code
-description:         Tool for sketching out MC functionality
+synopsis:            Monte Carlo neutrino transport simulation
+description:         Monte Carlo neutrino transport simulation. Restricted to 1D, spherical geometry. Particles tracked in lab frame; collisions computed in comoving (material) frame. Uses opacities based on analytic cross sections from Herant, Benz, Fryer, and Colgate (Ap J 1994). Tallies energy and momentum deposition per cell (spherical shell), counts MC events, and histograms escaped particles.
 license:             BSD3
 license-file:        COPYRIGHT
 copyright:           (c) 2010 LANS, LLC
 author:              T. M. Kelley
-maintainer:          tkelley@lanl.gov
+maintainer:          tkelley at lanl dt gov
 homepage:            http://software.lanl.gov/McPhD
 build-type:          Simple
 stability:           experimental
@@ -32,6 +32,8 @@ library
                      Opacity
                      PRNG
                      Particle
+                     Partition
+                     Philo2
                      Physical
                      Search
                      Sigma_HBFC
@@ -44,8 +46,9 @@ library
                      TallyV
                      TallyIM
                      TryNSave
+                     Utils
   ghc-options:       -Wall -fno-warn-name-shadowing -fno-warn-orphans -fwarn-tabs
-  ghc-options:       -funbox-strict-fields
+  ghc-options:       -funbox-strict-fields -fno-ignore-asserts
   ghc-options:       -rtsopts 
   default-extensions:        CPP
   build-depends:     base >=4 && <=5,
@@ -62,6 +65,8 @@ library
                    , primitive
                    , bytestring
                    , bytestring-lexing
+                   , cereal
+                   , haskell-mpi
 
   default-language:  Haskell2010
 
@@ -70,12 +75,33 @@ executable  black-hole
   ghc-options:       -Wall -fno-warn-name-shadowing -fno-warn-orphans -fwarn-tabs
   ghc-options:       -funbox-strict-fields
   ghc-options:       -rtsopts
-  main-is:           BH.hs
-  build-depends:     base >=4 && <=5,
-                     vector >= 0.7,
-                     parallel >= 3.1,
-                     filepath >= 1.2.0, 
-                     basic
+  main-is:           BH-philox.hs
+  build-depends:     base >=4 && <=5
+                    ,vector >= 0.7
+                    ,parallel >= 3.1
+                    ,filepath >= 1.2.0 
+                    ,deepseq
+                    ,basic
+                    ,monad-par
+                    ,haskell-mpi
+                    ,cereal
+  default-language:  Haskell2010
+
+executable  black-hole-mpi
+  hs-source-dirs:    src-main
+  ghc-options:       -Wall -fno-warn-name-shadowing -fno-warn-orphans -fwarn-tabs
+  ghc-options:       -funbox-strict-fields
+  ghc-options:       -rtsopts
+  main-is:           BH-philox-MPI.hs
+  build-depends:     base >=4 && <=5
+                    ,vector >= 0.7
+                    ,parallel >= 3.1
+                    ,filepath >= 1.2.0 
+                    ,deepseq
+                    ,basic
+                    ,monad-par
+                    ,haskell-mpi
+                    ,cereal
   default-language:  Haskell2010
 
 executable  basic-test
@@ -90,5 +116,8 @@ executable  basic-test
                      test-framework-quickcheck2,
                      test-framework-hunit,
                      test-framework,
+                     unordered-containers >= 0.1.4.3,
                      basic
+                   , cereal
+
   default-language:  Haskell2010

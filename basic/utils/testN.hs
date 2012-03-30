@@ -37,7 +37,7 @@ runOneVal :: FilePath -> -- directory for output files
              IO ()
 runOneVal dir summOnly nRuns nCores = do
   -- cl to run
-  let commStr = "time ./black-hole -i ../../data/p.7 -n 1000000 -c 10000 -s 4523645 +RTS -s%s/N_%i_gc_%i -N%i -RTS 2>&1 | tee %s/N_%i__run_%i"
+  let commStr = "time ./black-hole -i ../../data/p.7 -n 1000000 -c 500 -s 4523645 +RTS -s%s/N_%i_gc_%i -N%i -RTS 2>&1 | tee %s/N_%i__run_%i"
 
   -- execute all the runs
   if not summOnly
@@ -58,7 +58,7 @@ runOneVal dir summOnly nRuns nCores = do
   let statz = map statistify dataz
   -- report
   mapM report $ zip targSet statz
-  let summary  = summarizeAll statz  
+  let summary = summarizeAll statz  
       summPref = dir ++ "/summ_n__" ++ printInt nCores ++ "__" ++ printInt nRuns ++ "_runs"
   reportAll summary summPref
 

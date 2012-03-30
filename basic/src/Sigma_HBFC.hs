@@ -1,15 +1,48 @@
-{- | Analytic microscopic neutrino cross sections.
+{-# LANGUAGE TupleSections #-}
+
+{- | Analytic microscopic neutrino cross sections and interaction functions.
  - From Herant, Benz, Fryer, and Colgate: Ap. J. 435:339-361 (1994).
  - Cross sections are in cm^2, energies in MeV
  -}
 
-module Sigma_HBFC where
+module Sigma_HBFC
+  where
 
+import Material (tempE)
 import Physical
+import Mesh
+import PRNG
+import Control.Monad
 
 
--- * neutrino--baryon events
--- ------------------------
+-- * interactions
+type PState  = (Energy,Direction)
+type Scatter = Energy -> Direction -> PState
+
+newStateNAbs :: Scatter
+newStateNAbs _ oi = (Energy 0, oi)
+
+newStateNElastic :: Mesh m => m -> URD -> Scatter
+newStateNElastic m xi ei _ = (ei,sampleDirectionIso m xi)
+
+newStateEMinusInel :: Mesh m => m -> URD -> Cell -> Scatter
+newStateEMinusInel m xi cll ei _ =
+  (leptonEnergy cll ei, sampleDirectionIso m xi)
+
+newStateEPlusInel  :: Mesh m => m -> URD -> Cell -> Scatter
+newStateEPlusInel m xi cll ei _  =
+  (leptonEnergy cll ei, sampleDirectionIso m xi)
+
+-- | compute final neutrino energy using generic
+-- material temperature (in energy units) as lepton energy
+leptonEnergy :: Cell -> Energy -> Energy
+leptonEnergy cll (Energy ei) = Energy ef
+  where de   = 1/4 * (ei - elep)
+        ef   = ei - de
+        elep = temp . tempE . mat $ cll
+
+-- * neutrino--baryon cross sections
+-- ---------------------------------
 -- | nucleon absorption/emission
 
 nuNAbs :: Energy -> CrossSection
@@ -17,7 +50,7 @@ nuNAbs (Energy nrg) = CrossSection $ 9e-44 * nrg * nrg
 
 -- | nu--nucleon elastic scattering
 nuNElastic :: Energy -> CrossSection
-nuNElastic (Energy nrg) = CrossSection $ 1.7e-44* nrg * nrg
+nuNElastic (Energy nrg) = CrossSection $ 1.7e-44 * nrg * nrg
 
 -- -- | nu-nucleus elastic scatter: attempts to account
 -- -- | for coherent scattering from bound nucleons
@@ -27,8 +60,8 @@ nuNElastic (Energy nrg) = CrossSection $ 1.7e-44* nrg * nrg
 
 -- | if not too concerned about the balance between n's & p's:
 nuAElastic :: Energy -> NucleonNumber -> CrossSection
-nuAElastic (Energy nrg) (NucleonNumber a) = 
-  CrossSection $ 1.7e-44*a*a/6.0*nrg*nrg
+nuAElastic (Energy nrg) (NucleonNumber a) =
+  CrossSection $ 1.7e-44*a*a/6*nrg*nrg
 
 
 -- NOTE: the lepton cross sections are complicated by dependence on
@@ -36,8 +69,8 @@ nuAElastic (Energy nrg) (NucleonNumber a) =
 -- Python version. The corresponding opacity code figures out which
 -- species is involved, then branches to one of these functions....
 
--- * neutrino--lepton scattering
--- ----------------------------
+-- * neutrino--lepton scattering cross sections
+-- --------------------------------------------
 -- | nu_e--e^- & nu_bar_e--e^+ scattering
 nuEEMinus :: Energy -> Energy -> CrossSection
 nuEEMinus  (Energy e_nu) (Energy e_e) = CrossSection $ 9.2e-45 * e_nu * e_e
@@ -55,23 +88,12 @@ nuXEMinus  (Energy e_nu) (Energy e_e) = CrossSection $ 1.8e-45 * e_nu * e_e
 nuXEPlus :: Energy -> Energy -> CrossSection
 nuXEPlus (Energy e_nu) (Energy e_e) = CrossSection $ 1.3e-45 * e_nu * e_e
 
-
-
--- ...QUESTION: I'm hoping this will be more efficient (it's easier to code)
--- that what I have above.
--- The use case is something like this: we'll pass an instance of
--- Sigma.Lepton to MC.runParticle (or maybe curried into a MC.runParticleWith)
--- for a container of particles of one species. My hope is that
--- GHC will be able to determine statically which function is being called,
--- and inline it, or at least avoid the penalty of a function pointer.
--- Does that sound realistic?
-
 -- | Lepton packs cross-section functions for each different neutrino species.
 -- For the moment, we don't differentiate between tau and mu neutrinos (nu_x).
 data Lepton = Lepton {
     e_minus :: Energy -> Energy -> CrossSection
   , e_plus  :: Energy -> Energy -> CrossSection
-} 
+}
 
 nuE :: Lepton
 nuE = Lepton {

@@ -49,8 +49,6 @@ rejTest i x a r = assertBool (rejFailStr i x a r) (softEquiv (rejector x a) r 1e
 
 rejCases = [testCase (rejStr i) (rejTest i x a r) | (i,x,a,r) <- rejData]
 
-
-
 tests = [testGroup "energy sampling properties" 
          [ testProperty "rejector: 0 <= r <= 1 (alpha = 2)" rejectorBndedA2
          , testProperty "rejector: 0 <= r <= 1 (alpha arb)" rejectorBnded

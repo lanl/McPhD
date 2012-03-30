@@ -1,7 +1,6 @@
 module Geometry where
 
 import Physical
-import Constants (c)
 
 -- | Lorentz factor
 gamma :: FP -> FP

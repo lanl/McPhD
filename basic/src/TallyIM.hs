@@ -3,7 +3,7 @@
 -- Feb 03, 2011
 -- (c) Copyright 2011 LANSLLC, all rights reserved
 
-{-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE BangPatterns, TypeSynonymInstances, FlexibleInstances #-}
 
 module TallyIM ( Tally(..)
                , EventCount(..)
@@ -13,6 +13,7 @@ module TallyIM ( Tally(..)
                , merge
                , totalDep
                , totalMCSteps
+               , PhysicsTally
                )
   where
 
@@ -22,31 +23,21 @@ import Event
 import Mesh
 
 import Data.List as List
--- import qualified Data.IntMap as Map
 import Data.HashMap.Strict as Map
 import Control.DeepSeq
-import Data.Monoid
-
--- | Should and will be in Data.Monoid soon.
-(<>) :: Monoid a => a -> a -> a
-(<>) = mappend
-{-# INLINE (<>) #-}
+import Data.Monoid (Monoid, mempty, mappend, (<>) )
+import Data.Serialize
+import Control.Monad (replicateM, liftM2)
 
 data Tally = Tally { globalEvts  :: !EventCount
                    , deposition  :: !PhysicsTally
                    -- , escape      :: !EscapeCount
                    , totalPL     :: !Distance -- total path length
                                               -- travelled by all particles
-} deriving Show
-
-instance NFData Tally where
-  rnf (Tally ge dep {- esc -} dst) =
-    ge `deepseq` dep `deepseq` {- esc `deepseq` -} dst `deepseq` ()
+} deriving (Eq,Show)
 
 data CellTally     = CellTally {ctMom :: !Momentum, ctEnergy :: !Energy}
                      deriving (Show,Eq)
-
-instance NFData CellTally
 
 type PhysicsTally  = Map.HashMap Int CellTally
 
@@ -63,10 +54,8 @@ data EventCount    = EventCount {
   , nTimeout    :: !Int
   } deriving (Show, Eq)
 
-instance NFData EventCount
-
-tally :: Mesh m => m -> [(Event,Particle)] -> Tally -> Tally
-tally _ eps t = List.foldl' tallyImpl t eps
+tally :: Mesh m => m -> [(Event,Particle)] -> Tally
+tally msh = List.foldl' tallyImpl (emptyTally msh)
 
 -- | Tally an event
 tallyImpl :: Tally -> (Event,Particle) -> Tally
@@ -134,6 +123,64 @@ merge t1@(Tally ec1 dep1 {- esc1 -} pl1) t2@(Tally ec2 dep2 {- esc2 -} pl2) =
 totalDep :: Tally -> CellTally
 totalDep t = Map.foldl' mappend mempty (deposition t)
 
+
+--                       -----      Serialize instances      -----
+
+instance Serialize EventCount where
+  put (EventCount na ne nem nep nx nr nesc nto) = do
+                                put na 
+                                put ne 
+                                put nem
+                                put nep
+                                put nx 
+                                put nr 
+                                put nesc
+                                put nto
+  get = do
+    na   <- get
+    ne   <- get
+    nem  <- get
+    nep  <- get
+    nx   <- get
+    nr   <- get
+    nesc <- get
+    nto  <- get
+    return $ EventCount na ne nem nep nx nr nesc nto
+
+instance Serialize CellTally where
+  put (CellTally m e) = put m >> put e
+  get = do
+    m <- get
+    e <- get
+    return $ CellTally m e
+
+instance Serialize PhysicsTally where
+  put pt = 
+    (put $ size pt) >> 
+    mapM (\(k,v) -> put k >> put v) (toList pt) >> return ()
+  get = do
+    sz  <- get
+    kvs <- replicateM sz get2
+    return $ Map.fromList kvs
+    where get2 = liftM2 (,) get get
+
+instance Serialize Tally where
+  put (Tally ec dep plen) = put ec >> put dep >> put plen >> return ()
+  get = do
+    ec   <- get
+    dep  <- get
+    plen <- get
+    return $ Tally ec dep plen
+
+--                     -----       NFData instances      -----
+
+instance NFData Tally where
+  rnf (Tally ge dep {- esc -} dst) =
+    ge `deepseq` dep `deepseq` {- esc `deepseq` -} dst `deepseq` ()
+
+instance NFData CellTally
+
+instance NFData EventCount
 
 -- version
 -- $Id$

@@ -1,4 +1,7 @@
-module Mesh where
+module Mesh
+  ( module Mesh
+  , module Cell)
+ where
 
 import Data.Vector as V
 
@@ -9,13 +12,14 @@ import PRNG
 import Physical
 
 class Mesh m where
-  samplePosition       :: m -> Rnd (Position, CellIdx)
-  samplePositionInCell :: m -> Cell -> Rnd Position
-  sampleDirectionIso   :: m -> Rnd Direction
+  samplePositionInCell :: m -> Cell -> URD -> Position
+  sampleDirectionIso   :: m -> URD -> Direction
   distanceToBoundary   :: m -> Cell -> Position -> Direction -> (Distance, Face)
   cells                :: m -> Vector Cell
   cell                 :: m -> CellIdx -> Cell
   cellAcross           :: m -> CellIdx -> Face -> CellIdx
+  newCoord             :: m -> Position -> Direction -> Distance ->
+                          (Position,Direction)
 
 -- | Returns the maximum index of the vector of cells.
 nrCells :: Mesh m => m -> Int

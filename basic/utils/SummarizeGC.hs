@@ -25,13 +25,15 @@ newtype FileSet = FileSet [FilePath]   deriving Show
 newtype Target  = Target String        deriving Show
 newtype Mean    = Mean Double          deriving Show
 newtype StdDev  = StdDev Double        deriving Show
-newtype Stat    = Stat (Mean,StdDev)   deriving Show
+newtype Min     = Min Double           deriving Show
+newtype Max     = Max Double           deriving Show
+newtype Stat    = Stat (Mean,StdDev,Min,Max)   deriving Show
 
 -- targets serve two masters: the set of things we're looking
 -- for, and unique identifiers of interesting lines in the GC
 -- statistics output file.
 targets = map Target [
-           "Total time"
+           "Total   time"
           ,"GC  "
           ,"MUT  "
           ,"Parallel"
@@ -69,17 +71,20 @@ getData (FileSet fs) t = do
 -- | compute mean and standard deviation of a list of numbers
 statistify :: [Double] -> Stat
 statistify xs = let m = mean xs
- in Stat (m, stdDev xs m)
+                    mn = minimum xs
+                    mx = maximum xs
+ in Stat (m, stdDev xs m, Min mn, Max mx)
 
 -- reporting
 report :: (Target,Stat) -> IO ()
-report (targ,Stat (m,s)) = 
-  putStrLn $ show targ ++ ": " ++ show m ++ " +- " ++ show s
+report (targ,Stat (Mean m, StdDev s, Min mn, Max mx)) = 
+  putStrLn $ show targ ++ ": " ++ show m ++ ", " ++ show s++ ", " 
+             ++ show mn ++ ", " ++ show mx
 
 -- | comma-separated string with <mean>,<stddev> for each target.
 -- Useful for importing to spreadsheet... 
 summarizeAll :: [Stat] -> String
-summarizeAll ss = concat [printf "%f,%f," m s | Stat (Mean m,StdDev s) <- ss ]
+summarizeAll ss = concat [printf "%f,%f," m s | Stat (Mean m,StdDev s,_,_) <- ss ]
 
 reportAll :: String -> FilePath -> IO ()
 reportAll s f = do
@@ -102,24 +107,26 @@ findLine (Target st) f = do
 parseLine :: Target -> BS.ByteString -> Double
 parseLine (Target t) = 
   case t of
-    "Total time" -> parseTotal
-    "GC  "       -> parseGC
-    "MUT  "      -> parseMUT
-    "Parallel"   -> parseGCBal
-    "ideal"      -> parseIdeal
-    "SPARKS"     -> parseSparks
-    "converted"  -> parseConv
-    "maximum r"  -> parseRes
+    "Total   time" -> parseTotal
+    "GC  "         -> parseGC
+    "MUT  "        -> parseMUT
+    "Parallel"     -> parseGCBal
+    "ideal"        -> parseIdeal
+    "SPARKS"       -> parseSparks
+    "converted"    -> parseConv
+    "maximum r"    -> parseRes
 
 parseRes,parseGCBal,parseIdeal,parseTotal,parseMUT,parseGC,parseSparks,parseConv :: BS.ByteString -> Double
-parseTotal s  = readIt . strip 's' $ BS.words s !! 4
-parseGC s     = readIt . strip 's' $ BS.words s !! 4
-parseMUT s    = readIt . strip 's' $ BS.words s !! 4
+parseTotal s  = readIt . strip '(' . strip 's' $ BS.words s !! ((lws s) - 2)
+parseGC s     = readIt . strip '(' . strip 's' $ BS.words s !! ((lws s) - 2)
+parseMUT s    = readIt . strip '(' . strip 's' $ BS.words s !! ((lws s) - 2)
 parseGCBal s  = readIt $ BS.words s !! 4
 parseIdeal s  = readIt . strip ')' $ BS.words s !! 9
 parseSparks s = readIt $ BS.words s !! 1
 parseConv s   = readIt . strip '(' $ BS.words s !! 2
 parseRes s    = readIt . strip ',' $ BS.words s !! 0 
+
+lws = length . BS.words
 
 readIt = read . BS.unpack
 
