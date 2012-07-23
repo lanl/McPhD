@@ -14,6 +14,7 @@ module TallyIM ( Tally(..)
                , totalDep
                , totalMCSteps
                , PhysicsTally
+               , EscapeCount
                )
   where
 
@@ -21,6 +22,7 @@ import Physical
 import Particle
 import Event
 import Mesh
+-- import Histogram as Hst
 
 import Data.List as List
 import Data.HashMap.Strict as Map
@@ -31,10 +33,10 @@ import Control.Monad (replicateM, liftM2)
 
 data Tally = Tally { globalEvts  :: !EventCount
                    , deposition  :: !PhysicsTally
-                   -- , escape      :: !EscapeCount
+                   , escape      :: !EscapeCount
                    , totalPL     :: !Distance -- total path length
                                               -- travelled by all particles
-} deriving (Eq,Show)
+                   } deriving (Eq,Show)
 
 data CellTally     = CellTally {ctMom :: !Momentum, ctEnergy :: !Energy}
                      deriving (Show,Eq)
@@ -59,8 +61,8 @@ tally msh = List.foldl' tallyImpl (emptyTally msh)
 
 -- | Tally an event
 tallyImpl :: Tally -> (Event,Particle) -> Tally
-tallyImpl (Tally ec dep {- esc -} pl) (evt,p)  =
-  Tally (countEvent evt ec) (tDep evt (cellIdx p) dep) {- (tEsc evt esc) -} (tPL evt pl)
+tallyImpl (Tally ec dep esc pl) (evt,p)  =
+  Tally (countEvent evt ec) (tDep evt (cellIdx p) dep) (tEsc evt esc) (tPL evt pl)
 
 -- | Tally momentum deposition.
 tDep :: Event -> CellIdx -> PhysicsTally -> PhysicsTally
@@ -101,8 +103,10 @@ totalMCSteps (EventCount na ne nem nep nt nr nesc nto) =
 
 instance Monoid EventCount where
   mempty = EventCount 0 0 0 0 0 0 0 0
-  mappend (EventCount na1 ne1 emi1 epi1 t1 r1 e1 c1) (EventCount na2 ne2 emi2 epi2 t2 r2 e2 c2) =
-    EventCount (na1 + na2) (ne1 + ne2) (emi1 + emi2) (epi1 + epi2) (t1 + t2) (r1 + r2) (e1 + e2) (c1 + c2)
+  mappend (EventCount na1 ne1 emi1 epi1 t1 r1 e1 c1) 
+            (EventCount na2 ne2 emi2 epi2 t2 r2 e2 c2) =
+              EventCount (na1 + na2) (ne1 + ne2) (emi1 + emi2) (epi1 + epi2) 
+                           (t1 + t2) (r1 + r2) (e1 + e2) (c1 + c2)
 
 instance Monoid CellTally where
   mempty = CellTally 0 0
@@ -113,11 +117,11 @@ instance Monoid Tally where
   mappend = merge
 
 emptyTally :: m -> Tally
-emptyTally _ = Tally mempty Map.empty {- mempty -} 0
+emptyTally _ = Tally mempty Map.empty  mempty 0
 
 merge :: Tally -> Tally -> Tally
-merge t1@(Tally ec1 dep1 {- esc1 -} pl1) t2@(Tally ec2 dep2 {- esc2 -} pl2) =
-  let r = Tally (ec1 <> ec2) (Map.unionWith (<>) dep1 dep2) {- (Hst.combine esc1 esc2) -} (pl1 + pl2)
+merge t1@(Tally ec1 dep1 esc1 pl1) t2@(Tally ec2 dep2  esc2 pl2) =
+  let r = Tally (ec1 <> ec2) (Map.unionWith (<>) dep1 dep2)  (esc1 ++ esc2) (pl1 + pl2)
   in r `deepseq` r
 
 totalDep :: Tally -> CellTally
@@ -153,7 +157,7 @@ instance Serialize CellTally where
     m <- get
     e <- get
     return $ CellTally m e
-
+    
 instance Serialize PhysicsTally where
   put pt = 
     (put $ size pt) >> 
@@ -165,18 +169,19 @@ instance Serialize PhysicsTally where
     where get2 = liftM2 (,) get get
 
 instance Serialize Tally where
-  put (Tally ec dep plen) = put ec >> put dep >> put plen >> return ()
+  put (Tally ec dep escs plen) = put ec >> put dep >> put escs >> put plen >> return ()
   get = do
     ec   <- get
     dep  <- get
+    escs <- get
     plen <- get
-    return $ Tally ec dep plen
+    return $ Tally ec dep escs plen
 
 --                     -----       NFData instances      -----
 
 instance NFData Tally where
-  rnf (Tally ge dep {- esc -} dst) =
-    ge `deepseq` dep `deepseq` {- esc `deepseq` -} dst `deepseq` ()
+  rnf (Tally ge dep  esc dst) =
+    ge `deepseq` dep `deepseq`  esc `deepseq` dst `deepseq` ()
 
 instance NFData CellTally
 

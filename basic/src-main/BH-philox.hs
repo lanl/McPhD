@@ -12,7 +12,7 @@ import Control.DeepSeq (deepseq,rnf,NFData)
 import System.Console.GetOpt
 import System.Environment
 import System.FilePath.Posix (isValid)
-import Control.Monad (MonadPlus,guard)
+import Control.Monad (MonadPlus,guard,liftM)
 import Data.Word
 import qualified Data.Vector as V
 
@@ -28,8 +28,9 @@ import Philo2
 import Sigma_HBFC
 import FileInputCF
 import RunParticles
--- import qualified MPIStub as MPI  -- TO DO: write stubs to reunify the BH apps
-
+import Partition (renumberStats)
+import MPISwitch as MPI 
+import Histogram
 
 type VecLums = V.Vector Luminosity
 type Key = Philo4x32Key
@@ -45,60 +46,99 @@ runSim opts@(CLOpts { inputF  = infile
                     , llimit  = ll
                     , ulimit  = ul
                     , seed    = sd
-                    , nps     = n
+                    , nps     = nIn
                     , chunkSz = chunkSize
                     , alpha   = a
                     , simTime = dt
                     }
        ) = do
+  MPI.init
+  rank   <- MPI.commRank MPI.commWorld
+  commSz <- liftM fromIntegral $ MPI.commSize MPI.commWorld
+  time0  <- MPI.wtime
+
   -- read input, process into mesh, select corresponding luminosities,
   -- initialize rngs
-  (clls, lnuer, lnuebarr, lnuxr) <- parseFile infile
+  (clls, lnuer, lnuebarr, lnuxr) <- time0 `deepseq` parseFile infile
   putStrLn "read material state file"
   let (!msh,!ndropped)       = clls `deepseq` mkMesh clls ll ul
       !mshsz                 = ncells msh
       [!lnue,!lnuebar,!lnux] = map (trim ndropped mshsz) [lnuer,lnuebarr,lnuxr]
-      !n' = lnue `deepseq` lnuebar `deepseq` lnux `deepseq` (n `div` chunkSize) + 1
 
-  let !keys1 = mkKeys (Seed sd) n' (Offset $       1)
-      !keys2 = mkKeys (Seed sd) n' (Offset $  n' + 1)
-      !keys3 = mkKeys (Seed sd) n' (Offset $ 2*n' + 1)
+  time1 <- MPI.wtime
 
-  putStrLn $ "ndropped: " ++ show ndropped ++ 
+  let !nc = time1 `deepseq` (nIn `div` chunkSize) + 1
+      -- !keys1 = mkKeys (Seed sd) nc (Offset $        1)
+      -- !keys2 = mkKeys (Seed sd) nc (Offset $   nc + 1)
+      -- !keys3 = mkKeys (Seed sd) nc (Offset $ 2*nc + 1)
+      key = Key4x32 sd 0
+
+  putStrLn $ "ndropped: "    ++ show ndropped ++ 
              ", mesh size: " ++ show mshsz ++ 
-             ", n_chunks: " ++ show n'
-
+             ", n_chunks: "  ++ show nc
 
   -- run each species
-  let (rank,commSz) = (0,1) :: (Word32,Word32)  -- no difference in 
-      fc = runParticlesParList
-      -- fc = runParticlesParBuffer
-      -- fc = runParticlesPar
-      fcore = fc chunkSize msh a (rank,commSz)
-      f1 = fcore nuE keys1 
-      f2 = fcore nuEBar keys2 
-      f3 = fcore nuX keys3
+  let fc = runParticlesParList     --parList
+      -- fc = runParticlesParBuffer  -- Par monad
+      -- fc = runParticlesPar        -- parBuffer
+      fcore = fc chunkSize msh a (MPI.fromRank rank,fromIntegral commSz)
+      f1 = fcore nuE key
+      f2 = fcore nuEBar key 
+      f3 = fcore nuX key
 
-  talliesNuE    <- runOneSpeciesWith n dt (lnue,NuE) f1
-  talliesNuEBar <- runOneSpeciesWith n dt (lnuebar,NuEBar) f2
-  talliesNuX    <- runOneSpeciesWith n dt (lnux,NuX) f3
-  writeTally (outfile++"_nuE")    talliesNuE
-  writeTally (outfile++"_nuEBar") talliesNuEBar
-  writeTally (outfile++"_nuX")    talliesNuX
+  talliesNuE    <- runOneSpeciesWith nIn dt (rank,commSz) (lnue,NuE) f1
+  talliesNuEBar <- runOneSpeciesWith nIn dt (rank,commSz) (lnuebar,NuEBar) f2
+  talliesNuX    <- runOneSpeciesWith nIn dt (rank,commSz) (lnux,NuX) f3
 
+  time2 <- talliesNuE    `deepseq` 
+           talliesNuEBar `deepseq` 
+           talliesNuX    `deepseq` 
+           MPI.wtime
+
+  if rank /= MPI.toRank 0
+  then MPI.sendTally talliesNuE
+       >> MPI.sendTally talliesNuEBar
+       >> MPI.sendTally talliesNuX
+  else do
+    tallyNuE    <- MPI.recvTally talliesNuE
+    tallyNuEBar <- MPI.recvTally talliesNuEBar
+    tallyNuX    <- MPI.recvTally talliesNuX
+    writeTally (outfile++"_nuE")    tallyNuE
+    writeTally (outfile++"_nuEBar") tallyNuEBar
+    writeTally (outfile++"_nuX")    tallyNuX
+    -- histogram escape events
+    -- let bounds = [Energy i | i <- [0..100]]
+    --     histNuE    = foldr count (mkHist bounds) $ escape tallyNuE
+    --     histNuEBar = foldr count (mkHist bounds) $ escape tallyNuEBar
+    --     histNuX    = foldr count (mkHist bounds) $ escape tallyNuX
+    -- writeHistogram ("hist_"++outfile++"_nuE")    histNuE
+    -- writeHistogram ("hist_"++outfile++"_nuEBar") histNuEBar
+    -- writeHistogram ("hist_"++outfile++"_nuX")    histNuX
+  
+
+  time3 <- MPI.wtime
+
+  putStrLn $ "Rank " ++ show rank 
+             ++ ", interval 1: " ++ show (MPI.diffTime time1 time0)
+             ++ ", interval 2: " ++ show (MPI.diffTime time2 time1)
+             ++ ", interval 3: " ++ show (MPI.diffTime time3 time2)
+
+  MPI.finalize
 
 -- | run one neutrino species: derive its source statistics (where to put
 --  particles) and run them to get a tally
-runOneSpeciesWith :: Word32              ->  -- # particles
-                     Time                -> 
-                    (VecLums,PType)      ->
+runOneSpeciesWith :: Word32               ->  -- ^ number particles
+                     Time                 -> 
+                    (MPI.Rank,Word32)     ->  -- ^ rank,nranks
+                    (VecLums,PType)       ->
                     (SrcStats -> SrcStats -> Tally)  ->
                     IO Tally
-runOneSpeciesWith nps dt (lnu,nuType) f = do
-  let statsNu = calcSrcStats lnu dt nps
+runOneSpeciesWith nps dt (rank,commSz) (lnu,nuType) f = do
+  let statsNuRaw = calcSrcStats lnu dt nps
+      statsNu    = renumberStats rank commSz statsNuRaw
   summarizeStats statsNu nuType
-  let tllyNu = f statsNu statsNu
-  summarizeTallyIO tllyNu
+  summarizeStats statsNuRaw nuType
+  let tllyNu = f statsNuRaw statsNu
   return tllyNu
 
 trim :: Int -> Int -> V.Vector a -> V.Vector a
@@ -173,7 +213,7 @@ getOpts argv =
     (_,_,es) -> ioError (userError (concat es ++ usageInfo header options))
 
 header :: String
-header = "Usage: BH [OPTION...] N_Particles Input_File"
+header = "Usage: BH [OPTION...] -n <n_particles> -i <input_file>"
 
 checkOpts :: CLOpts -> IO CLOpts
 checkOpts os = case checkOptsArgsM os of

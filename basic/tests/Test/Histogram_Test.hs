@@ -23,14 +23,14 @@ import qualified Data.Vector.Unboxed as U
 -- | count with a null weight should leave the counts & squares unchanged
 prop_nullCountUnchanged :: HistNEnergy -> Bool
 prop_nullCountUnchanged (HistNEnergy h e) = cmpEHists  h' h (EnergyWeight 1e-16)
-  where h' = count h (e,EnergyWeight 0)
+  where h' = count (e,EnergyWeight 0) h
 
 -- | count is commutative to within FP error (on same index)
 --     (that is, {count h e1; count h e2} == {count h e2; count h e1})
 prop_cmtvSameIdx :: HistNEnergy -> EnergyWeight -> EnergyWeight -> Bool
 prop_cmtvSameIdx (HistNEnergy h e) ew1 ew2 = cmpEHists h1 h2 (EnergyWeight 1e-14)
-  where h1 = count (count h (e,ew1)) (e,ew2)
-        h2 = count (count h (e,ew2)) (e,ew1)
+  where h1 = count (e,ew2) (count (e,ew1) h)
+        h2 = count (e,ew1) (count (e,ew2) h)
 
 cmpEHists ha hb tol = U.foldl1' (&&) compCounts
   where compCounts  = U.zipWith cmpfunc (ehcounts ha) (ehcounts hb)

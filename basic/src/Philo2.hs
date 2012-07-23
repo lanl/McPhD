@@ -97,6 +97,7 @@ wordsToDouble x y  = (fromIntegral u * m_inv_32 + (0.5 + m_inv_53) +
           v        = fromIntegral y :: Int32
 {-# INLINE wordsToDouble #-}
 
+-- | Get two doubles from a single RNG state
 random2 :: RNG -> (URD,URD)
 random2 (RNG c k) =
   let Ctr4x32 c1 c2 c3 c4 = philo4x32 c k
@@ -133,6 +134,22 @@ incrCtr3 (Ctr4x32 c1 c2 c3 c4) (Offset n) = Ctr4x32 c1 (c2+n) c3 c4
 incrCtr2 :: Philo4x32Ctr -> Offset -> Philo4x32Ctr
 incrCtr2 (Ctr4x32 c1 c2 c3 c4) (Offset n) = Ctr4x32 c1 c2 (c3+n) c4
 
+
+{- 
+
+-- Ooh this is a really ugly hack: really just threw this in to compare 
+-- with C++ version (in the NuT code).
+randoms :: RNG -> Int -> (RNG,[URD])
+randoms g1 i = go g1 0
+  where go g n | n < i  = let g2 = incrRNG g 
+                              (u1,u2) = random2 g
+                              (ginf,us) = go g2 (n + 2)
+                          in (ginf,u1:u2:us)
+        go g n | n >= i = let g2 = incrRNG g
+                              (u1,u2) = random2 g
+                          in (g2,u1:u2:[])
+ 
+-}
 
 -- version
 -- $Id$

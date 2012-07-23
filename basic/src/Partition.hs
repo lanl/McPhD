@@ -6,17 +6,12 @@
 -- | Tools for partitioning particles across processes (ranks, 
 -- in MPI parlance)
 
-module Partition 
-  ( genPtclIds
-  , idsPerCell
-  , psPerRank
-  , renumberStats )   
-  where
+module Partition ( genPtclIds, idsPerCell, psPerRank, renumberStats ) where
 
 import qualified Data.List as L
 import Data.Word (Word32)
 import Source (SrcStat)
-import Control.Parallel.MPI.Simple (Rank, fromRank)
+import qualified MPISwitch as MPI
 
 {- Parallel decomposition: We divide particles up within each cell.
  - Every rank r gets nc / commSz particles, plus one extra if 
@@ -36,12 +31,12 @@ import Control.Parallel.MPI.Simple (Rank, fromRank)
 
 -- | Assign particles from global statistics list
 -- (matches how we'll generate RNGs).
-renumberStats :: Rank -> Word32 -> [SrcStat] -> [SrcStat]
+renumberStats :: MPI.Rank -> Word32 -> [SrcStat] -> [SrcStat]
 renumberStats r c ss = map (\(x,n,y,z) -> (x,n2 n,y,z)) ss
-  where n2 n = psPerRank (fromRank r) c n
+  where n2 n = psPerRank (MPI.fromRank r) c n
 
 -- | Given rank, total number of ranks, and global statistics,
--- compute a of unique id's for particles. This set should be the same
+-- compute a list of unique id's for particles. This set should be the same
 -- regardless of the number of ranks.
 genPtclIds :: Word32 -> Word32 -> [SrcStat] -> [Word32]
 genPtclIds r commSz ss  = L.concat $ zipWith (idsPerCell r commSz) cumNs ss
@@ -51,13 +46,14 @@ genPtclIds r commSz ss  = L.concat $ zipWith (idsPerCell r commSz) cumNs ss
 
 -- | Generate a list of particle ids for one cell, implementing 
 -- id of kth particle in cell j for rank r = 
--- cumN           (cumulative number of all particles in cells c < j
+-- cumN           (cumulative number of all particles in cells c < j)
 -- + rank offset  (number of particles in ranks p < r)
--- + k            (for all k in [0,nc) ).
-idsPerCell :: Word32 -- ^ rank
-              -> Word32 -- ^ communicator size
-              -> Word32 -- ^ cumulative # particles
-              -> SrcStat -> [Word32]
+-- + k            (for all k in [0,psPerRank r) ).
+idsPerCell :: Word32     -- ^ rank
+              -> Word32  -- ^ communicator size
+              -> Word32  -- ^ cumulative # particles
+              -> SrcStat -- ^ includes how many particles total per cell
+              -> [Word32]
 idsPerCell _ _      _    (_,0,_,_)  = []
 idsPerCell r commSz cumN (_,nc,_,_) = 
   if ppr > 0
@@ -66,15 +62,15 @@ idsPerCell r commSz cumN (_,nc,_,_) =
     where ppr = psPerRank r commSz nc
 
 -- | Offset for rank
-rankOff :: Word32 -- ^ rank
+rankOff :: Word32    -- ^ total number of particles in cell
+           -> Word32 -- ^ rank
            -> Word32 -- ^ communicator size
-           -> Word32 -- ^ total number of particles in cell
            -> Word32 
 rankOff _ 0 _ = 0
 rankOff nc r commSz = sum $ map (\rk -> psPerRank rk commSz nc) [0..(r-1)]
 
 -- | Number of particles per cell per rank, based on comm size
-psPerRank :: Word32 -- ^ rank 
+psPerRank :: Word32    -- ^ rank 
              -> Word32 -- ^ communicator size
              -> Word32 -- ^ total number of particles per cell
              -> Word32

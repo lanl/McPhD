@@ -5,7 +5,6 @@ module Test.Arbitraries where
 import Test.QuickCheck
 import Control.Applicative ( (<$>) )
 import Physical
-import Constants
 import Cell
 import Material
 import Sigma_HBFC
@@ -235,8 +234,9 @@ instance Arbitrary T_IM.Tally where
   arbitrary = do
     ec  <- arbitrary
     dep <- arbitrary
+    escs <- arbitrary
     pl  <- arbitrary
-    return $ T_IM.Tally ec dep pl
+    return $ T_IM.Tally ec dep escs pl
 
 
 -- Types for testing Partitioning
@@ -247,6 +247,7 @@ instance Arbitrary RankNComm where
     rank <- choose (0,(comm-1))
     return $ RankNComm rank comm
 
+-- Rank, CommSz, cumulative number of particles, number of particles per cell
 -- rank & commSz s.t. rank < commSz, wholly arbitrary cumulative n particles,
 -- and limited nc
 data RankNCommNNC = RankNCommNNC Word32 Word32 Word32 SrcStat deriving Show
@@ -263,12 +264,12 @@ data SrcStatV  = SrcStatV {unsV :: SrcStat} deriving Show
 
 instance Arbitrary SrcStatV where
   arbitrary = do 
-    n <- choose (0,100)
+    n <- choose (0,100) :: Gen Word32
     return $ SrcStatV (0,n,0,0)
 
 instance Arbitrary SrcStatsV where
   arbitrary = do 
-    ss <- resize 15 $ listOf arbitrary
+    ss <- resize 15 $ listOf1 arbitrary
     return $ SrcStatsV ss
 
 -- for testing chunkBy: need a list of objects and list of lengths, 

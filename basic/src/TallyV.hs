@@ -15,11 +15,12 @@ import Control.DeepSeq
 import Data.List as L
 import Data.Monoid (Monoid, mempty, mappend, (<>) )
 import qualified Data.Vector.Generic as GV
-{-
+
 import qualified Data.Vector.Generic.Mutable as GMV
 import Data.Vector.Unboxed as V
--}
-import Data.Vector as V
+import Control.Monad (liftM)
+
+-- import Data.Vector as V
 
 import Event
 import Mesh
@@ -39,7 +40,7 @@ instance NFData Tally
 data CellTally = CellTally {ctMom :: !Momentum, ctEnergy :: !Energy}
   deriving (Show,Eq)
 
-{-
+
 newtype instance MVector s CellTally = MV_CellTally (MVector s (Momentum, Energy))
 newtype instance Vector    CellTally = V_CellTally  (Vector    (Momentum, Energy))
 
@@ -58,7 +59,7 @@ instance GV.Vector   Vector  CellTally where
   basicUnsafeIndexM (V_CellTally v) n = GV.basicUnsafeIndexM v n >>= \ (m, w) -> return (CellTally m w)
 
 instance Unbox CellTally
--}
+
 
 instance Monoid CellTally where
   mempty = CellTally 0 0 

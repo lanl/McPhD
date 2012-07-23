@@ -14,24 +14,30 @@ import Data.Serialize
 import Constants
 import Numerical
 
+import Text.Printf -- for PrintfArg instances
+
 -- | cm
 newtype Position     = Position     { pos   :: Vec }
-  deriving (Eq,Show,Read,Num,Fractional,GV.Vector V.Vector,GMV.MVector V.MVector,Unbox)
+  deriving (Eq,Show,Read,Num,Fractional,GV.Vector V.Vector,
+            GMV.MVector V.MVector,Unbox)
 -- | dimensionless
 newtype Direction    = Direction    { dir   :: Vec }
   deriving (Eq,Show,Read,Num)
 -- | g cm/sec
 newtype Momentum     = Momentum     { mom   :: Vec }
-  deriving (Eq,Show,Read,Num,GV.Vector V.Vector,GMV.MVector V.MVector,Unbox,Serialize)
+  deriving (Eq,Show,Read,Num,GV.Vector V.Vector,GMV.MVector V.MVector,Unbox,
+            Serialize)
 -- | cm/sec
 newtype Velocity     = Velocity     { vel   :: Vec }
   deriving (Eq,Show,Read,GV.Vector V.Vector,GMV.MVector V.MVector,Unbox)
 -- | MeV
 newtype Energy       = Energy       { e     :: FP  }
-  deriving (Eq, Show, Read, Ord, Num, Fractional, Floating, GV.Vector V.Vector, GMV.MVector V.MVector, Unbox, NFData,Serialize)
+  deriving (Eq, Show, Read, Ord, Num, Fractional, Floating, GV.Vector V.Vector,
+            GMV.MVector V.MVector, Unbox, NFData,Serialize,PrintfArg)
 -- | dimensionless
 newtype EnergyWeight = EnergyWeight { ew    :: FP  }
-  deriving (Eq, Show, Read, Ord, Num, Fractional, Floating, GV.Vector V.Vector, GMV.MVector V.MVector, Unbox, NFData)
+  deriving (Eq, Show, Read, Ord, Num, Fractional, Floating, GV.Vector V.Vector, 
+            GMV.MVector V.MVector, Unbox, NFData,Serialize,PrintfArg)
 -- | sec
 newtype Time         = Time         { t     :: FP  }
   deriving (Eq,Show,Read,Num)

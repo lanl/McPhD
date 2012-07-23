@@ -15,6 +15,11 @@ prop_serDeserEC t = case (decode . encode $ t)  of
                       Left _ -> False
                       Right t' -> t == t'
 
+prop_serDeserEscC :: IM.EscapeCount -> Bool
+prop_serDeserEscC t = case (decode . encode $ t)  of 
+                        Left _ -> False
+                        Right t' -> t == t'
+
 prop_serDeserCT :: IM.CellTally -> Bool
 prop_serDeserCT t = case (decode . encode $ t)  of 
                       Left _ -> False
@@ -36,6 +41,7 @@ tests =
    [
     testProperty "TallyIM.EventCount   serializes/deserializes correctly" prop_serDeserEC
   , testProperty "TallyIM.CellTally    serializes/deserializes correctly" prop_serDeserCT
+  , testProperty "TallyIM.EscapeCount  serializes/deserializes correctly" prop_serDeserEscC
   , testProperty "TallyIM.PhysicsTally serializes/deserializes correctly" prop_serDeserPT
   , testProperty "TallyIM.Tally        serializes/deserializes correctly" prop_serDeserTallyIM
    ] 

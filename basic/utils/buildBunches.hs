@@ -9,30 +9,42 @@ import Text.Printf
 import System.Directory
 import System.Console.GetOpt
 import System.Environment
-import System.Process
+import System.Process (system)
+import System.Exit (ExitCode(..))
 
 configs = 
   [" -O2 --builddir=./build/O2"
+  ," -O2 --builddir=./build/mpi-threaded-O2 -fmpi --ghc-options=\"-threaded\""
   ," -O2 --builddir=./build/threaded-O2 --ghc-options=\"-threaded\""
   ," -O2 --builddir=./build/log-O2 --ghc-options=\"-threaded -eventlog\""
   ," -O2 --builddir=./build/prof-O2 --ghc-options=\"-prof -auto-all -caf-all\""
   ]
 
-builds = ["./build/O2","./build/threaded-O2","./build/log-O2","./build/prof-O2"]
+builds = ["./build/O2",
+          "./build/mpi-threaded-O2",
+          "./build/threaded-O2",
+          "./build/log-O2",
+          "./build/prof-O2"]
 
 runConfig :: String -> IO ()
 runConfig c = do
   let base = "cabal configure %s"
       comm = printf base c
   putStrLn $ "Now running: " ++ comm
-  system comm >> return ()
+  rval <- system comm
+  case rval of 
+    ExitSuccess -> return ()
+    ExitFailure i -> error $ "configuration " ++ comm ++ " failed! return value = " ++ show i
 
 runBuild :: String -> IO ()
 runBuild b = do
   let base = "cabal build --builddir=%s"
       comm = printf base b
   putStrLn $ "Now running: " ++ comm
-  system comm >> return ()
+  rval <- system comm
+  case rval of 
+    ExitSuccess -> return ()
+    ExitFailure i -> error $ "build " ++ comm ++ " failed! return value = " ++ show i
 
 main = do
   argv <- getArgs

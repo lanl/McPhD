@@ -1,5 +1,5 @@
 -- | An executable to run all of the tests
-import Test.Framework (defaultMain, testGroup)
+import Test.Framework (defaultMain, testGroup, Test)
 
 -- Modules under test:
 
@@ -19,6 +19,7 @@ import Test.Utils_Test       as Utils
 -- import Test.Sphere1D_test as Sphere1D
 -- import Test.MC_test as MC
 
+all_tests :: [Test]
 all_tests = [ testGroup "Mesh tests"      Mesh.tests
             , testGroup "Geometry Tests"  Geometry.tests
             , testGroup "Opacity Tests"   Opacity.tests

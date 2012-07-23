@@ -35,11 +35,8 @@ stepsPs sig msh ps gs = evts
   where
     evts = concat $ zipWith go gs ps
     go g0 p = let (evt, p') = step sig msh p g0
-                  g1 = 
-                       incrRNG . incrRNG $ g0
-              in -- trace ("Event: " ++ show evt ++ "\ninit particle: " ++
-                 --        show p ++ "\ngen: " ++ show g0) $
-                   ((evt, p') :) $ if isContinuing evt then go g1 p' else []
+                  g1 = incrRNG . incrRNG $ g0
+              in ((evt, p') :) $ if isContinuing evt then go g1 p' else []
 
 -- | Compute the trace of a particle as long as events that allow continuing
 -- are produced. Returns the entire list.

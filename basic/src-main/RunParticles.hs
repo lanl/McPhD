@@ -67,10 +67,11 @@ type Key = Philo4x32Key
 statsToTally ::  Mesh m =>
                  m        ->
                  Lepton   ->
-                 FP                ->    -- ^ alpha
-                 (Key,SrcStats,[Word32])    ->
+                 FP       ->    -- ^ alpha
+                 Key      -> 
+                 (SrcStats,[Word32]) ->
                  Tally
-statsToTally msh lep alpha (!key,!stats, ptclIds) =
+statsToTally msh lep alpha key (!stats, ptclIds) =
   let
     particles :: [Particle]
     particles = -- trace ("chunk " ++ show key ++ ": len ptclIds: " ++ 
@@ -86,16 +87,16 @@ statsToTally msh lep alpha (!key,!stats, ptclIds) =
 
 -- | Run particles using parallel strategy parList
 runParticlesParList :: Mesh m =>
-                     Word32   ->   -- ^ chunkSize
+                     Word32   ->    -- ^ chunkSize
                      m        ->
                      FP       ->    -- ^ alpha
-                     (Word32,Word32)   ->   -- ^ rank (for dist. parallel)
+                     (Word32,Word32) ->   -- ^ rank (for dist. parallel)
                      Lepton   ->
-                     [Key]    ->
+                     Key      ->
                      SrcStats ->
                      SrcStats ->
                      Tally
-runParticlesParList chnkSz msh alph (r,c) lep keys glblStats statsIn =
+runParticlesParList chnkSz msh alph (r,c) lep key glblStats statsIn =
   let stats :: [SrcStats]
       statsf =  L.unfoldr (takeNParticlesM chnkSz) statsIn
       stats  = reverse $ statsf
@@ -112,10 +113,9 @@ runParticlesParList chnkSz msh alph (r,c) lep keys glblStats statsIn =
       -- TO DO: check that the lengths of each ptclIds sublist corresponds
       -- to the number of particles in each stats sublist.
       tallies = assert (cromulent ptclIds stats)
-                keys `deepseq` stats `deepseq` 
-                map (statsToTally msh lep alph) (zip3 keys stats ptclIds)
+                stats `deepseq` 
+                map (statsToTally msh lep alph key) (zip stats ptclIds)
       res = runEval $ parList rdeepseq tallies
-      -- res = tallies `using` parBuffer 100 rdeepseq
   in L.foldl' mappend mempty res
 {-# INLINE runParticlesParList #-}
 

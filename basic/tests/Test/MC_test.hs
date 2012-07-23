@@ -37,7 +37,7 @@ testMesh = mshType $ listArray meshSize
 noScatteringMaterial = Material $ listArray meshSize $ repeat (MatState (Opacity 0.0) (Opacity 0.0) (Velocity 0.0) (Temperature 1.0))
 
 -- | In a test problem without scattering, all events should be face crossings
-prop_AllSurfaceCrossings = propFunction testMesh noScatteringMaterial
+prop_AllSurfXings = propFunction testMesh noScatteringMaterial
 
 -- | This function can be used to create multiple property functions
 -- by closing over the mesh and material variables.
@@ -59,10 +59,9 @@ propFunction mesh matl rng tag u1 u2 =
 --         particle = sampleParticle mesh rng'' tag
 --     in getEvent mesh matl particle u1 u2 (pDir particle)
 
-
-
 tests = [ testGroup "Events"
           [ 
-           testProperty "No scattering or census -> All crossings" prop_AllSurfaceCrossings
+           testProperty "No scattering or census -> All crossings" 
+                        prop_AllSurfXings
           ]
         ]

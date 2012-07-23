@@ -1,18 +1,19 @@
-{- | Histogramming escape events. -}
+{- | Histogramming neutrino escape events. -}
 
 module Histogram 
   (
-   -- * creation
-    mkHist
-   -- * counting escape events
+   -- * Energy weights, binned by energy
+   EHist(..)
+   -- * Create
+  , mkHist
+   -- * Count escape events
   , count
-   -- * examining the data
+   -- * Examine the data
   , getCounts
-   -- * merge two EHist instances iff the bin boundaries are the same
+   -- * Merge two EHist instances 
   , combine
-   -- * helpers
+   -- * Helpers
   , findBin
-  , EHist(..)
   , divIfne0
   ) 
   where
@@ -27,13 +28,15 @@ import Control.DeepSeq (NFData)
 type EVector     = VU.Vector Energy
 type EWVector    = VU.Vector EnergyWeight
 type IVector     = VU.Vector Int
-type BinBounds   = EVector -- any static way to enforce monotonicity?
+type BinBounds   = EVector -- static way to enforce monotonicity?
 
+-- Note: EHist is not a monoid, since combining two Histrograms requires
+-- they have the same bin boundaries.
 data EHist = EHist { ehcounts  :: EWVector     -- ^ accumulated weights
-                    , ehsquares :: EWVector     -- ^ accumulated squares of wts
-                    , ehnevents :: IVector      -- ^ number of events per bin
-                    , ehbins    :: BinBounds
-                    }
+                   , ehsquares :: EWVector    -- ^ accumulated squares of wts
+                   , ehnevents :: IVector     -- ^ number of events per bin
+                   , ehbins    :: BinBounds
+                   }
              deriving (Show,Eq)
 
 instance NFData EHist
@@ -45,10 +48,10 @@ mkHist es = EHist (rep 0) (rep 0) (rep 0) (toBins es)
         rep :: (VU.Unbox a,Num a) => a -> VU.Vector a
         rep m = VU.replicate n m
 
--- | Add an escape event to the histogram
+-- | Add an escape event to the histogram, in foldr order.
 -- In principle, this uses a super-quick, O(1) destructive update.
-count :: EHist -> (Energy,EnergyWeight) -> EHist
-count h@(EHist cs ss ns bins) (e,ew) =
+count :: (Energy,EnergyWeight) -> EHist -> EHist
+count (e,ew) h@(EHist cs ss ns bins) =
   let bin = findBin e bins
   in h { ehcounts  = accToBin cs bin ew
        , ehsquares = accToBin ss bin (ew*ew)
@@ -108,6 +111,7 @@ monotonic [] = True
 monotonic [_e] = True
 monotonic (e0:e1:es) = e0 <= e1 && monotonic (e1:es)
 
+-- | Merge two EHist instance iff the bin boundaries are the same
 combine :: EHist -> EHist -> EHist
 combine (EHist cs1 ss1 ns1 bbs1) (EHist cs2 ss2 ns2 bbs2) = 
   if bbs1 == bbs2

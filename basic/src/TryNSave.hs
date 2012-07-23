@@ -4,6 +4,7 @@
 -- (c) Copyright 2011 LANSLLC, all rights reserved
 
 module TryNSave (writeTally
+                ,writeHistogram
                 ,summarizeTally
                 ,summarizeTallyIO
                 ,summarizeStats
@@ -16,10 +17,13 @@ import Physical
 import Material
 import Particle
 import Source
+import Histogram
 
 import Text.CSV
 import Text.Printf
 import Data.List as L
+import Data.Monoid ( (<>) )
+import qualified Data.Vector.Unboxed as V
 
 import qualified Data.HashMap.Strict as Map
 import qualified Data.ByteString.Char8 as C
@@ -35,6 +39,22 @@ summarizeStats stats typ = do
       outstr = printf fmtstr (show typ) ntot (e etot) (ew meanEW / fromIntegral sz)
   putStrLn outstr
 
+writeHistogram :: FilePath -> EHist -> IO ()
+writeHistogram fname (EHist cnts sqrs ns bns) = 
+  let bnsBS  = (writeVector bns  "%15e " "bins") <> C.pack "\n"
+      cntsBS = (writeVector cnts "%15e " "weight")  <> C.pack "\n"
+      sqrsBS = (writeVector sqrs "%15e " "sum_of_squared_weights") <> C.pack "\n"
+      nsBS   = (writeVector ns   "%d " "number_of_events") <> C.pack "\n"
+  in C.writeFile fname (bnsBS <> cntsBS <> sqrsBS <> nsBS)
+
+printfx :: PrintfArg a => String -> String -> a -> String
+printfx f s x = s ++ (printf f x)
+
+writeVector :: (V.Unbox a, PrintfArg a) => V.Vector a -> String -> String -> CBS
+writeVector v fmt name = 
+  let bs = C.pack $ V.foldl' (printfx fmt) "" v
+  in C.pack name <> C.pack "=[" <> bs <> C.pack "]" 
+
 writeTally :: String -> Tally -> IO ()
 writeTally name t = let header     = summarizeTally t 
                         deposition = writeDeposition t
@@ -46,13 +66,14 @@ appCellTally s (cidx,CellTally (Momentum m) (Energy e)) = s `C.append` line
         fmtStr = "%04i: %15e, %15e\n"
 
 writeDeposition :: Tally -> CBS
-writeDeposition (Tally _ dep _) = depHeader `C.append` lines
+writeDeposition (Tally _ dep _ _) = depHeader `C.append` lines
   where lines = L.foldl' appCellTally C.empty cells
         depHeader = C.pack "\nCell        Momentum                Energy    \n"
         cells = sortBy (\(k1,_) (k2,_) -> compare k1 k2) $ Map.toList dep
 
+-- TO DO: better treatment of escape tally?
 summarizeTally :: Tally -> CBS
-summarizeTally tlly@(Tally cntrs _dep {- esc -} (Distance pl)) = 
+summarizeTally tlly@(Tally cntrs _dep _ (Distance pl)) = 
   let CellTally{ctMom = Momentum momTot,ctEnergy = Energy eTot} = totalDep tlly
   in C.intercalate (C.pack "\n") . map (C.pack) $
            ("Total energy deposited: "        ++ show eTot) :
@@ -73,9 +94,9 @@ summarizeTally tlly@(Tally cntrs _dep {- esc -} (Distance pl)) =
            ("Total number of MC steps: "      ++ show (totalMCSteps cntrs)) :
           "==================================================" : []
 
-
+-- TO DO: better treatment of escape tally?
 summarizeTallyIO :: Tally -> IO ()
-summarizeTallyIO tlly@(Tally cntrs _dep {- esc -} pl) = do
+summarizeTallyIO tlly@(Tally cntrs _dep _ pl) = do
   -- summarize global events
   let CellTally{ctMom = momTot,ctEnergy = eTot} = totalDep tlly
   mapM_ putStrLn $
