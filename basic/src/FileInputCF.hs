@@ -32,18 +32,18 @@ type VecCellBounds = U.Vector Position
 
 parseFile :: FilePath -> IO (VecCell,VecLum,VecLum,VecLum)
 parseFile f = do
-  all <- L.readFile f
-  let lines = L.lines all
+  all <- BS.readFile f
+  let lines = BS.lines all
   return $ mkSim lines
 
 -- parse each line to doubles
 -- extract cell center and luminosities vectors
 -- use cell centers to lay out vector of cells
-mkSim :: [L.ByteString] -> (VecCell,VecLum,VecLum,VecLum)
+mkSim :: [BS.ByteString] -> (VecCell,VecLum,VecLum,VecLum)
 mkSim bss = separate . interpretLs $ bss
 
 -- parse, interpret each line to a vector
-interpretLs :: [L.ByteString] -> VecLine
+interpretLs :: [BS.ByteString] -> VecLine
 interpretLs = U.fromList . map (interpretL . parseL)
 
 -- transpose & process vector of tuples into tuple of vectors.
@@ -62,18 +62,18 @@ mkVecCells vci =
 
 -- turn a single CellInfo + CellGeom into a Cell
 mkCell :: CellInfo -> CellGeom -> Cell
-mkCell ci (CellGeom lb ub lbc ubc) = Cell lb ub lbc ubc mtl
+mkCell ci (lb, ub, lbc, ubc) = Cell lb ub lbc ubc mtl
   where mtl = mkMat ci
 
 mkMat :: CellInfo -> Material
-mkMat (_,v,t,r,n) = Material v t r n (NDensity 0) -- no positrons
-
+mkMat (_,v,t,r,n) = Material op0 op0 v t r n (NDensity 0) -- no positrons
+  where op0 = Opacity 0.0
 -- work out cell geometry. Take cell boundaries as midpoint between
 -- cell centers.
 mkGeoms :: VecCellBounds -> VecGeoms
 mkGeoms ctrs =
     -- trace (show n) $
-    U.zipWith4 CellGeom lowerBounds upperBounds lowerBCs upperBCs
+    U.zip4 {-CellGeom-} lowerBounds upperBounds lowerBCs upperBCs
   where lowerBounds = U.zipWith (-) ctrs (U.init diffs)
         upperBounds = U.zipWith (-) ctrs (U.tail diffs)
         diffs       = U.generate (n+1) (genDiff n ctrs)
@@ -111,11 +111,11 @@ interpretL ds = (ci,ls)
              )
 
 -- convert ByteString for one line to doubles
-parseL :: L.ByteString -> VecDub
+parseL :: BS.ByteString -> VecDub
 parseL s =
-  let ws = L.split ',' s
-      readFirst :: L.ByteString -> Maybe Double
-      readFirst s = fst <$> L.readDouble s
+  let ws =  BS.split ',' s
+      readFirst ::  BS.ByteString -> Maybe Double
+      readFirst s = fst <$>  L.readExponential s
   in U.fromList $ map (fromMaybe 0 . readFirst) ws
 
 -- version
