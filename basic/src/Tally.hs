@@ -1,63 +1,22 @@
-{-# LANGUAGE TypeFamilies, MultiParamTypeClasses #-}
-module Tally 
+{-# LANGUAGE TypeFamilies, MultiParamTypeClasses, DeriveGeneric
+  , TemplateHaskell #-}
+module Tally
   where
 
 import Control.DeepSeq
-import Control.Monad
+-- import Control.Monad
 import Data.List as L
 import Data.Monoid
-import qualified Data.Vector.Generic as GV
-import qualified Data.Vector.Generic.Mutable as GMV
+-- import qualified Data.Vector.Generic as GV
+-- import qualified Data.Vector.Generic.Mutable as GMV
 import Data.Vector.Unboxed as V
+import Data.Vector.Unboxed.Deriving
+import GHC.Generics (Generic)
 
 import Event
 import Mesh
-import Particle 
+import Particle
 import Physical
-
--- | Should and will be in Data.Monoid soon.
-(<>) :: Monoid a => a -> a -> a
-(<>) = mappend
-{-# INLINE (<>) #-}
-
-data Tally = Tally {
-    globalEvts :: !EventCount
-  , deposition :: !PhysicsTally
-  , escape     :: ![(Energy,EnergyWeight)]
-  } deriving (Show)
-
-instance NFData Tally
-
-data CellTally = CellTally !Momentum !Energy
-  deriving (Show)
-
-newtype instance MVector s CellTally = MV_CellTally (MVector s (Momentum, Energy))
-newtype instance Vector    CellTally = V_CellTally  (Vector    (Momentum, Energy))
-
-instance GMV.MVector MVector CellTally where
-  basicLength (MV_CellTally v) = GMV.basicLength v
-  basicUnsafeSlice m n (MV_CellTally v) = MV_CellTally (GMV.basicUnsafeSlice m n v)
-  basicOverlaps (MV_CellTally v1) (MV_CellTally v2) = GMV.basicOverlaps v1 v2
-  basicUnsafeNew n = liftM MV_CellTally (GMV.basicUnsafeNew n)
-  basicUnsafeRead (MV_CellTally v) n = GMV.basicUnsafeRead v n >>= \ (m, w) -> return (CellTally m w)
-  basicUnsafeWrite (MV_CellTally v) n (CellTally m w) = GMV.basicUnsafeWrite v n (m, w)
-instance GV.Vector   Vector  CellTally where
-  basicLength (V_CellTally v) = GV.basicLength v
-  basicUnsafeFreeze (MV_CellTally v) = liftM V_CellTally (GV.basicUnsafeFreeze v)
-  basicUnsafeThaw (V_CellTally v) = liftM MV_CellTally (GV.basicUnsafeThaw v)
-  basicUnsafeSlice m n (V_CellTally v) = V_CellTally (GV.basicUnsafeSlice m n v)
-  basicUnsafeIndexM (V_CellTally v) n = GV.basicUnsafeIndexM v n >>= \ (m, w) -> return (CellTally m w)
-
-instance Unbox CellTally
-
-instance Monoid CellTally where
-  mempty = CellTally 0 0
-  mappend (CellTally m1 e1) (CellTally m2 e2) = CellTally (m1 + m2) (e1 + e2)
-
--- TODO: Using a vector here is somewhat risky. If there are many cells, we
--- will have to keep many sparse vectors around for intermediate results.
--- A finite map might be better at this stage.
-type PhysicsTally = Vector CellTally
 
 -- | Data structure for counting the number of occurrences of each of the
 -- different event types.
@@ -70,7 +29,34 @@ data EventCount = EventCount {
   , nReflect    :: !Int
   , nEscape     :: !Int
   , nTimeout    :: !Int
-  } deriving (Show, Eq)
+  } deriving (Show, Eq, Generic)
+
+instance NFData EventCount
+
+data CellTally = CellTally !Momentum !Energy
+  deriving (Show,Generic)
+
+derivingUnbox "CellTally"
+  [t| CellTally -> (Momentum,Energy) |]
+  [| \(CellTally m e) -> (m,e) |]
+  [| \(m,e) -> CellTally m e   |]
+
+-- TODO: Using a vector here is somewhat risky. If there are many cells, we
+-- will have to keep many sparse vectors around for intermediate results.
+-- A finite map might be better at this stage.
+type PhysicsTally = Vector CellTally
+
+data Tally = Tally {
+    globalEvts :: !EventCount
+  , deposition :: !PhysicsTally
+  , escape     :: ![(Energy,EnergyWeight)]
+  } deriving (Show,Generic)
+
+instance NFData Tally
+
+instance Monoid CellTally where
+  mempty = CellTally 0 0
+  mappend (CellTally m1 e1) (CellTally m2 e2) = CellTally (m1 + m2) (e1 + e2)
 
 instance Monoid EventCount where
   mempty = EventCount 0 0 0 0 0 0 0 0
@@ -82,18 +68,13 @@ type EscapeCount = [(Energy,EnergyWeight)]
 -- | Empty (initial) tally.
 emptyTally :: Mesh m => m -> Tally
 emptyTally msh = Tally mempty
-                       (V.replicate (nrCells msh) (CellTally 0 0)) 
+                       (V.replicate (nrCells msh) (CellTally 0 0))
                        mempty
 
 -- | Merge two tallies.
 merge :: Tally -> Tally -> Tally
-merge (Tally ec1 d1 esc1) (Tally ec2 d2 esc2) = 
+merge (Tally ec1 d1 esc1) (Tally ec2 d2 esc2) =
   Tally (ec1 <> ec2) (V.zipWith (<>) d1 d2) (esc1 L.++ esc2)
-
--- TODO: It's a bit annoying that due to the use of vectors, we cannot
--- make Tally an instance of the Monoid class. Well, we could if we'd
--- reserve an additional constructor for an empty tally. But that's
--- probably not worth it.
 
 -- | Tally all the particle states.
 tally :: Mesh m => m -> [(Event, Particle)] -> Tally
@@ -101,12 +82,12 @@ tally msh = L.foldl' tallyImpl (emptyTally msh)
 
 -- | Add the data of one event and particle to the current tally.
 tallyImpl :: Tally -> (Event, Particle) -> Tally
-tallyImpl (Tally ec dep esc) (evt, p) = 
+tallyImpl (Tally ec dep esc) (evt, p) =
   Tally (countEvent evt ec) (tDep evt (cellIdx p) dep) (tEsc evt esc)
 
 -- | Compute the deposition of a single event.
 tDep :: Event -> CellIdx -> PhysicsTally -> PhysicsTally
-tDep (Collision _ _ dp ed) (CellIdx cidx) tlly = 
+tDep (Collision _ _ dp ed) (CellIdx cidx) tlly =
   accum (<>) tlly [(cidx, CellTally dp ed)]
 tDep _                     _              tlly = tlly
 
