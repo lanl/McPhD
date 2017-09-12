@@ -25,18 +25,20 @@ newtype Direction    = Direction    { dir   :: Vec } deriving (Eq, Show, Num)
 -- | g cm/sec
 newtype Momentum     = Momentum     { mom   :: Double } deriving (Eq, Show, Num )
 
-derivingUnbox "Momentum" [t| Momentum -> Double |] [| mom |] [| Momentum |]
+derivingUnbox "Momentum" [t| Momentum -> Vec |] [| mom |] [| Momentum |]
 
 -- | cm/sec
 newtype Velocity     = Velocity     { vel   :: Vec } deriving (Eq, Show)
 -- | MeV
-newtype Energy       = Energy       { e     :: FP  }
-  deriving (Eq, Show, Num )
-
-derivingUnbox "Energy" [t| Energy->Double |] [| e |] [| Energy |]
+newtype Energy       = Energy { e :: FP }  deriving (Eq, Show, Num, Ord )
+derivingUnbox "Energy" [t| Energy->Vec |] [| e |] [| Energy |]
 
 -- | dimensionless
-newtype EnergyWeight = EnergyWeight { ew    :: FP  } deriving (Eq, Show, Num)
+newtype EnergyWeight = EnergyWeight { ew :: FP}
+  deriving (Eq, Show, Num, Fractional, Floating)
+derivingUnbox "EnergyWeight" [t| EnergyWeight->FP |] [| ew |] [| EnergyWeight |]
+
+
 -- | sec
 newtype Time         = Time         { t     :: FP  } deriving (Eq, Show, Num)
 -- | cm ^2
