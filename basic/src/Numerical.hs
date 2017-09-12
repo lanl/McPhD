@@ -1,7 +1,8 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving, DeriveGeneric #-}
 module Numerical where
 
 import Control.DeepSeq
+import GHC.Generics (Generic)
 
 -- We currently use 1-dimensional vectors.
 type Vec = Double
@@ -11,6 +12,6 @@ newtype URD = URD Double deriving (Eq,Show,Ord,Num) -- uniform random deviate [0
 type Idx = Int
 
 newtype CellIdx = CellIdx { idx :: Idx }
-  deriving (Eq, Show, Num)
+  deriving (Eq, Show, Num, Generic)
 
-instance NFData CellIdx 
+instance NFData CellIdx
