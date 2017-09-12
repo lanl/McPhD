@@ -17,7 +17,7 @@ testRNG = mkRNG 42
 -- QUESTION: Should we make a Random monad?
 
 newtype Rnd a = Rnd (State RNG a)
-  deriving (Monad, MonadState RNG)
+  deriving (Functor, Applicative, Monad, MonadState RNG)
 
 -- We can make a Rnd-value into a testable value.
 -- In the 'property' method, we specify how to initialize
