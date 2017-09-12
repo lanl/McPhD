@@ -1,4 +1,8 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeFamilies #-}
+
 module Physical (
     module Physical
   , module Constants
@@ -6,9 +10,10 @@ module Physical (
   )
   where
 
-import Data.Vector.Generic.Base as GV
-import Data.Vector.Generic.Mutable as GMV
-import Data.Vector.Unboxed as V
+-- import Data.Vector.Generic.Base as GV
+-- import Data.Vector.Generic.Mutable as GMV
+-- import Data.Vector.Unboxed as V
+import Data.Vector.Unboxed.Deriving
 
 import Constants
 import Numerical
@@ -18,14 +23,19 @@ newtype Position     = Position     { pos   :: Vec } deriving (Eq, Show)
 -- | dimensionless
 newtype Direction    = Direction    { dir   :: Vec } deriving (Eq, Show, Num)
 -- | g cm/sec
-newtype Momentum     = Momentum     { mom   :: Vec }
-  deriving (Eq, Show, Num, GV.Vector V.Vector, GMV.MVector V.MVector, Unbox)
+newtype Momentum     = Momentum     { mom   :: Double } deriving (Eq, Show, Num )
+
+derivingUnbox "Momentum" [t| Momentum -> Double |] [| mom |] [| Momentum |]
+
 -- | cm/sec
 newtype Velocity     = Velocity     { vel   :: Vec } deriving (Eq, Show)
 -- | MeV
-newtype Energy       = Energy       { e     :: FP  } 
-  deriving (Eq, Show, Num, GV.Vector V.Vector, GMV.MVector V.MVector, Unbox)
--- | dimensionless 
+newtype Energy       = Energy       { e     :: FP  }
+  deriving (Eq, Show, Num )
+
+derivingUnbox "Energy" [t| Energy->Double |] [| e |] [| Energy |]
+
+-- | dimensionless
 newtype EnergyWeight = EnergyWeight { ew    :: FP  } deriving (Eq, Show, Num)
 -- | sec
 newtype Time         = Time         { t     :: FP  } deriving (Eq, Show, Num)
@@ -38,7 +48,7 @@ newtype Temperature  = Temperature  { temp  :: FP  } deriving (Eq, Show)
 -- | g/(cc^3)
 newtype Density      = Density      { rho   :: FP  } deriving (Eq, Show)
 -- | 1/(cc^3)
-newtype NDensity     = NDensity     { nrho   :: FP } deriving (Eq, Show) 
+newtype NDensity     = NDensity     { nrho   :: FP } deriving (Eq, Show)
 -- | dimensionless
 newtype NucleonNumber = NucleonNumber {nnucl :: FP } deriving (Eq, Show, Num)
 -- | cm
