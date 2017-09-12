@@ -4,7 +4,8 @@
 -- (c) Copyright 2011 LANSLLC, all rights reserved
 
 module TryNSave (writeTally
-                ,readMatStateP)
+                ,readMatStateP
+                ,CellGeom)
     where
 
 import Tally
@@ -18,23 +19,23 @@ import Particle
 -- import Control.Monad
 
 writeTally :: String -> Tally -> IO ()
-writeTally name = writeFile name . show 
+writeTally name = writeFile name . show
 
 type CellGeom = (Position,Position,BoundaryCondition,BoundaryCondition)
 
 -- | Read a material state file. Cell coordinates get special treatment,
--- everything else is read out, possibly with a scalar conversion. This 
+-- everything else is read out, possibly with a scalar conversion. This
 -- is specialized to one particular format.
 readMatStateP :: FilePath -> IO ([Cell],[Luminosity],[Luminosity],[Luminosity])
 readMatStateP f = do
   elines <- parseCSVFromFile f
-  case elines of 
+  case elines of
     Left  _  -> return ([],[],[],[])
     Right ls -> do
       let recs = init ls
           bs = cellBoundsP recs
-      return $ (getCellsP recs bs, getLumsP recs NuE, getLumsP recs NuEBar, 
-                getLumsP recs NuX) 
+      return $ (getCellsP recs bs, getLumsP recs NuE, getLumsP recs NuEBar,
+                getLumsP recs NuX)
 
 
 getLumsP :: [Record] -> PType -> [Luminosity]
@@ -47,7 +48,7 @@ getLumsP rs NuX = map f rs
 
 getCellsP :: [Record] -> [CellGeom] -> [Cell]
 getCellsP recs gs = map getCellP (zip recs gs)
-        
+
 getCellP :: (Record,CellGeom) -> Cell
 getCellP (rcd,(lox,hix,lobc,hibc)) = Cell lox hix lobc hibc mtl
   where mtl = Material op0 op0 velo tmp rhoN rhoEM rhoEP
@@ -59,10 +60,10 @@ getCellP (rcd,(lox,hix,lobc,hibc)) = Cell lox hix lobc hibc mtl
         rhoEP = NDensity 0.0 -- no positrons in the file.
 
 -- | Process cell centers given in data file into pairs of (lower,upper)
--- bounds. Assume that the bound of a cell is halfway between successive 
+-- bounds. Assume that the bound of a cell is halfway between successive
 -- centers. For lower bound of first cell, take difference between cell
 -- 0 and cell 1, and similarly for last cell.
-cellBoundsP :: [Record] -> 
+cellBoundsP :: [Record] ->
                [CellGeom]
 cellBoundsP rs = bounds
   where bounds = zip4 lowerBounds upperBounds lowerBCs upperBCs
@@ -84,8 +85,8 @@ cellBoundsP rs = bounds
 --            Right rs -> rs
 
 -- -- how to do this using bind?
--- rsr f = do 
---   cs <- parseCSVFromFile f 
+-- rsr f = do
+--   cs <- parseCSVFromFile f
 --   return $ csr cs
 
 -- version
