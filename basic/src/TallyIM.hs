@@ -4,6 +4,7 @@
 -- (c) Copyright 2011 LANSLLC, all rights reserved
 
 {-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE DeriveGeneric #-}
 
 module TallyIM ( Tally(..)
                , EventCount(..)
@@ -21,30 +22,31 @@ import Particle
 import Event
 import Mesh
 
+import Control.DeepSeq
 import Data.List as List
 -- import qualified Data.IntMap as Map
 import Data.HashMap.Strict as Map
-import Control.DeepSeq
 import Data.Monoid
+import GHC.Generics (Generic)
 
 -- | Should and will be in Data.Monoid soon.
-(<>) :: Monoid a => a -> a -> a
-(<>) = mappend
-{-# INLINE (<>) #-}
+-- (<>) :: Monoid a => a -> a -> a
+-- (<>) = mappend
+-- {-# INLINE (<>) #-}
 
 data Tally = Tally { globalEvts  :: !EventCount
                    , deposition  :: !PhysicsTally
                    -- , escape      :: !EscapeCount
                    , totalPL     :: !Distance -- total path length
                                               -- travelled by all particles
-} deriving Show
+} deriving (Show,Generic)
 
 instance NFData Tally where
   rnf (Tally ge dep {- esc -} dst) =
     ge `deepseq` dep `deepseq` {- esc `deepseq` -} dst `deepseq` ()
 
 data CellTally     = CellTally {ctMom :: !Momentum, ctEnergy :: !Energy}
-                     deriving (Show,Eq)
+                     deriving (Show, Eq, Generic)
 
 instance NFData CellTally
 
@@ -61,7 +63,7 @@ data EventCount    = EventCount {
   , nReflect    :: !Int
   , nEscape     :: !Int
   , nTimeout    :: !Int
-  } deriving (Show, Eq)
+  } deriving (Show, Eq, Generic)
 
 instance NFData EventCount
 
@@ -75,15 +77,8 @@ tallyImpl (Tally ec dep {- esc -} pl) (evt,p)  =
 
 -- | Tally momentum deposition.
 tDep :: Event -> CellIdx -> PhysicsTally -> PhysicsTally
-tDep (Collision _ _ 
-                (Direction oli) 
-                (Energy ei)
-                (Direction olf)
-                (Energy ef)
-                (EnergyWeight wt)) (CellIdx cidx) tlly =
+tDep (Collision _ _ pd ed) (CellIdx cidx) tlly =
   Map.insertWith (<>) cidx (CellTally pd ed) tlly
-     where ed = Energy $   wt * (ei - ef)
-           pd = Momentum $ wt / c * (ei * oli - ef * olf)
 tDep _ _ t = t
 
 -- | Tally an Escape event.
@@ -107,7 +102,7 @@ countEvent (Boundary  {bType = Transmit})   ctr = ctr { nTransmit   = 1 + nTrans
 countEvent (Timeout   {})                   ctr = ctr { nTimeout    = 1 + nTimeout   ctr}
 
 totalMCSteps :: EventCount -> Int
-totalMCSteps (EventCount na ne nem nep nt nr nesc nto) = 
+totalMCSteps (EventCount na ne nem nep nt nr nesc nto) =
   na + ne + nem + nep + nt + nr + nesc + nto
 
 instance Monoid EventCount where
