@@ -1,5 +1,5 @@
-{-# LANGUAGE 
-  GeneralizedNewtypeDeriving, 
+{-# LANGUAGE
+  GeneralizedNewtypeDeriving,
   FlexibleInstances,
   FlexibleContexts,
   RankNTypes,
@@ -45,6 +45,9 @@ instance MonadState RNG Rnd where
 
 instance Functor Rnd where
   fmap f (Rnd g) = Rnd (\ k -> g (k . f))
+
+instance Applicative Rnd where
+  f <*> v = undefined
 
 runRnd :: RNG -> Rnd a -> a
 runRnd g (Rnd x) = x const g
