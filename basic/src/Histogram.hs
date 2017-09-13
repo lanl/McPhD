@@ -1,6 +1,8 @@
 {- | Histogramming neutrino escape events. -}
 
-module Histogram 
+{-# LANGUAGE DeriveGeneric #-}
+
+module Histogram
   (
    -- * Energy weights, binned by energy
    EHist(..)
@@ -10,20 +12,21 @@ module Histogram
   , count
    -- * Examine the data
   , getCounts
-   -- * Merge two EHist instances 
+   -- * Merge two EHist instances
   , combine
    -- * Helpers
   , findBin
   , divIfne0
-  ) 
+  )
   where
-
-import Physical
-import qualified Data.Vector.Unboxed as VU
-import qualified Data.Vector.Unboxed.Mutable as VUM
 
 import Control.Monad.ST.Strict as S (ST)
 import Control.DeepSeq (NFData)
+import qualified Data.Vector.Unboxed as VU
+import qualified Data.Vector.Unboxed.Mutable as VUM
+import GHC.Generics (Generic)
+
+import Physical
 
 type EVector     = VU.Vector Energy
 type EWVector    = VU.Vector EnergyWeight
@@ -37,7 +40,7 @@ data EHist = EHist { ehcounts  :: EWVector     -- ^ accumulated weights
                    , ehnevents :: IVector     -- ^ number of events per bin
                    , ehbins    :: BinBounds
                    }
-             deriving (Show,Eq)
+             deriving (Show,Eq,Generic)
 
 instance NFData EHist
 
@@ -78,11 +81,11 @@ findBin e bb =
     Nothing -> error $ "energy " ++ show e ++ " outside of bin bounds: "
                ++ showBounds bb
 
--- | elementwise std deviation. Input vectors are 
+-- | elementwise std deviation. Input vectors are
 --   cs: summed energy weight in each bin  (\sum_i c_i)
 --   ss: summed square of energy weight in each bin (\sum_i c_i^2)
 --   ins: number of observations in each bin
--- The standard deviation in each bin is 
+-- The standard deviation in each bin is
 -- [1/(n_i-1)*(\sum_i (c_i)^2 - 1/n * (\sum_i c_i)^2)]^(1/2)
 rms :: (Eq a, Floating a,VU.Unbox a) => VU.Vector a -> VU.Vector a -> IVector -> VU.Vector a
 rms ss cs ins = VU.map sqrt vars
@@ -113,7 +116,7 @@ monotonic (e0:e1:es) = e0 <= e1 && monotonic (e1:es)
 
 -- | Merge two EHist instance iff the bin boundaries are the same
 combine :: EHist -> EHist -> EHist
-combine (EHist cs1 ss1 ns1 bbs1) (EHist cs2 ss2 ns2 bbs2) = 
+combine (EHist cs1 ss1 ns1 bbs1) (EHist cs2 ss2 ns2 bbs2) =
   if bbs1 == bbs2
   then EHist (cs1 `zs` cs2) (ss1 `zs` ss2) (ns1 `zs` ns2) bbs1
   else error "Histogram.merge: don't know how to combine histograms with different bin boundaries"
