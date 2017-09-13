@@ -11,9 +11,6 @@ module Sigma_HBFC
 import Material (tempE)
 import Physical
 import Mesh
-import PRNG
-import Control.Monad
-
 
 -- * interactions
 type PState  = (Energy,Direction)

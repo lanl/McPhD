@@ -8,7 +8,6 @@ import Data.Vector as V
 import Cell
 import Event
 import Material
-import PRNG
 import Physical
 
 class Mesh m where
