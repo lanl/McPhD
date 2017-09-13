@@ -70,6 +70,7 @@ processEvent (BoundaryCand dBdy fce) msh _ p@(Particle { P.dir   = o
                                                        , weight  = wt
                                                        , cellIdx = cidx
                                                        }) _ _ =
+  -- GHC warns on non-exhaustive pattern: may need refactor
   case boundaryEvent msh cidx dBdy fce nrg wt of
     b@(Boundary {bType = Reflect})  -> (b, p{P.dir = -o})
     b@(Boundary {bType = Escape})   -> (b, p{P.cellIdx = -1})

@@ -47,7 +47,7 @@ instance Functor Rnd where
   fmap f (Rnd g) = Rnd (\ k -> g (k . f))
 
 instance Applicative Rnd where
-  f <*> v = undefined
+  (<*>) = undefined
   pure = undefined
 
 runRnd :: RNG -> Rnd a -> a

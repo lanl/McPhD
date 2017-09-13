@@ -28,8 +28,10 @@ data Rank = Rank { fromRank :: Word32} deriving (Show,Eq,Ord)
 
 commWorld :: Word32
 commWorld  = 1
+
 commRank :: Word32 -> IO Rank
 commRank _ = return (Rank 0)
+
 commSize :: Word32 -> IO Word32
 commSize _ = return 1
 
