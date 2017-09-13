@@ -68,21 +68,21 @@ runSim opts@(CLOpts { inputF  = infile
   let (msh,!ndropped)      = mkMesh clls ll ul
       !mshsz               = ncells msh
       [lnue,lnuebar,lnux] = map (trim ndropped mshsz) [lnuer,lnuebarr,lnuxr]
-      
+
   time1 <- MPI.wtime
 
   -- Offset RNG keys by rank times number of chunks per rank.
   -- In the case commSz -> 1, we should get base -> 0, ensuring the
   -- same results as if we ran serial.
-  let n   = time1 `deepseq` 
+  let n   = time1 `deepseq`
             nIn `div` fromIntegral commSz
       !nc = (nIn `div` chunkSize) + 1
       !keys1 = mkKeys (Seed sd) nc (Offset $        1)
       !keys2 = mkKeys (Seed sd) nc (Offset $   nc + 1)
       !keys3 = mkKeys (Seed sd) nc (Offset $ 2*nc + 1)
 
-  putStrLn $ "ndropped: "    ++ show ndropped ++ 
-             ", mesh size: " ++ show mshsz    ++ 
+  putStrLn $ "ndropped: "    ++ show ndropped ++
+             ", mesh size: " ++ show mshsz    ++
              ", n_chunks: "  ++ show nc
 
   -- run each species
@@ -91,17 +91,17 @@ runSim opts@(CLOpts { inputF  = infile
            -- runParticlesPar       -- Par monad
            -- runParticlesParBuffer -- parBuffer
       fcore = fc chunkSize msh a (fromRank rank,fromIntegral commSz)
-      f1 = fcore nuE    keys1 
-      f2 = fcore nuEBar keys2 
+      f1 = fcore nuE    keys1
+      f2 = fcore nuEBar keys2
       f3 = fcore nuX    keys3
 
   talliesNuE    <- runOneSpeciesWith nIn dt (rank,commSz) (lnue,NuE) f1
   talliesNuEBar <- runOneSpeciesWith nIn dt (rank,commSz) (lnuebar,NuEBar) f2
   talliesNuX    <- runOneSpeciesWith nIn dt (rank,commSz) (lnux,NuX) f3
 
-  time2 <- talliesNuE    `deepseq` 
-           talliesNuEBar `deepseq` 
-           talliesNuX    `deepseq` 
+  time2 <- talliesNuE    `deepseq`
+           talliesNuEBar `deepseq`
+           talliesNuX    `deepseq`
            MPI.wtime
 
   if rank /= 0
@@ -127,7 +127,7 @@ runSim opts@(CLOpts { inputF  = infile
 -- | run one neutrino species: derive its source statistics (where to put
 --  particles) and run them to get a tally
 runOneSpeciesWith :: Word32              ->  -- ^ number particles
-                     Time                -> 
+                     Time                ->
                      (Rank,Word32)       ->  -- ^ rank,nranks
                     (VecLums,PType)      ->
                     (SrcStats -> SrcStats -> Tally)  ->
@@ -144,7 +144,7 @@ sendTally :: Tally -> IO ()
 sendTally t = MPI.gatherSend commWorld 0 (Serialize.encode t)
 
 recvTally :: Tally -> IO Tally
-recvTally t = do 
+recvTally t = do
   msgs <- MPI.gatherRecv commWorld 0 (Serialize.encode t)
   let ts = map (forceEither . Serialize.decode) msgs
   return $ L.foldl' mappend mempty ts
@@ -205,8 +205,8 @@ options =
   ,Option ['u']  ["upper-limit"]
             (ReqArg (\f opts -> opts { ulimit = read f }) "ul")
             "upper limit in cm"
-  ,Option ['c']  ["chunk-size"] 
-            (ReqArg (\f opts -> opts { chunkSz = read f}) "sz") 
+  ,Option ['c']  ["chunk-size"]
+            (ReqArg (\f opts -> opts { chunkSz = read f}) "sz")
             "chunk size (defaults to nps)"
   ,Option ['d']  ["dt"]
             (ReqArg (\f opts -> opts { simTime = Time (read f) }) "t")
@@ -214,11 +214,11 @@ options =
   ,Option ['a']  ["alpha"]
             (ReqArg (\f opts -> opts { alpha = read f }) "a")
             "alpha"
-  ,Option ['s']  ["rng--seed"] 
-            (ReqArg (\f opts -> opts { seed =  (read f)}) "s") 
+  ,Option ['s']  ["rng--seed"]
+            (ReqArg (\f opts -> opts { seed =  (read f)}) "s")
             "seed"
-  ,Option ['h']  ["help"] 
-            (NoArg (\opts -> opts { help = True})) 
+  ,Option ['h']  ["help"]
+            (NoArg (\opts -> opts { help = True}))
             "print useful help message and exit"
           ]
 
@@ -270,8 +270,5 @@ checkChunk os@(CLOpts {nps = n, chunkSz = sz}) =
   return (if sz > 0 then os else os {chunkSz = n})
 
 checkHelp   = ensure (not . help)
-
--- version
--- $Id$
 
 -- End of file

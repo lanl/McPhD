@@ -8,49 +8,40 @@
 -- This differs from BH only in that it uses an LFG random number generator,
 -- instead of the standard LCG in System.Random
 
-import Control.DeepSeq (deepseq,rnf,NFData)
-import System.Console.GetOpt
-import System.Environment
-import System.FilePath.Posix (isValid)
+import Control.DeepSeq (deepseq)
 import Control.Monad (MonadPlus,guard,liftM)
 import Data.Word
 import qualified Data.Vector as V
+import System.Console.GetOpt
+import System.Environment
+import System.FilePath.Posix (isValid)
 
-import Numerical
-import TryNSave
-import MC
-import Physical
-import Sphere1D
-import Mesh
-import Data.List as L
-import Source
-import Philo2
-import Sigma_HBFC
 import FileInputCF
-import RunParticles
+import MC
+import MPISwitch as MPI
+import Numerical
 import Partition (renumberStats)
-import MPISwitch as MPI 
-import Histogram
+import Philo2
+import Physical
+import RunParticles
+import Sigma_HBFC
+import Source
+import Sphere1D
+import TryNSave
 
 type VecLums = V.Vector Luminosity
-type Key = Philo4x32Key
-
-instance NFData a => NFData (V.Vector a) where
-  rnf v = V.foldl' (\x y -> y `deepseq` x) () v
-instance NFData Luminosity
-instance NFData Cell 
 
 runSim :: CLOpts -> IO ()
-runSim opts@(CLOpts { inputF  = infile
-                    , outputF = outfile
-                    , llimit  = ll
-                    , ulimit  = ul
-                    , seed    = sd
-                    , nps     = nIn
-                    , chunkSz = chunkSize
-                    , alpha   = a
-                    , simTime = dt
-                    }
+runSim (CLOpts { inputF  = infile
+               , outputF = outfile
+               , llimit  = ll
+               , ulimit  = ul
+               , seed    = sd
+               , nps     = nIn
+               , chunkSz = chunkSize
+               , alpha   = a
+               , simTime = dt
+               }
        ) = do
   MPI.init
   rank   <- MPI.commRank MPI.commWorld
@@ -73,8 +64,8 @@ runSim opts@(CLOpts { inputF  = infile
       -- !keys3 = mkKeys (Seed sd) nc (Offset $ 2*nc + 1)
       key = Key4x32 sd 0
 
-  putStrLn $ "ndropped: "    ++ show ndropped ++ 
-             ", mesh size: " ++ show mshsz ++ 
+  putStrLn $ "ndropped: "    ++ show ndropped ++
+             ", mesh size: " ++ show mshsz ++
              ", n_chunks: "  ++ show nc
 
   -- run each species
@@ -83,16 +74,16 @@ runSim opts@(CLOpts { inputF  = infile
       -- fc = runParticlesPar        -- parBuffer
       fcore = fc chunkSize msh a (MPI.fromRank rank,fromIntegral commSz)
       f1 = fcore nuE key
-      f2 = fcore nuEBar key 
+      f2 = fcore nuEBar key
       f3 = fcore nuX key
 
   talliesNuE    <- runOneSpeciesWith nIn dt (rank,commSz) (lnue,NuE) f1
   talliesNuEBar <- runOneSpeciesWith nIn dt (rank,commSz) (lnuebar,NuEBar) f2
   talliesNuX    <- runOneSpeciesWith nIn dt (rank,commSz) (lnux,NuX) f3
 
-  time2 <- talliesNuE    `deepseq` 
-           talliesNuEBar `deepseq` 
-           talliesNuX    `deepseq` 
+  time2 <- talliesNuE    `deepseq`
+           talliesNuEBar `deepseq`
+           talliesNuX    `deepseq`
            MPI.wtime
 
   if rank /= MPI.toRank 0
@@ -114,11 +105,11 @@ runSim opts@(CLOpts { inputF  = infile
     -- writeHistogram ("hist_"++outfile++"_nuE")    histNuE
     -- writeHistogram ("hist_"++outfile++"_nuEBar") histNuEBar
     -- writeHistogram ("hist_"++outfile++"_nuX")    histNuX
-  
+
 
   time3 <- MPI.wtime
 
-  putStrLn $ "Rank " ++ show rank 
+  putStrLn $ "Rank " ++ show rank
              ++ ", interval 1: " ++ show (MPI.diffTime time1 time0)
              ++ ", interval 2: " ++ show (MPI.diffTime time2 time1)
              ++ ", interval 3: " ++ show (MPI.diffTime time3 time2)
@@ -128,7 +119,7 @@ runSim opts@(CLOpts { inputF  = infile
 -- | run one neutrino species: derive its source statistics (where to put
 --  particles) and run them to get a tally
 runOneSpeciesWith :: Word32               ->  -- ^ number particles
-                     Time                 -> 
+                     Time                 ->
                     (MPI.Rank,Word32)     ->  -- ^ rank,nranks
                     (VecLums,PType)       ->
                     (SrcStats -> SrcStats -> Tally)  ->
@@ -189,8 +180,8 @@ options =
   ,Option ['u']  ["upper-limit"]
             (ReqArg (\f opts -> opts { ulimit = read f }) "ul")
             "upper limit in cm"
-  ,Option ['c']  ["chunk-size"] 
-            (ReqArg (\f opts -> opts { chunkSz = read f}) "sz") 
+  ,Option ['c']  ["chunk-size"]
+            (ReqArg (\f opts -> opts { chunkSz = read f}) "sz")
             "chunk size (defaults to nps)"
   ,Option ['d']  ["dt"]
             (ReqArg (\f opts -> opts { simTime = Time (read f) }) "t")
@@ -198,11 +189,11 @@ options =
   ,Option ['a']  ["alpha"]
             (ReqArg (\f opts -> opts { alpha = read f }) "a")
             "alpha"
-  ,Option ['s']  ["rng--seed"] 
-            (ReqArg (\f opts -> opts { seed =  (read f)}) "s") 
+  ,Option ['s']  ["rng--seed"]
+            (ReqArg (\f opts -> opts { seed =  (read f)}) "s")
             "seed"
-  ,Option ['h']  ["help"] 
-            (NoArg (\opts -> opts { help = True})) 
+  ,Option ['h']  ["help"]
+            (NoArg (\opts -> opts { help = True}))
             "print useful help message and exit"
           ]
 
@@ -232,7 +223,7 @@ ensure :: (MonadPlus m) => (a -> Bool) -> a -> m a
 ensure p x = guard (p x) >> return x
 
 checkNPs, checkInput, checkOutput, checkLimits :: CLOpts -> Maybe CLOpts
-checkChunk, checkTime, checkAlpha :: CLOpts -> Maybe CLOpts
+checkChunk, checkTime, checkAlpha, checkHelp :: CLOpts -> Maybe CLOpts
 
 checkNPs    = ensure ((> 0) . nps)
 
@@ -253,9 +244,6 @@ checkAlpha  = ensure ((> 0) . alpha)
 checkChunk os@(CLOpts {nps = n, chunkSz = sz}) =
   return (if sz > 0 then os else os {chunkSz = n})
 
-checkHelp   = ensure (not . help)
-
--- version
--- $Id$
+checkHelp = ensure (not . help)
 
 -- End of file
