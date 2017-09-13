@@ -2,7 +2,7 @@
 -- Dec. 26, 2011
 -- (c) Copyright 2011 LANSLLC, all rights reserved
 
-{-# LANGUAGE BangPatterns, GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE BangPatterns, GeneralizedNewtypeDeriving, DeriveGeneric #-}
 
 module Philo2 where
 
@@ -11,17 +11,18 @@ module Philo2 where
 
 -- import Data.Word (Word32,Word64)
 -- import Data.Int  (Int32)
-import Data.Word 
-import Data.Int  
-import Data.Bits
 import Control.DeepSeq
+import Data.Word
+import Data.Int
+import Data.Bits
+import GHC.Generics (Generic)
 import Numerical
 
-data Philo4x32Ctr = Ctr4x32 {-# UNPACK #-} !Word32 !Word32 !Word32 !Word32 
-                    deriving (Show)
-data Philo4x32Key = Key4x32 {-# UNPACK #-} !Word32 !Word32 deriving (Show)
+data Philo4x32Ctr = Ctr4x32 {-# UNPACK #-} !Word32 !Word32 !Word32 !Word32
+                    deriving (Show,Generic)
+data Philo4x32Key = Key4x32 {-# UNPACK #-} !Word32 !Word32 deriving (Show,Generic)
 
-data RNG = RNG Philo4x32Ctr Philo4x32Key deriving (Show)
+data RNG = RNG Philo4x32Ctr Philo4x32Key deriving (Show,Generic)
 
 instance NFData Philo4x32Ctr
 instance NFData Philo4x32Key
@@ -71,7 +72,7 @@ philo4x32Bump (Key4x32 k1 k2) = Key4x32 (k1 + philo_W32_0) (k2 + philo_W32_1)
 {-# INLINE philo4x32Bump #-}
 
 philo4x32Round :: Philo4x32Ctr -> Philo4x32Key -> Philo4x32Ctr
-philo4x32Round (Ctr4x32 c0 c1 c2 c3) (Key4x32 k0 k1) = 
+philo4x32Round (Ctr4x32 c0 c1 c2 c3) (Key4x32 k0 k1) =
   let (lo0,hi0) = mulHiLo philo_M4x32_0 c0
       (lo1,hi1) = mulHiLo philo_M4x32_1 c2
       in Ctr4x32 (hi1 `xor` c1 `xor` k0) lo1 (hi0 `xor` c3 `xor` k1) lo0
@@ -113,9 +114,9 @@ incrRNG (RNG c k) = RNG (incrCtr1 c (Offset 1)) k
 advanceRNG :: RNG -> Offset -> RNG
 advanceRNG (RNG c k) n = RNG (incrCtr1 c n) k
 
--- | increment a counter by 1 in the least significant word. 
--- This should be sufficient to get another 128b of output 
--- goodness. This will not carry correctly. 
+-- | increment a counter by 1 in the least significant word.
+-- This should be sufficient to get another 128b of output
+-- goodness. This will not carry correctly.
 incrCtr1 :: Philo4x32Ctr -> Offset -> Philo4x32Ctr
 incrCtr1 (Ctr4x32 c1 c2 c3 c4) (Offset n) = Ctr4x32 c1 c2 c3 (c4+n)
 
@@ -125,30 +126,30 @@ incrCtr4 :: Philo4x32Ctr -> Offset -> Philo4x32Ctr
 incrCtr4 (Ctr4x32 c1 c2 c3 c4) (Offset n) = Ctr4x32 (c1+n) c2 c3 c4
 
 -- | increment a 4x32 counter in its second most significant word. For
--- subdividing a stream. 
+-- subdividing a stream.
 incrCtr3 :: Philo4x32Ctr -> Offset -> Philo4x32Ctr
 incrCtr3 (Ctr4x32 c1 c2 c3 c4) (Offset n) = Ctr4x32 c1 (c2+n) c3 c4
 
 -- | increment a 4x32 counter in its second least significant word. For
--- subdividing a stream. 
+-- subdividing a stream.
 incrCtr2 :: Philo4x32Ctr -> Offset -> Philo4x32Ctr
 incrCtr2 (Ctr4x32 c1 c2 c3 c4) (Offset n) = Ctr4x32 c1 c2 (c3+n) c4
 
 
-{- 
+{-
 
--- Ooh this is a really ugly hack: really just threw this in to compare 
+-- Ooh this is a really ugly hack: really just threw this in to compare
 -- with C++ version (in the NuT code).
 randoms :: RNG -> Int -> (RNG,[URD])
 randoms g1 i = go g1 0
-  where go g n | n < i  = let g2 = incrRNG g 
+  where go g n | n < i  = let g2 = incrRNG g
                               (u1,u2) = random2 g
                               (ginf,us) = go g2 (n + 2)
                           in (ginf,u1:u2:us)
         go g n | n >= i = let g2 = incrRNG g
                               (u1,u2) = random2 g
                           in (g2,u1:u2:[])
- 
+
 -}
 
 -- version
