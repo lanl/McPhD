@@ -19,35 +19,31 @@ import Numerical
 import Text.Printf -- for PrintfArg instances
 
 -- | cm
-newtype Position = Position { pos :: Vec }
-  deriving (Eq,Show,Read,Num,Fractional)
+newtype Position = Position { pos :: Vec } deriving (Eq,Show,Read,Num,
+  Fractional,NFData)
 derivingUnbox "Position" [t| Position -> Vec |] [| pos |] [| Position |]
 
 -- | dimensionless
-newtype Direction = Direction { dir :: Vec }
-  deriving (Eq,Show,Read,Num)
+newtype Direction = Direction { dir :: Vec } deriving (Eq,Show,Read,Num)
 derivingUnbox "Direction" [t| Direction -> Vec |] [| dir |] [| Direction |]
 
 -- | g cm/sec
-newtype Momentum = Momentum { mom :: Vec }
-  deriving (Eq,Show,Read,Num,Serialize,NFData)
+newtype Momentum = Momentum { mom :: Vec } deriving (Eq,Show,Read,Num,Serialize,
+  NFData)
 derivingUnbox "Momentum" [t| Momentum -> Vec |] [| mom |] [| Momentum |]
 
 -- | cm/sec
-newtype Velocity = Velocity { vel :: Vec }
-  deriving (Eq,Show,Read)
+newtype Velocity = Velocity { vel :: Vec } deriving (Eq,Show,Read,NFData)
 derivingUnbox "Velocity" [t| Velocity -> Vec |] [| vel |] [| Velocity |]
 
 -- | MeV
-newtype Energy = Energy { e :: FP }
-  deriving (Eq, Show, Read, Ord, Num, Fractional, Floating, NFData,Serialize,
-    PrintfArg)
+newtype Energy = Energy { e :: FP } deriving (Eq, Show, Read, Ord, Num,
+  Fractional, Floating, NFData,Serialize, PrintfArg)
 derivingUnbox "Energy" [t| Energy -> Vec |] [| e |] [| Energy |]
 
 -- | dimensionless
-newtype EnergyWeight = EnergyWeight { ew :: FP }
-  deriving (Eq, Show, Read, Ord, Num, Fractional, Floating, NFData,Serialize,
-    PrintfArg)
+newtype EnergyWeight = EnergyWeight { ew :: FP } deriving (Eq, Show, Read, Ord,
+  Num, Fractional, Floating, NFData,Serialize, PrintfArg)
 derivingUnbox "EnergyWeight"
   [t| EnergyWeight -> Vec |] [| ew |] [| EnergyWeight |]
 
@@ -65,16 +61,16 @@ newtype Opacity = Opacity { mu :: FP } deriving (Eq,Show,Read,Num)
 derivingUnbox "Opacity" [t| Opacity -> Vec |] [| mu |] [| Opacity |]
 
 -- | MeV
-newtype Temperature = Temperature { temp :: FP } deriving (Eq,Show,Read)
+newtype Temperature = Temperature { temp :: FP } deriving (Eq,Show,Read,NFData)
 derivingUnbox "Temperature"
   [t| Temperature -> Vec |] [| temp |] [| Temperature |]
 
 -- | g/(cc^3)
-newtype Density = Density { rho :: FP } deriving (Eq,Show,Read)
+newtype Density = Density { rho :: FP } deriving (Eq,Show,Read,NFData)
 derivingUnbox "Density" [t| Density -> Vec |] [| rho |] [| Density |]
 
 -- | 1/(cc^3)
-newtype NDensity = NDensity { nrho :: FP } deriving (Eq,Show,Read)
+newtype NDensity = NDensity { nrho :: FP } deriving (Eq,Show,Read,NFData)
 derivingUnbox "NDensity" [t| NDensity -> Vec |] [| nrho |] [| NDensity |]
 
 -- | dimensionless
@@ -88,7 +84,7 @@ newtype Distance = Distance { distance :: FP } deriving (Eq, Show, Read, Num,
 derivingUnbox "Distance" [t| Distance -> Vec |] [| distance |] [| Distance |]
 
 -- | MeV/sec
-newtype Luminosity = Luminosity { lum :: FP } deriving (Eq,Show,Read,Num,Ord)
+newtype Luminosity = Luminosity { lum :: FP } deriving (Eq,Show,Read,Num,Ord,NFData)
 derivingUnbox "Luminosity" [t| Luminosity -> Vec |] [| lum |] [| Luminosity |]
 
 -- | dimensionless
