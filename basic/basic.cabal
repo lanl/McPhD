@@ -33,7 +33,7 @@ library
                      Material
                      Mesh
                      MPIStub
-                     MPIFull 
+                     MPIFull
                      MPISwitch
                      Numerical
                      Opacity
@@ -47,8 +47,6 @@ library
                      SoftEquiv
                      Source
                      Sphere1D
-                     System.Random.LFG
-                     System.Random.LFG.Pure
                      Tally
                      TallyV
                      TallyIM
@@ -56,7 +54,6 @@ library
                      Utils
   ghc-options:       -Wall -fno-warn-name-shadowing -fno-warn-orphans -fwarn-tabs
   ghc-options:       -funbox-strict-fields -fno-ignore-asserts
-  ghc-options:       -rtsopts 
   default-extensions:        CPP
   if flag(mpi)
       cpp-options:       -DUseMPI
@@ -93,7 +90,7 @@ executable  black-hole
   build-depends:     base >=4 && <=5
                     ,vector >= 0.7
                     ,parallel >= 3.1
-                    ,filepath >= 1.2.0 
+                    ,filepath >= 1.2.0
                     ,deepseq
                     ,basic
                     ,monad-par
@@ -104,14 +101,14 @@ executable  black-hole
 -- executable  black-hole-mpi
 --   hs-source-dirs:    src-main
 --   ghc-options:       -Wall -fno-warn-name-shadowing -fno-warn-orphans -fwarn-tabs
---   ghc-options:       -funbox-strict-fields 
+--   ghc-options:       -funbox-strict-fields
 --   ghc-options:       -rtsopts
 --   default-extensions:        CPP
 --   main-is:           BH-philox.hs
 --   build-depends:     base >=4 && <=5
 --                     ,vector >= 0.7
 --                     ,parallel >= 3.1
---                     ,filepath >= 1.2.0 
+--                     ,filepath >= 1.2.0
 --                     ,deepseq
 --                     ,basic
 --                     ,monad-par
@@ -122,7 +119,7 @@ executable  black-hole
 executable  basic-test
   hs-source-dirs:    tests
   ghc-options:       -Wall -fno-warn-name-shadowing -fno-warn-orphans -fwarn-tabs
-  ghc-options:       -rtsopts 
+  ghc-options:       -rtsopts
   main-is:           TestSuite.hs
   build-depends:     base >=4 && <=5,
                      vector >= 0.7,
