@@ -16,11 +16,9 @@ module MPIFull (toRank
                ,finalize
                ,diffTime
                )
-  where 
+  where
 
 import Control.Parallel.MPI.Simple as MPI
-import Control.Parallel.MPI.Base as MPIB
-import Data.Monoid
 import Data.Serialize as Serialize
 import qualified Data.List as L
 
@@ -28,7 +26,7 @@ sendTally :: Serialize a => a -> IO ()
 sendTally t = MPI.gatherSend commWorld 0 (Serialize.encode t)
 
 recvTally :: (Serialize a,Monoid a) => a -> IO a
-recvTally t = do 
+recvTally t = do
   msgs <- MPI.gatherRecv commWorld 0 (Serialize.encode t)
   let ts = map (forceEither . Serialize.decode) msgs
   return $ L.foldl' mappend mempty ts
