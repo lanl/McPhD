@@ -30,7 +30,7 @@ derivingUnbox "Direction" [t| Direction -> Vec |] [| dir |] [| Direction |]
 
 -- | g cm/sec
 newtype Momentum = Momentum { mom :: Vec }
-  deriving (Eq,Show,Read,Num,Serialize)
+  deriving (Eq,Show,Read,Num,Serialize,NFData)
 derivingUnbox "Momentum" [t| Momentum -> Vec |] [| mom |] [| Momentum |]
 
 -- | cm/sec
