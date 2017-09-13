@@ -3,7 +3,8 @@
 -- Feb 03, 2011
 -- (c) Copyright 2011 LANSLLC, all rights reserved
 
-{-# LANGUAGE BangPatterns, TypeSynonymInstances, FlexibleInstances #-}
+{-# LANGUAGE BangPatterns, TypeSynonymInstances, FlexibleInstances,
+  DeriveGeneric #-}
 
 module TallyIM ( Tally(..)
                , EventCount(..)
@@ -22,14 +23,14 @@ import Physical
 import Particle
 import Event
 import Mesh
--- import Histogram as Hst
 
-import Data.List as List
-import Data.HashMap.Strict as Map
 import Control.DeepSeq
+import Control.Monad (replicateM, liftM2)
+import Data.HashMap.Strict as Map
+import Data.List as List
 import Data.Monoid (Monoid, mempty, mappend, (<>) )
 import Data.Serialize
-import Control.Monad (replicateM, liftM2)
+import GHC.Generics (Generic)
 
 data Tally = Tally { globalEvts  :: !EventCount
                    , deposition  :: !PhysicsTally
@@ -39,7 +40,7 @@ data Tally = Tally { globalEvts  :: !EventCount
                    } deriving (Eq,Show)
 
 data CellTally     = CellTally {ctMom :: !Momentum, ctEnergy :: !Energy}
-                     deriving (Show,Eq)
+                     deriving (Show,Eq,Generic)
 
 type PhysicsTally  = Map.HashMap Int CellTally
 
@@ -54,7 +55,7 @@ data EventCount    = EventCount {
   , nReflect    :: !Int
   , nEscape     :: !Int
   , nTimeout    :: !Int
-  } deriving (Show, Eq)
+  } deriving (Show, Eq, Generic)
 
 tally :: Mesh m => m -> [(Event,Particle)] -> Tally
 tally msh = List.foldl' tallyImpl (emptyTally msh)
@@ -66,8 +67,8 @@ tallyImpl (Tally ec dep esc pl) (evt,p)  =
 
 -- | Tally momentum deposition.
 tDep :: Event -> CellIdx -> PhysicsTally -> PhysicsTally
-tDep (Collision _ _ 
-                (Direction oli) 
+tDep (Collision _ _
+                (Direction oli)
                 (Energy ei)
                 (Direction olf)
                 (Energy ef)
@@ -98,14 +99,14 @@ countEvent (Boundary  {bType = Transmit})   ctr = ctr { nTransmit   = 1 + nTrans
 countEvent (Timeout   {})                   ctr = ctr { nTimeout    = 1 + nTimeout   ctr}
 
 totalMCSteps :: EventCount -> Int
-totalMCSteps (EventCount na ne nem nep nt nr nesc nto) = 
+totalMCSteps (EventCount na ne nem nep nt nr nesc nto) =
   na + ne + nem + nep + nt + nr + nesc + nto
 
 instance Monoid EventCount where
   mempty = EventCount 0 0 0 0 0 0 0 0
-  mappend (EventCount na1 ne1 emi1 epi1 t1 r1 e1 c1) 
+  mappend (EventCount na1 ne1 emi1 epi1 t1 r1 e1 c1)
             (EventCount na2 ne2 emi2 epi2 t2 r2 e2 c2) =
-              EventCount (na1 + na2) (ne1 + ne2) (emi1 + emi2) (epi1 + epi2) 
+              EventCount (na1 + na2) (ne1 + ne2) (emi1 + emi2) (epi1 + epi2)
                            (t1 + t2) (r1 + r2) (e1 + e2) (c1 + c2)
 
 instance Monoid CellTally where
@@ -120,7 +121,7 @@ emptyTally :: m -> Tally
 emptyTally _ = Tally mempty Map.empty  mempty 0
 
 merge :: Tally -> Tally -> Tally
-merge t1@(Tally ec1 dep1 esc1 pl1) t2@(Tally ec2 dep2  esc2 pl2) =
+merge (Tally ec1 dep1 esc1 pl1) (Tally ec2 dep2  esc2 pl2) =
   let r = Tally (ec1 <> ec2) (Map.unionWith (<>) dep1 dep2)  (esc1 ++ esc2) (pl1 + pl2)
   in r `deepseq` r
 
@@ -132,12 +133,12 @@ totalDep t = Map.foldl' mappend mempty (deposition t)
 
 instance Serialize EventCount where
   put (EventCount na ne nem nep nx nr nesc nto) = do
-                                put na 
-                                put ne 
+                                put na
+                                put ne
                                 put nem
                                 put nep
-                                put nx 
-                                put nr 
+                                put nx
+                                put nr
                                 put nesc
                                 put nto
   get = do
@@ -157,10 +158,10 @@ instance Serialize CellTally where
     m <- get
     e <- get
     return $ CellTally m e
-    
+
 instance Serialize PhysicsTally where
-  put pt = 
-    (put $ size pt) >> 
+  put pt =
+    (put $ size pt) >>
     mapM (\(k,v) -> put k >> put v) (toList pt) >> return ()
   get = do
     sz  <- get
