@@ -2,22 +2,22 @@
 
 module Test.Arbitraries where
 
-import Test.QuickCheck
-import Control.Applicative ( (<$>) )
-import Physical
+
 import Cell
-import Material
-import Sigma_HBFC
 import Constants (pmg)
-import Sphere1D
-import Particle
-import qualified PRNG
 import Event
 import Histogram
-import Source
+import Material
+import Particle
 import qualified Philo2
+import Physical
+import Sigma_HBFC
+import Source
+import Sphere1D
 import qualified TallyIM as T_IM
 
+import Test.QuickCheck
+import Control.Applicative ( (<$>) )
 import qualified Data.HashMap.Strict as HMap
 import qualified Data.Vector as V
 import qualified Data.Vector.Unboxed as U
@@ -33,7 +33,7 @@ gt0 = suchThat arbitrary (> 0)
 instance Arbitrary Energy where
   arbitrary = Energy <$> ge0
 
-instance Arbitrary Momentum where 
+instance Arbitrary Momentum where
   arbitrary = arbitrary >>= \x -> return $ Momentum x
 
 instance Arbitrary EnergyWeight where
@@ -253,26 +253,26 @@ instance Arbitrary RankNComm where
 data RankNCommNNC = RankNCommNNC Word32 Word32 Word32 SrcStat deriving Show
 instance Arbitrary RankNCommNNC where
   arbitrary = do
-    (RankNComm r c) <- arbitrary 
+    (RankNComm r c) <- arbitrary
     cumN <- arbitrary
     nc <- choose (0,50000)
     return $ RankNCommNNC r c cumN (0,nc,0,0)
 
--- work around existing Arbitrary instance (a,b,c,d) 
+-- work around existing Arbitrary instance (a,b,c,d)
 data SrcStatsV = SrcStatsV {unssV :: [SrcStat]} deriving Show
 data SrcStatV  = SrcStatV {unsV :: SrcStat} deriving Show
 
 instance Arbitrary SrcStatV where
-  arbitrary = do 
+  arbitrary = do
     n <- choose (0,100) :: Gen Word32
     return $ SrcStatV (0,n,0,0)
 
 instance Arbitrary SrcStatsV where
-  arbitrary = do 
+  arbitrary = do
     ss <- resize 15 $ listOf1 arbitrary
     return $ SrcStatsV ss
 
--- for testing chunkBy: need a list of objects and list of lengths, 
+-- for testing chunkBy: need a list of objects and list of lengths,
 -- such that the sum of lengths <= length of the list of objects.
 data Chunkable = Chunkable [Int] [Double] deriving Show
 
@@ -282,7 +282,7 @@ instance Arbitrary Chunkable where
     lCands <- vectorOf (length xs) (choose (1,length xs))
     let ls = foldr go [] lCands
           where go :: Int -> [Int] -> [Int]
-                go i ys = case (i + (sum ys)) < length xs of 
+                go i ys = case (i + (sum ys)) < length xs of
                             True -> i:ys
                             False -> ys
     return $ Chunkable ls xs

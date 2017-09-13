@@ -9,17 +9,17 @@ module Test.Utils_Test where
 import Utils
 
 -- Testing libraries
-import Test.Framework (testGroup)
+import Test.Framework (testGroup,Test)
 import Test.Framework.Providers.QuickCheck2 (testProperty)
-import Test.QuickCheck
 import Test.Arbitraries
 
 prop_chunkByOutputLength :: Chunkable -> Bool
-prop_chunkByOutputLength (Chunkable ls xs) = 
+prop_chunkByOutputLength (Chunkable ls xs) =
   length chunked == length ls
     where chunked = chunkBy ls xs
 
-tests = 
+tests :: [Test]
+tests =
   [ testGroup "Utilities"
     [
      testProperty "chunked list has correct length" prop_chunkByOutputLength

@@ -5,26 +5,14 @@
 
 module Test.Stream_Test (tests) where
 
-import Test.Framework (testGroup)
-import Test.Framework.Providers.HUnit
-import Test.Framework.Providers.QuickCheck2 (testProperty)
-import Test.HUnit
-import Test.QuickCheck
-import Test.Arbitraries
-
 -- The library under test
 import Sphere1D
-import Mesh
-import Cell
--- import Physical
-import PRNG
-import Material
-import SoftEquiv
 import MC
-import Sigma_HBFC
-import Particle as P
--- import Constants
-import Source
+
+-- Test libraries
+import Test.Framework (testGroup,Test)
+import Test.Framework.Providers.QuickCheck2 (testProperty)
+import Test.Arbitraries ()
 
 -- * properties of stream
 
@@ -50,8 +38,9 @@ covary msh ec p@(Particle { pos  = r
        then  r /= r'  &&  o /= o'  &&  t /= t'
        else  r == r'  &&  o == o'  &&  t == t'
 
+tests :: [Test]
 tests = [testGroup "stream"
-         [ 
+         [
            testProperty "stream changes only position, direction, time" eUnchanged
          , testProperty "stream changes position, direction, time together" covary
          ]

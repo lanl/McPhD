@@ -5,18 +5,14 @@
 
 module Test.Histogram_Test (tests) where
 
-import Test.Framework (testGroup)
-import Test.Framework.Providers.HUnit
-import Test.Framework.Providers.QuickCheck2 (testProperty)
-import Test.HUnit
-import Test.QuickCheck
-import Test.Arbitraries
-
 import Histogram
 import Physical
 import SoftEquiv
 
 import qualified Data.Vector.Unboxed as U
+import Test.Framework (testGroup,Test)
+import Test.Framework.Providers.QuickCheck2 (testProperty)
+import Test.Arbitraries
 
 -- * count
 
@@ -32,32 +28,33 @@ prop_cmtvSameIdx (HistNEnergy h e) ew1 ew2 = cmpEHists h1 h2 (EnergyWeight 1e-14
   where h1 = count (e,ew2) (count (e,ew1) h)
         h2 = count (e,ew1) (count (e,ew2) h)
 
+cmpEHists :: EHist -> EHist -> EnergyWeight -> Bool
 cmpEHists ha hb tol = U.foldl1' (&&) compCounts
   where compCounts  = U.zipWith cmpfunc (ehcounts ha) (ehcounts hb)
-        compSquares = U.zipWith cmpfunc (ehsquares ha) (ehsquares hb)
         cmpfunc x y = softEquiv x y tol
 
 -- | count is absolutely commutative (on different indices)
 
 
 -- findBin properties
+prop_fbLowerBound{-, prop_fbUpperBound-} :: HistNEnergy -> Bool
 --   bb ! (findBin e bb) <= e
 prop_fbLowerBound (HistNEnergy (EHist _ _ _ bbs) e) = bbs U.! i <= e
   where i = findBin e bbs
 
 --   bb ! (findBin e bb) + 1 > e
-prop_fbUpperBound (HistNEnergy (EHist _ _ _ bbs) e) = bbs U.! (i + 1) > e
-  where i = findBin e bbs
+-- prop_fbUpperBound (HistNEnergy (EHist _ _ _ bbs) e) = bbs U.! (i + 1) > e
+--   where i = findBin e bbs
 
 --   throws exception if asked for an energy outside of the bin boundaries
 
 -- divIfne0
-prop_divIfne0_finite :: Double -> Double -> Bool
-prop_divIfne0_finite x y = q /= 1/0 && q /= -1/0
-  where q = x `divIfne0` y
-
+-- prop_divIfne0_finite :: Double -> Double -> Bool
+-- prop_divIfne0_finite x y = q /= 1/0 && q /= -1/0
+--   where q = x `divIfne0` y
 
 -- aggregate tests for framework
+tests :: [Test]
 tests = [testGroup "histogram tests"
          [
           testProperty "count 0 wt: histogram unchanged" prop_nullCountUnchanged
