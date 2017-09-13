@@ -2,17 +2,16 @@
 -- Nov. 11, 2011
 -- (c) Copyright 2011 LANSLLC, all rights reserved
 
-{-| Read simulation inputs from data files provided by Chris Fryer. 
+{-| Read simulation inputs from data files provided by Chris Fryer.
  - This version attempts greater strictness via Vector. -}
 
 module FileInputCF (parseFile) where
 
-import qualified Data.ByteString.Lazy.Char8      as L
-import qualified Data.ByteString.Lex.Lazy.Double as L
-import qualified Data.Vector                     as U
-import Data.Maybe          (fromMaybe)
+import qualified Data.ByteString.Char8 as L
+import qualified Data.ByteString.Lex.Fractional as BL
+import qualified Data.Vector as U
+import Data.Maybe (fromMaybe)
 import Control.Applicative ( (<$>) )
--- import Debug.Trace
 
 import Cell
 import Physical
@@ -30,8 +29,8 @@ type VecCellInfo = U.Vector CellInfo
 type VecCellBounds = U.Vector Position
 
 parseFile :: FilePath -> IO (VecCell,VecLum,VecLum,VecLum)
-parseFile f = do 
-  all <- L.readFile f 
+parseFile f = do
+  all <- L.readFile f
   let lines = L.lines all
   return $ mkSim lines
 
@@ -47,14 +46,14 @@ interpretLs = U.fromList . map (interpretL . parseL)
 
 -- transpose & process vector of tuples into tuple of vectors.
 separate :: VecLine -> (VecCell,VecLum,VecLum,VecLum)
-separate vl = 
+separate vl =
   let (vci,vlums)   = U.unzip vl
       (vl1,vl2,vl3) = U.unzip3 vlums
   in (mkVecCells vci, vl1, vl2, vl3)
 
 -- turn a vector of cell data into a vector of cells
 mkVecCells :: VecCellInfo -> VecCell
-mkVecCells vci = 
+mkVecCells vci =
   let geoms = mkGeoms ctrs
       (ctrs,_,_,_,_) = U.unzip5 vci
   in U.zipWith mkCell vci geoms
@@ -97,7 +96,7 @@ genBound _ _ = Transp
 -- convert raw doubles to cell center, velocity, tmp, rhoN,
 -- rhoE, L_nu_E, L_nu_Ebar, L_nu_X
 interpretL :: VecDub -> (CellInfo,Lums)
-interpretL ds = (ci,ls) 
+interpretL ds = (ci,ls)
   where ci = ( Position   $ ds U.! 2
              , Velocity    $ ds U.! 4
              , Temperature $ k_B * 1e9 * (ds U.! 7)
@@ -111,10 +110,10 @@ interpretL ds = (ci,ls)
 
 -- convert ByteString for one line to doubles
 parseL :: L.ByteString -> VecDub
-parseL s = 
+parseL s =
   let ws = L.split ',' s
       readFirst :: L.ByteString -> Maybe Double
-      readFirst s = fst <$> L.readDouble s
+      readFirst s = fst <$> BL.readExponential s
   in U.fromList $ map (fromMaybe 0 . readFirst) ws
 
 -- version
