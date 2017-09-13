@@ -3,12 +3,12 @@
 -- Mar 27, 2012
 -- (c) Copyright 2012 LANSLLC, all rights reserved
 
-module Utils 
+module Utils
   -- ( chunkBy
   -- , cromulent )
   where
 
-import Data.List 
+import Data.List
 import Data.Word
 
 -- | chunk a list according to a list of lengths. The sum of the list of
@@ -17,8 +17,8 @@ import Data.Word
 chunkBy :: Integral b => [b] -> [a] -> [[a]]
 chunkBy ls xs = unfoldr go (ls,xs)
   where go ([],_) = Nothing
-        go ([l],xs) = Just (xs,([],[]))
-        go ( (l:ls),xs) = case splitAt (fromIntegral l) xs of 
+        go ([_],xs) = Just (xs,([],[]))
+        go ( (l:ls),xs) = case splitAt (fromIntegral l) xs of
                             ([],[]) -> Nothing
                             (ys,rs) -> Just (ys,(ls,rs))
 {-# INLINE chunkBy #-}

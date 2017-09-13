@@ -16,12 +16,12 @@ import Data.Word (Word32)
 import Data.Int (Int32)
 import Data.Bits
 import Data.List
-import qualified Data.Vector.Unboxed as V
+-- import qualified Data.Vector.Unboxed as V
 
 import System.Random as R
-import System.Random.LFG (defaultLags, largeLag)
-import System.Random.LFG.Pure as LFG
-import qualified System.Random.MWC as MWC
+-- import System.Random.LFG (defaultLags, largeLag)
+-- import System.Random.LFG.Pure as LFG
+-- import qualified System.Random.MWC as MWC
 
 -- | A pure generator is a lazy stream of words (bits).
 data RNG = RNG !FP RNG
@@ -48,6 +48,7 @@ instance Functor Rnd where
 
 instance Applicative Rnd where
   f <*> v = undefined
+  pure = undefined
 
 runRnd :: RNG -> Rnd a -> a
 runRnd g (Rnd x) = x const g
@@ -71,14 +72,14 @@ wordsToDouble x y  = (fromIntegral u * m_inv_32 + (0.5 + m_inv_53) +
           v        = fromIntegral y :: Int32
 {-# INLINE wordsToDouble #-}
 
-{-# NOINLINE createLFG #-}
-createLFG :: Int -> Int -> IO [RNG]
-createLFG s n =
-  do
-    mwc <- MWC.initialize (V.singleton (fromIntegral s))
-    initials <- replicateM (n * largeLag defaultLags) (MWC.uniform mwc)
-    let mkRNG = unfoldRNG (\ (x : y : zs) -> (wordsToDouble x y, zs))
-    return $ map mkRNG $ LFG.sequences defaultLags initials
+-- {-# NOINLINE createLFG #-}
+-- createLFG :: Int -> Int -> IO [RNG]
+-- createLFG s n =
+--   do
+--     mwc <- MWC.initialize (V.singleton (fromIntegral s))
+--     initials <- replicateM (n * largeLag defaultLags) (MWC.uniform mwc)
+--     let mkRNG = unfoldRNG (\ (x : y : zs) -> (wordsToDouble x y, zs))
+--     return $ map mkRNG $ LFG.sequences defaultLags initials
 
 makeStdGen :: Int -> Int -> [RNG]
 makeStdGen s n =

@@ -15,7 +15,7 @@ module MPIStub (sendTally
                ,toRank
                ,Rank
                ,fromRank
-               ,diffTime 
+               ,diffTime
                )
   where
 
@@ -40,10 +40,12 @@ init, finalize :: IO ()
 init     = return ()
 finalize = return ()
 
+sendTally :: Monad m => a -> m()
 sendTally _ = return ()
+recvTally :: Monad m => a -> m a
 recvTally t = return t
 
-wtime :: IO UTCTime 
+wtime :: IO UTCTime
 wtime = getCurrentTime
 
 diffTime :: UTCTime -> UTCTime -> NominalDiffTime

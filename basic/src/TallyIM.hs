@@ -188,9 +188,6 @@ instance NFData CellTally
 
 instance NFData EventCount
 
--- version
--- $Id$
-
 -- End of file
 
 

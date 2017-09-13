@@ -8,19 +8,15 @@ module MC
   )
   where
 
-import Control.Applicative
 import Cell
+import Collision
 import Event
+import Material
 import Mesh as M
 import Particle as P
 import Physical
 import Philo2
 import Tally
-import Sigma_HBFC
-import Collision
-import Material
-
--- import Debug.Trace
 
 -- | Run an individual particle in a mesh. Returns the tally containing
 -- information about all the generated events.
@@ -58,13 +54,13 @@ step sig msh p g0 = let
   (sel_d_coll,_) = random2 g0
   g1 = incrRNG g0
   (sel_coll,sel_newState) = random2 g1
-  
+
   evtCand = pickEvent sig msh p sel_d_coll
   pInit   = stream msh p evtCand
   in processEvent evtCand msh sig pInit sel_coll sel_newState
 
--- | Turn an event candidate and an input particle into an event and an 
--- output particle. 
+-- | Turn an event candidate and an input particle into an event and an
+-- output particle.
 processEvent :: Mesh m => EventCandidate -> m -> Lepton -> Particle ->
                 URD -> URD ->
                 (Event,Particle)
@@ -73,7 +69,7 @@ processEvent (BoundaryCand dBdy fce) msh _ p@(Particle { P.dir   = o
                                                        , energy  = nrg
                                                        , weight  = wt
                                                        , cellIdx = cidx
-                                                       }) _ _ = 
+                                                       }) _ _ =
   case boundaryEvent msh cidx dBdy fce nrg wt of
     b@(Boundary {bType = Reflect})  -> (b, p{P.dir = -o})
     b@(Boundary {bType = Escape})   -> (b, p{P.cellIdx = -1})
@@ -107,7 +103,7 @@ stream msh
 -- | Determine the next event that occurs for a particle, and
 -- a new state for the particle.
 pickEvent :: Mesh m => Lepton -> m -> Particle -> URD -> EventCandidate
-pickEvent sig msh 
+pickEvent sig msh
           Particle { P.dir     = omega
                    , P.pos     = r
                    , cellIdx   = cidx

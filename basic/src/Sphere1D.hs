@@ -6,13 +6,11 @@
 module Sphere1D where
 
 import Control.Arrow
-import Control.Monad
 import Data.List as L
 import Data.Vector as V
 
 import Cell
 import Mesh
-import PRNG
 import Physical
 import Search
 import SoftEquiv
@@ -21,7 +19,7 @@ type VecCell = Vector Cell
 
 data Sphere1D = Sphere1D (VecCell) deriving Show
 
--- | form mesh from sublist of cells and user limits. Also returns the 
+-- | form mesh from sublist of cells and user limits. Also returns the
 -- number of cells not used from the start of the container.
 mkMesh :: VecCell -> FP -> FP -> (Sphere1D, Int)
 mkMesh clls llim ulim = (Sphere1D cellsInBounds, ndropped)
@@ -116,25 +114,25 @@ instance Mesh Sphere1D where
                  L.++ "\n  mesh dump: " L.++ show msh
       Just c -> c
 
-  cellAcross m cidx Lo = case (lowBC $ cell m cidx) of 
+  cellAcross m cidx Lo = case (lowBC $ cell m cidx) of
                            Refl   -> cidx
                            Transp -> cidx - 1
-                           Vac    -> -1  
-  cellAcross m cidx Hi = case (highBC $ cell m cidx) of 
+                           Vac    -> -1
+  cellAcross m cidx Hi = case (highBC $ cell m cidx) of
                            Refl   -> cidx
                            Transp -> cidx + 1
                            Vac    -> -1
 
   -- | compute new coordinate & direction after travelling a
   -- distance d along a given direction.
-  -- newCoord :: Sphere1D -> Position -> Direction -> Distance -> 
+  -- newCoord :: Sphere1D -> Position -> Direction -> Distance ->
   --             (Position,Direction)
-  newCoord _ (Position r) (Direction o) (Distance d) = 
+  newCoord _ (Position r) (Direction o) (Distance d) =
     (Position newR, Direction newO)
       where newR  = sqrt (newX * newX + newY * newY)
             newX  = r + d * o
             newY  = d * s
-            theta = acos o 
+            theta = acos o
             s     = sin theta
             newO  = cos (theta - asin (d / newR * s))
 

@@ -152,7 +152,4 @@ randoms g1 i = go g1 0
 
 -}
 
--- version
--- $Id$
-
 -- End of file

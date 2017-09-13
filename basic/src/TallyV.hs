@@ -71,7 +71,7 @@ instance Monoid EventCount where
   mappend (EventCount na1 ne1 emi1 epi1 t1 r1 e1 c1) (EventCount na2 ne2 emi2 epi2 t2 r2 e2 c2) =
     EventCount (na1 + na2) (ne1 + ne2) (emi1 + emi2) (epi1 + epi2) (t1 + t2) (r1 + r2) (e1 + e2) (c1 + c2)
 
-type EscapeCount = [(Energy,EnergyWeight)]
+-- type EscapeCount = [(Energy,EnergyWeight)]
 
 -- | Empty (initial) tally.
 emptyTally :: Mesh m => m -> Tally
@@ -118,9 +118,9 @@ tDep (Collision _ _
 tDep _                     _              tlly = tlly
 
 -- tally an Escape event
-tEsc :: Event -> EscapeCount -> EscapeCount
-tEsc (Boundary Escape _ _ ed wt) ec = (ed,wt):ec
-tEsc _ ec = ec
+-- tEsc :: Event -> EscapeCount -> EscapeCount
+-- tEsc (Boundary Escape _ _ ed wt) ec = (ed,wt):ec
+-- tEsc _ ec = ec
 
 -- TODO: It would be slightly cleaner, but potentially a bit less efficient,
 -- to have a function computing a CellTally from an event, and always add that
