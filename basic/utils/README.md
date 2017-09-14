@@ -31,22 +31,22 @@ Assumed directory structure
 ---------------------------
 The testN* scripts assume that they are in a particular place relative to the data/ directory, namely that data/  is two levels higher. Here's how my directory layout looks:
 
-|- src
-|- src-main
-|- data
-|- build
-    |- O2
-    |- threaded-O2
+    |- src
+    |- src-main
+    |- data
+    |- build
+        |- O2
+        |- threaded-O2
+        |- etc
+    |-runs
+        |- O2
+        |- threaded-O2
+             |- running test<blah> here
+                  |- chunk
+                  |- N-strong
+                  |- N-weak
+        |- etc
     |- etc
-|-runs
-    |- O2
-    |- threaded-O2
-         |- running test<blah> here
-              |- chunk
-              |- N-strong
-              |- N-weak
-    |- etc
-|- etc
 
 Feel free to modify to suit your needs. I typically sym link the executable into the run directory.
 
