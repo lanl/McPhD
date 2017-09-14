@@ -1,7 +1,9 @@
 Utilities for basic
 ===========================
 
-This directory contains several utility scripts for benchmarking performance of black-hole with respect to one command line parameter, using GHC's GC statistics. Each script uses the module SummarizeGC, a homely but effective script for averaging GC statistics from multiple runs.
+This directory contains several utility scripts for benchmarking performance of black-hole with respect to one command line parameter, using GHC's GC statistics. Each script uses the module SummarizeGC, a homely but effective script for averaging GC statistics from multiple runs. The test scripts themselves are very redundant; they're all running some variation on
+
+    black-hole -i ../../data/p.7 -n N_Particles -c ChunkSize -s Seed +RTS -sGC_Filename -NN_Threads -RTS
 
 Available tests
 ---------------

@@ -26,3 +26,5 @@ To get started
 3. cabal configure -O2
 4. cabal build
 5. ./dist/build/basic-test/basic-test
+
+More information on running the code is in the utils/ directory.
