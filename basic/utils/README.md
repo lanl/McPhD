@@ -9,7 +9,7 @@ test-seed: test the effect of running with a different seed every time. Interest
 
 testChunks: run black-hole 10 times with a given chunk size (-c <i>). TO DO: optionally work on an ensemble of chunk sizes.
 
-testN: run black-hole 10 times with a given number of threads (+RTS -N<i>).
+testN: run black-hole 10 times with a given number of threads (+RTS -N i).
 
 testN-mpi-strong: Run with different values of N (number of MPI ranks), keeping the number of particles fixed.
 
