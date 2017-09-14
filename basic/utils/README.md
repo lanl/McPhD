@@ -7,7 +7,7 @@ Available tests
 ---------------
 test-seed: test the effect of running with a different seed every time. Interesting--suggests we're quire poorly resolved.
 
-testChunks: run black-hole 10 times with a given chunk size (-c <i>). TO DO: optionally work on an ensemble of chunk sizes.
+testChunks: run black-hole 10 times with a given chunk size (-c chksz). TO DO: optionally work on an ensemble of chunk sizes.
 
 testN: run black-hole 10 times with a given number of threads (+RTS -N i).
 
