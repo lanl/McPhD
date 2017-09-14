@@ -12,12 +12,18 @@ import System.Environment
 import System.Process (system)
 import System.Exit (ExitCode(..))
 
-configs = 
+{- Note: if the -threaded -eventlog build fails with message
+
+ ... combination not supported: Threaded/Profiling/RTS Event Logging
+
+ then make sure profiling is not enabled in your .cabal/config file
+  -}
+configs =
   [" -O2 --builddir=./build/O2"
   ," -O2 --builddir=./build/mpi-threaded-O2 -fmpi --ghc-options=\"-threaded\""
   ," -O2 --builddir=./build/threaded-O2 --ghc-options=\"-threaded\""
   ," -O2 --builddir=./build/log-O2 --ghc-options=\"-threaded -eventlog\""
-  ," -O2 --builddir=./build/prof-O2 --ghc-options=\"-prof -auto-all -caf-all\""
+  ," -O2 --builddir=./build/prof-O2 --ghc-options=\"-prof -fprof-auto -fprof-cafs\""
   ]
 
 builds = ["./build/O2",
@@ -32,7 +38,7 @@ runConfig c = do
       comm = printf base c
   putStrLn $ "Now running: " ++ comm
   rval <- system comm
-  case rval of 
+  case rval of
     ExitSuccess -> return ()
     ExitFailure i -> error $ "configuration " ++ comm ++ " failed! return value = " ++ show i
 
@@ -42,9 +48,11 @@ runBuild b = do
       comm = printf base b
   putStrLn $ "Now running: " ++ comm
   rval <- system comm
-  case rval of 
+  case rval of
     ExitSuccess -> return ()
-    ExitFailure i -> error $ "build " ++ comm ++ " failed! return value = " ++ show i
+    ExitFailure i -> do
+      let errstr = "build command '" ++ comm ++ "' failed! return value = " ++ show i
+      putStrLn errstr
 
 main = do
   argv <- getArgs
